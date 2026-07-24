@@ -23898,3 +23898,410 @@ html[data-installer-app='true'] body {
     animation: none;
   }
 }
+
+/* -------- Tema claro / escuro persistente -------- */
+.site-theme-toggle {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right, 0px));
+  bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  z-index: 180;
+  min-height: 3rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.42rem 0.82rem 0.42rem 0.45rem;
+  border: 1px solid var(--site-accent-line-strong);
+  border-radius: 999px;
+  background: rgba(var(--site-panel-rgb), 0.9);
+  box-shadow:
+    0 1rem 2.6rem rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.035) inset;
+  color: var(--text);
+  font-family: 'Public Sans', 'Segoe UI', sans-serif;
+  backdrop-filter: blur(18px);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.site-theme-toggle:hover {
+  border-color: rgba(var(--site-accent-rgb), 0.62);
+  box-shadow:
+    0 1.2rem 3rem rgba(0, 0, 0, 0.26),
+    0 0 0 1px rgba(var(--site-accent-rgb), 0.08) inset;
+  transform: translateY(-2px);
+}
+
+.site-theme-toggle:focus-visible {
+  outline: 3px solid rgba(var(--site-accent-rgb), 0.24);
+  outline-offset: 3px;
+}
+
+.site-theme-toggle-icon {
+  width: 2.15rem;
+  height: 2.15rem;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--site-accent-soft);
+  color: var(--site-accent-strong);
+}
+
+.site-theme-toggle-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.site-theme-toggle-copy {
+  display: grid;
+  gap: 0.02rem;
+  text-align: left;
+}
+
+.site-theme-toggle-copy small {
+  color: var(--muted);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.site-theme-toggle-copy strong {
+  color: var(--text);
+  font-size: 0.76rem;
+  line-height: 1.15;
+}
+
+html[data-site-theme='light'],
+html[data-site-theme='light'] body,
+html[data-site-theme='light'] #root,
+html[data-site-theme='light'] .app-layout,
+html[data-site-theme='light'] .app-layout-shell,
+html[data-site-theme='light'] .auth-scene,
+html[data-site-theme='light'] .clean-landing-shell,
+html[data-site-theme='light'] .client-app-page,
+html[data-site-theme='light'] .showcase-landing-shell,
+html[data-site-theme='light'] .installer-login-page,
+html[data-site-theme='light'] .client-login-page,
+html[data-site-theme='light'][data-installer-app='true'],
+html[data-site-theme='light'][data-installer-app='true'] body,
+html[data-site-theme='light'][data-installer-app='true'] #root {
+  background-color: #ffffff !important;
+  color: var(--text);
+}
+
+html[data-site-theme='light'] body {
+  background: #ffffff !important;
+}
+
+html[data-site-theme='light'] .brand-wordmark-image {
+  filter: brightness(0.35) contrast(1.2);
+}
+
+html[data-site-theme='light'] .dashboard-reference-layout {
+  background: #ffffff !important;
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .site-theme-toggle {
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    0 1rem 2.8rem rgba(65, 48, 17, 0.14),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+}
+
+html[data-site-theme='light'] .lux-panel {
+  background:
+    linear-gradient(180deg, rgba(var(--site-accent-rgb), 0.045), transparent 20%),
+    #ffffff;
+}
+
+html[data-site-theme='light'] .lux-panel-soft,
+html[data-site-theme='light'] .empty-state {
+  background: rgba(var(--site-panel-soft-rgb), 0.88);
+}
+
+html[data-site-theme='light'] .metric-card {
+  background:
+    radial-gradient(circle at top right, rgba(var(--site-accent-rgb), 0.1), transparent 42%),
+    linear-gradient(180deg, #ffffff, var(--site-panel-soft));
+}
+
+html[data-site-theme='light'] .field-input,
+html[data-site-theme='light'] .field-select,
+html[data-site-theme='light'] .field-textarea {
+  background: rgba(var(--site-panel-rgb), 0.96);
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .ghost-button,
+html[data-site-theme='light'] .glow-badge {
+  background: rgba(27, 20, 10, 0.035);
+}
+
+html[data-site-theme='light'] .panel-topbar {
+  background: rgba(255, 255, 255, 0.86) !important;
+}
+
+html[data-site-theme='light'] .site-confirm-backdrop {
+  background: rgba(36, 29, 18, 0.34);
+}
+
+html[data-site-theme='light'] .site-confirm-dialog,
+html[data-site-theme='light'] .settings-panel,
+html[data-site-theme='light'] .settings-color-row button,
+html[data-site-theme='light'] .settings-segment button,
+html[data-site-theme='light'] .settings-shortcuts a,
+html[data-site-theme='light'] .settings-color-picker {
+  background-color: rgba(var(--site-panel-rgb), 0.96);
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .settings-live-preview {
+  background:
+    radial-gradient(circle at top right, rgba(var(--site-accent-rgb), 0.12), transparent 42%),
+    var(--site-panel-soft);
+}
+
+html[data-site-theme='light'] .ref-panel-shell {
+  --ref-bg: #ffffff;
+  --ref-sidebar: #fbfaf7;
+  --ref-card: #ffffff;
+  --ref-card-soft: #f7f4ed;
+  --ref-line-soft: rgba(35, 28, 17, 0.1);
+  --ref-text: #17130d;
+  --ref-muted: #726a5e;
+  background:
+    radial-gradient(72rem 34rem at 8% -8%, rgba(var(--site-accent-rgb), 0.075), transparent 62%),
+    #ffffff;
+}
+
+html[data-site-theme='light'] .ref-panel-main {
+  background:
+    radial-gradient(64rem 34rem at 82% -12%, rgba(var(--site-accent-rgb), 0.065), transparent 62%),
+    #ffffff;
+}
+
+html[data-site-theme='light'] .ref-panel-sidebar {
+  background:
+    linear-gradient(180deg, rgba(var(--site-panel-soft-rgb), 0.92), rgba(255, 255, 255, 0.98)),
+    var(--ref-sidebar);
+}
+
+html[data-site-theme='light'] .ref-panel-topbar,
+html[data-site-theme='light'] .ref-panel-mobile-header,
+html[data-site-theme='light'] .ref-panel-bottom-nav {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+html[data-site-theme='light'] .ref-panel-search,
+html[data-site-theme='light'] .ref-panel-date,
+html[data-site-theme='light'] .ref-panel-bell,
+html[data-site-theme='light'] .ref-panel-account {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ref-muted);
+}
+
+html[data-site-theme='light'] .ref-panel-hero,
+html[data-site-theme='light'] .ref-panel-card,
+html[data-site-theme='light'] .ref-panel-metric-card {
+  background:
+    radial-gradient(circle at top right, rgba(var(--site-accent-rgb), 0.08), transparent 36%),
+    linear-gradient(180deg, #ffffff, rgba(var(--site-panel-soft-rgb), 0.7));
+}
+
+html[data-site-theme='light'] .ref-panel-nav-link:hover,
+html[data-site-theme='light'] .ref-panel-logout:hover,
+html[data-site-theme='light'] .ref-panel-tabs button,
+html[data-site-theme='light'] .ref-panel-agenda-stats span,
+html[data-site-theme='light'] .ref-panel-ranking-row,
+html[data-site-theme='light'] .ref-panel-quote-row,
+html[data-site-theme='light'] .ref-panel-finance-row,
+html[data-site-theme='light'] .ref-panel-appointment {
+  background-color: rgba(30, 23, 13, 0.035);
+}
+
+html[data-site-theme='light'] .ref-panel-donut::before {
+  background: #ffffff;
+}
+
+html[data-site-theme='light'] .installer-app-download {
+  background:
+    radial-gradient(circle at 9% 18%, rgba(var(--site-accent-rgb), 0.16), transparent 29%),
+    linear-gradient(112deg, #fffdf8 0%, #f7f4ed 56%, #fff7e7 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 18px 44px rgba(57, 43, 18, 0.1);
+}
+
+html[data-site-theme='light'] .installer-app-download-phone,
+html[data-site-theme='light'] .ref-panel-mobile-drawer {
+  background-color: var(--site-panel-soft);
+}
+
+html[data-site-theme='light'] .installer-login-page,
+html[data-site-theme='light'] .client-login-page {
+  background:
+    radial-gradient(52rem 36rem at 30% 12%, rgba(var(--site-accent-rgb), 0.1), transparent 62%),
+    linear-gradient(180deg, #ffffff 0%, #faf8f3 100%) !important;
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .installer-login-frame,
+html[data-site-theme='light'] .client-login-frame {
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 2rem 5rem rgba(65, 48, 17, 0.12);
+}
+
+html[data-site-theme='light'] .installer-login-right,
+html[data-site-theme='light'] .client-login-right {
+  background:
+    radial-gradient(38rem 34rem at 50% 28%, rgba(var(--site-accent-rgb), 0.07), transparent 72%),
+    linear-gradient(180deg, rgba(35, 27, 15, 0.02), transparent 48%);
+}
+
+html[data-site-theme='light'] .installer-login-card,
+html[data-site-theme='light'] .client-login-card,
+html[data-site-theme='light'] .installer-login-trust-bar {
+  background:
+    radial-gradient(24rem 16rem at 50% 0%, rgba(var(--site-accent-rgb), 0.06), transparent 72%),
+    rgba(255, 255, 255, 0.82);
+  border-color: rgba(36, 28, 16, 0.13);
+  box-shadow: 0 2rem 5rem rgba(65, 48, 17, 0.1);
+}
+
+html[data-site-theme='light'] .installer-login-card-head h2,
+html[data-site-theme='light'] .installer-login-field > span,
+html[data-site-theme='light'] .installer-login-remember,
+html[data-site-theme='light'] .installer-login-input-wrap input,
+html[data-site-theme='light'] .installer-login-benefits strong,
+html[data-site-theme='light'] .installer-login-trust-bar strong,
+html[data-site-theme='light'] .client-login-card-head h2,
+html[data-site-theme='light'] .client-login-field > span,
+html[data-site-theme='light'] .client-login-input-wrap input,
+html[data-site-theme='light'] .client-login-benefits strong {
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .installer-login-card-head p,
+html[data-site-theme='light'] .installer-login-description,
+html[data-site-theme='light'] .installer-login-benefits p,
+html[data-site-theme='light'] .installer-login-register,
+html[data-site-theme='light'] .installer-login-trust-bar p,
+html[data-site-theme='light'] .client-login-card-head p,
+html[data-site-theme='light'] .client-login-description,
+html[data-site-theme='light'] .client-login-benefits p,
+html[data-site-theme='light'] .client-login-register {
+  color: var(--muted);
+}
+
+html[data-site-theme='light'] .installer-login-input-wrap,
+html[data-site-theme='light'] .client-login-input-wrap,
+html[data-site-theme='light'] .installer-login-socials button,
+html[data-site-theme='light'] .client-login-socials button {
+  border-color: rgba(35, 27, 15, 0.14);
+  background: rgba(32, 24, 12, 0.035);
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .installer-login-input-wrap input::placeholder,
+html[data-site-theme='light'] .client-login-input-wrap input::placeholder {
+  color: rgba(23, 19, 13, 0.42);
+}
+
+html[data-site-theme='light'] .installer-login-input-wrap > svg,
+html[data-site-theme='light'] .installer-login-eye,
+html[data-site-theme='light'] .client-login-input-wrap > svg,
+html[data-site-theme='light'] .client-login-eye {
+  color: rgba(23, 19, 13, 0.58);
+}
+
+html[data-site-theme='light'] .installer-login-divider,
+html[data-site-theme='light'] .client-login-divider {
+  color: var(--muted);
+}
+
+html[data-site-theme='light'] .installer-login-divider span,
+html[data-site-theme='light'] .client-login-divider span {
+  background: rgba(23, 19, 13, 0.14);
+}
+
+html[data-site-theme='light'] .installer-app-login-page {
+  background:
+    radial-gradient(26rem 19rem at 100% 0%, rgba(var(--site-accent-rgb), 0.11), transparent 68%),
+    #ffffff !important;
+}
+
+html[data-site-theme='light'] .installer-app-login-card .installer-login-card-head p,
+html[data-site-theme='light'] .installer-app-login-card .installer-login-divider p,
+html[data-site-theme='light'] .installer-app-login-top > a {
+  color: var(--muted);
+}
+
+html[data-site-theme='light'] .installer-onboarding-page,
+html[data-site-theme='light'] .mobile-oauth-return-page {
+  background:
+    radial-gradient(28rem 22rem at 104% 2%, rgba(var(--site-accent-rgb), 0.13), transparent 66%),
+    radial-gradient(26rem 22rem at -12% 76%, rgba(var(--site-accent-deep-rgb), 0.08), transparent 68%),
+    #ffffff;
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .installer-onboarding-copy h1,
+html[data-site-theme='light'] .mobile-oauth-return-card h1,
+html[data-site-theme='light'] .installer-onboarding-phone strong,
+html[data-site-theme='light'] .installer-onboarding-mini-card strong {
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .installer-onboarding-copy > span,
+html[data-site-theme='light'] .mobile-oauth-return-card p,
+html[data-site-theme='light'] .mobile-oauth-return-card > a:last-child,
+html[data-site-theme='light'] .installer-onboarding-phone small,
+html[data-site-theme='light'] .installer-onboarding-mini-card small,
+html[data-site-theme='light'] .installer-onboarding-header > button {
+  color: var(--muted);
+}
+
+html[data-site-theme='light'] .installer-onboarding-slide.is-requests .installer-onboarding-visual,
+html[data-site-theme='light'] .installer-onboarding-slide.is-organize .installer-onboarding-visual,
+html[data-site-theme='light'] .installer-onboarding-phone,
+html[data-site-theme='light'] .installer-onboarding-mini-card,
+html[data-site-theme='light'] .installer-onboarding-worker-badge {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(32, 24, 12, 0.12);
+}
+
+html[data-site-theme='light'] .installer-onboarding-footer {
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.97) 28%);
+}
+
+@media (max-width: 767px) {
+  .site-theme-toggle--landing {
+    top: calc(5rem + env(safe-area-inset-top, 0px));
+    bottom: auto;
+  }
+
+  html[data-installer-app='true'] .site-theme-toggle {
+    top: auto;
+    bottom: calc(5.4rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .site-theme-toggle-copy {
+    display: none;
+  }
+
+  .site-theme-toggle {
+    width: 3rem;
+    justify-content: center;
+    padding: 0.4rem;
+  }
+}

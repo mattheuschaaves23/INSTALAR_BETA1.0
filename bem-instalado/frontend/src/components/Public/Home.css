@@ -3639,6 +3639,110 @@
   }
 }
 
+html[data-site-theme='light'] .client-app-page {
+  background:
+    radial-gradient(circle at top, rgba(var(--site-accent-rgb), 0.08), transparent 22%),
+    linear-gradient(180deg, #ffffff 0%, #faf8f3 100%);
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .client-app-topbar,
+html[data-site-theme='light'] .client-app-request-card,
+html[data-site-theme='light'] .client-app-request-receipt,
+html[data-site-theme='light'] .client-app-finder-intro,
+html[data-site-theme='light'] .client-app-search-card,
+html[data-site-theme='light'] .client-app-toolbar,
+html[data-site-theme='light'] .client-app-installer-card,
+html[data-site-theme='light'] .client-app-trust-strip,
+html[data-site-theme='light'] .client-app-empty,
+html[data-site-theme='light'] .client-app-suggestion-box,
+html[data-site-theme='light'] .client-app-account-requests,
+html[data-site-theme='light'] .client-app-tracking-lookup,
+html[data-site-theme='light'] .client-app-tracking-panel,
+html[data-site-theme='light'] .client-app-interest-panel {
+  background:
+    linear-gradient(180deg, rgba(var(--site-accent-rgb), 0.025), rgba(255, 255, 255, 0.7)),
+    rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 18px 42px rgba(58, 43, 17, 0.1),
+    0 0 0 1px rgba(var(--site-accent-rgb), 0.045) inset;
+}
+
+html[data-site-theme='light'] .client-app-page :is(h1, h2, h3, h4, strong, label) {
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .client-app-page :is(p, small) {
+  color: var(--muted);
+}
+
+html[data-site-theme='light'] .client-app-brand-copy span,
+html[data-site-theme='light'] .client-app-request-head p,
+html[data-site-theme='light'] .client-app-request-score span,
+html[data-site-theme='light'] .client-app-detail-heading span,
+html[data-site-theme='light'] .client-app-detail-titleline small,
+html[data-site-theme='light'] .client-app-service-grid span:last-child,
+html[data-site-theme='light'] .client-app-option-list button small,
+html[data-site-theme='light'] .client-app-review-block > div:first-child span,
+html[data-site-theme='light'] .client-app-installer-card p,
+html[data-site-theme='light'] .client-app-installer-card small {
+  color: var(--muted);
+}
+
+html[data-site-theme='light'] .client-app-chip-link,
+html[data-site-theme='light'] .client-app-request-progress button,
+html[data-site-theme='light'] .client-app-service-grid button,
+html[data-site-theme='light'] .client-app-chip-grid button,
+html[data-site-theme='light'] .client-app-option-list button,
+html[data-site-theme='light'] .client-app-material-list button,
+html[data-site-theme='light'] .client-app-measure-options button,
+html[data-site-theme='light'] .client-app-room-stream button,
+html[data-site-theme='light'] .client-app-ghost-button {
+  background: rgba(30, 23, 13, 0.035);
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .client-app-request-panel,
+html[data-site-theme='light'] .client-app-detail-section,
+html[data-site-theme='light'] .client-app-review-block,
+html[data-site-theme='light'] .client-app-request-score,
+html[data-site-theme='light'] .client-app-photo-drop,
+html[data-site-theme='light'] .client-app-account-request-list > article,
+html[data-site-theme='light'] .client-app-notification-menu {
+  background-color: rgba(var(--site-panel-soft-rgb), 0.7);
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .client-app-request-field input,
+html[data-site-theme='light'] .client-app-request-field textarea,
+html[data-site-theme='light'] .client-app-request-field--line input,
+html[data-site-theme='light'] .client-app-request-field--line textarea,
+html[data-site-theme='light'] .client-app-search-card input,
+html[data-site-theme='light'] .client-app-search-card select {
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .client-app-kicker,
+html[data-site-theme='light'] .client-app-logout-button,
+html[data-site-theme='light'] .client-app-icon-button,
+html[data-site-theme='light'] .client-app-locate-button,
+html[data-site-theme='light'] .client-app-favorite-button {
+  color: var(--site-accent-deep);
+}
+
+html[data-site-theme='light'] .client-app-request-progress button.is-active,
+html[data-site-theme='light'] .client-app-request-progress button.is-done,
+html[data-site-theme='light'] .client-app-service-grid button.is-selected,
+html[data-site-theme='light'] .client-app-chip-grid button.is-selected,
+html[data-site-theme='light'] .client-app-option-list button.is-selected,
+html[data-site-theme='light'] .client-app-material-list button.is-selected,
+html[data-site-theme='light'] .client-app-measure-options button.is-selected,
+html[data-site-theme='light'] .client-app-room-stream button.is-selected {
+  color: var(--text);
+  background: rgba(var(--site-accent-rgb), 0.1);
+}
+
 /* Fluxo do cliente: hierarquia simples, quatro etapas e uma acao principal. */
 .client-app-page {
   padding-top: 0.65rem;
@@ -4472,4 +4576,58 @@
   .client-app-opportunity-publish {
     padding-inline: 0;
   }
+}
+
+/* Mantém o tema claro acima das variações visuais específicas desta página. */
+html[data-site-theme='light'] .client-app-page {
+  background:
+    radial-gradient(circle at top, rgba(var(--site-accent-rgb), 0.08), transparent 22%),
+    linear-gradient(180deg, #ffffff 0%, #faf8f3 100%) !important;
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .client-app-topbar,
+html[data-site-theme='light'] .client-app-request-card,
+html[data-site-theme='light'] .client-app-request-receipt,
+html[data-site-theme='light'] .client-app-finder-intro,
+html[data-site-theme='light'] .client-app-search-card,
+html[data-site-theme='light'] .client-app-toolbar,
+html[data-site-theme='light'] .client-app-empty,
+html[data-site-theme='light'] .client-app-suggestion-box,
+html[data-site-theme='light'] .client-app-account-requests,
+html[data-site-theme='light'] .client-app-tracking-lookup,
+html[data-site-theme='light'] .client-app-tracking-panel,
+html[data-site-theme='light'] .client-app-interest-panel {
+  background-color: rgba(255, 255, 255, 0.96);
+  color: var(--text);
+  box-shadow: 0 18px 42px rgba(58, 43, 17, 0.1);
+}
+
+html[data-site-theme='light'] .client-app-page :is(h1, h2, h3, h4, strong, label) {
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .client-app-page :is(p, small) {
+  color: var(--muted);
+}
+
+html[data-site-theme='light'] .client-app-request-panel,
+html[data-site-theme='light'] .client-app-detail-section,
+html[data-site-theme='light'] .client-app-review-block,
+html[data-site-theme='light'] .client-app-request-score,
+html[data-site-theme='light'] .client-app-photo-drop,
+html[data-site-theme='light'] .client-app-account-request-list > article,
+html[data-site-theme='light'] .client-app-notification-menu {
+  background-color: rgba(var(--site-panel-soft-rgb), 0.72);
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .client-app-request-field input,
+html[data-site-theme='light'] .client-app-request-field textarea,
+html[data-site-theme='light'] .client-app-request-field--line input,
+html[data-site-theme='light'] .client-app-request-field--line textarea,
+html[data-site-theme='light'] .client-app-search-card input,
+html[data-site-theme='light'] .client-app-search-card select {
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--text);
 }

@@ -15,6 +15,11 @@ const densityOptions = [
   { value: 'compact', label: 'Compacta', detail: 'Mais informação' },
 ];
 
+const themeOptions = [
+  { value: 'dark', label: 'Preto', detail: 'Alto contraste' },
+  { value: 'light', label: 'Branco', detail: 'Mais luminoso' },
+];
+
 const motionOptions = [
   { value: 'smooth', label: 'Suaves', detail: 'Padrão' },
   { value: 'reduced', label: 'Reduzidas', detail: 'Menos movimento' },
@@ -104,6 +109,11 @@ export default function Settings() {
 
   const stats = [
     {
+      label: 'Fundo',
+      value: preferences.theme === 'light' ? 'Branco' : 'Preto',
+      detail: 'Tema deste dispositivo',
+    },
+    {
       label: 'Cor secundária',
       value: currentPreset?.name || preferences.accentColor.toUpperCase(),
       detail: preferences.accentColor.toUpperCase(),
@@ -175,7 +185,7 @@ export default function Settings() {
             <div>
               <span className="settings-preview-dot" />
               <p>Painel InstalaPro</p>
-              <strong>Fundo preto, destaque na sua cor</strong>
+              <strong>Fundo {preferences.theme === 'light' ? 'branco' : 'preto'}, destaque na sua cor</strong>
             </div>
             <button type="button">Botão principal</button>
           </div>
@@ -189,6 +199,13 @@ export default function Settings() {
               <h2>Organização visual</h2>
             </div>
           </div>
+
+          <PreferenceSegment
+            label="Fundo"
+            onChange={(value) => savePreference({ theme: value })}
+            options={themeOptions}
+            value={preferences.theme}
+          />
 
           <PreferenceSegment
             label="Espaçamento"
