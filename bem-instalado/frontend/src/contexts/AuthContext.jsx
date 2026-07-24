@@ -50,21 +50,35 @@ export function AuthProvider({ children }) {
     let active = true;
 
     const restoreSession = async () => {
-      const token = await hydrateAuthToken();
+      try {
+        const token = await hydrateAuthToken();
 
-      if (!active) {
-        return;
+        if (!active) {
+          return;
+        }
+
+        if (!token) {
+          setUser(null);
+          setAuthError('');
+          return;
+        }
+
+        await loadProfile();
+      } catch (_error) {
+        if (!active) {
+          return;
+        }
+
+        setUser(null);
+        setAuthError('Não foi possível abrir sua sessão. Verifique a conexão e tente novamente.');
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
       }
-
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      await loadProfile();
     };
 
-    restoreSession();
+    void restoreSession();
 
     return () => {
       active = false;

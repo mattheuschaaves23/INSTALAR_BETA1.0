@@ -50,7 +50,7 @@ export async function registerClientRequest(payload) {
 }
 
 export async function getProfileRequest() {
-  const response = await api.get('/users/profile');
+  const response = await api.get('/users/profile', { timeout: 12000 });
   return response.data;
 }
 

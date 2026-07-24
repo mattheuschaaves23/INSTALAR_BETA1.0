@@ -2,7 +2,31 @@ const storageCache = new Map();
 const AUTH_TOKEN_KEY = 'token';
 const AUTH_COOKIE_NAME = 'instalapro_auth_token';
 const AUTH_COOKIE_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
+const NATIVE_STORAGE_TIMEOUT_MS = 2500;
 let memoryAuthToken = '';
+
+function resolveWithTimeout(task, fallback, timeoutMs = NATIVE_STORAGE_TIMEOUT_MS) {
+  return new Promise((resolve) => {
+    let finished = false;
+    let timeoutId;
+
+    const finish = (value) => {
+      if (finished) {
+        return;
+      }
+
+      finished = true;
+      clearTimeout(timeoutId);
+      resolve(value);
+    };
+
+    timeoutId = setTimeout(() => finish(fallback), timeoutMs);
+    Promise.resolve()
+      .then(task)
+      .then(finish)
+      .catch(() => finish(fallback));
+  });
+}
 
 function getStorage(storageName) {
   if (typeof window === 'undefined') {
@@ -80,16 +104,14 @@ async function getNativePreferences() {
     return null;
   }
 
-  try {
+  return resolveWithTimeout(async () => {
     const [{ Capacitor }, { Preferences }] = await Promise.all([
       import('@capacitor/core'),
       import('@capacitor/preferences'),
     ]);
 
     return Capacitor.isNativePlatform() ? Preferences : null;
-  } catch (_error) {
-    return null;
-  }
+  }, null);
 }
 
 function createSafeStorage(storageName) {
@@ -145,20 +167,30 @@ export function getAuthToken() {
 
 export async function hydrateAuthToken() {
   const existingToken = getAuthToken();
-  const preferences = await getNativePreferences();
 
   if (existingToken) {
-    if (preferences) {
-      await preferences.set({ key: AUTH_TOKEN_KEY, value: existingToken }).catch(() => null);
-    }
+    void getNativePreferences().then((preferences) => {
+      if (preferences) {
+        void resolveWithTimeout(
+          () => preferences.set({ key: AUTH_TOKEN_KEY, value: existingToken }),
+          null
+        );
+      }
+    });
+
     return existingToken;
   }
+
+  const preferences = await getNativePreferences();
 
   if (!preferences) {
     return null;
   }
 
-  const result = await preferences.get({ key: AUTH_TOKEN_KEY }).catch(() => ({ value: null }));
+  const result = await resolveWithTimeout(
+    () => preferences.get({ key: AUTH_TOKEN_KEY }),
+    { value: null }
+  );
   const nativeToken = String(result?.value || '').trim();
 
   if (!nativeToken) {
@@ -184,10 +216,10 @@ export async function setAuthToken(token, remember = true) {
   let storedNatively = false;
 
   if (preferences) {
-    storedNatively = await preferences
-      .set({ key: AUTH_TOKEN_KEY, value: normalizedToken })
-      .then(() => true)
-      .catch(() => false);
+    storedNatively = await resolveWithTimeout(
+      () => preferences.set({ key: AUTH_TOKEN_KEY, value: normalizedToken }).then(() => true),
+      false
+    );
   }
 
   return Boolean(normalizedToken && (storedInBrowser || storedInCookie || storedNatively || memoryAuthToken));
@@ -201,6 +233,6 @@ export async function clearAuthToken() {
 
   const preferences = await getNativePreferences();
   if (preferences) {
-    await preferences.remove({ key: AUTH_TOKEN_KEY }).catch(() => null);
+    await resolveWithTimeout(() => preferences.remove({ key: AUTH_TOKEN_KEY }), null);
   }
 }
