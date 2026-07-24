@@ -6,6 +6,8 @@ import { hasAdminAccess } from '../../utils/adminAccess';
 import BrandMark from './BrandMark';
 import BrandWordmark from './BrandWordmark';
 
+const IS_INSTALLER_APP = process.env.REACT_APP_INSTALLER_APP === 'true';
+
 const MOBILE_DOCK_ITEMS = [
   { to: '/dashboard', label: 'Início', icon: 'home' },
   { to: '/opportunities', label: 'Oportunidades', icon: 'opportunities' },
@@ -104,7 +106,7 @@ function SidebarContent({ allowCollapse = false, badgeCounts, collapsed = false,
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
-  const canSeeAdmin = hasAdminAccess(user);
+  const canSeeAdmin = !IS_INSTALLER_APP && hasAdminAccess(user);
   const navItems = useMemo(() => (canSeeAdmin ? [...PANEL_NAV_ITEMS, ADMIN_NAV_ITEM] : PANEL_NAV_ITEMS), [canSeeAdmin]);
 
   const handleLogout = () => {
@@ -173,7 +175,7 @@ export default function InstallerPanelShell({ children }) {
   const userName = user?.name || 'Instalador';
   const badgeCounts = usePanelBadgeCounts();
   const notificationBadge = badgeCounts.notifications > 0 ? formatPanelBadgeCount(badgeCounts.notifications) : null;
-  const canSeeAdmin = hasAdminAccess(user);
+  const canSeeAdmin = !IS_INSTALLER_APP && hasAdminAccess(user);
   const searchableItems = useMemo(
     () => (canSeeAdmin ? [...PANEL_NAV_ITEMS, ADMIN_NAV_ITEM] : PANEL_NAV_ITEMS),
     [canSeeAdmin]

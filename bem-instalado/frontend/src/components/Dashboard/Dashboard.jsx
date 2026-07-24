@@ -19,6 +19,8 @@ import {
   formatStatusLabel,
 } from '../../utils/formatters';
 
+const IS_INSTALLER_APP = process.env.REACT_APP_INSTALLER_APP === 'true';
+
 const CHART_WIDTH = 820;
 const CHART_HEIGHT = 280;
 const CHART_PADDING_X = 18;
@@ -586,7 +588,7 @@ export default function Dashboard() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const badgeCounts = usePanelBadgeCounts();
   const notificationBadge = badgeCounts.notifications > 0 ? formatPanelBadgeCount(badgeCounts.notifications) : null;
-  const canSeeAdmin = hasAdminAccess(user);
+  const canSeeAdmin = !IS_INSTALLER_APP && hasAdminAccess(user);
   const panelNavItems = useMemo(() => (canSeeAdmin ? [...PANEL_NAV_ITEMS, ADMIN_NAV_ITEM] : PANEL_NAV_ITEMS), [canSeeAdmin]);
   const mobileDockItems = useMemo(
     () => (canSeeAdmin ? [...MOBILE_DOCK_ITEMS.slice(0, 4), ADMIN_MOBILE_DOCK_ITEM] : MOBILE_DOCK_ITEMS),

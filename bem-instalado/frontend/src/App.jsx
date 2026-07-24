@@ -18,7 +18,6 @@ const INSTALLER_APP_PATHS = [
   '/settings',
   '/subscription',
   '/support',
-  '/admin',
 ];
 
 const ClientLogin = lazy(() => import('./components/Auth/ClientLogin'));
