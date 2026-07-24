@@ -9,6 +9,7 @@ import {
   getPanelBadgeValue,
   usePanelBadgeCounts,
 } from '../Layout/panelBadgeCounts';
+import { SidebarContent } from '../Layout/InstallerPanelShell';
 import { hasAdminAccess } from '../../utils/adminAccess';
 import BrandMark from '../Layout/BrandMark';
 import BrandWordmark from '../Layout/BrandWordmark';
@@ -27,7 +28,7 @@ const CHART_PADDING_X = 18;
 const CHART_PADDING_Y = 24;
 const DASHBOARD_REFRESH_INTERVAL = 30000;
 const INSTALLER_APP_DOWNLOAD_URL = 'https://github.com/mattheuschaaves23/Instalar/releases/latest/download/InstalaPro-Instaladores.apk';
-const INSTALLER_APP_VERSION = '1.0.2';
+const INSTALLER_APP_VERSION = '1.0.3';
 const CHART_VIEWS = ['weekly', 'monthly', 'yearly'];
 const CHART_VIEW_LABELS = {
   weekly: 'Semanal',
@@ -122,9 +123,17 @@ function DashboardDockIcon({ type }) {
     case 'budgets':
       return (
         <svg {...sharedProps}>
-          <path d="M4 7h2l1.8 8.2a1 1 0 0 0 1 .8h7.7a1 1 0 0 0 1-.8L19 9H8.2" />
-          <circle cx="10" cy="19" r="1.3" />
-          <circle cx="17" cy="19" r="1.3" />
+          <path d="M7 3.8h7l3 3V20H7z" />
+          <path d="M14 3.8V7h3" />
+          <path d="M9.5 11h5M9.5 15h4" />
+        </svg>
+      );
+    case 'opportunities':
+      return (
+        <svg {...sharedProps}>
+          <path d="M9 6V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1" />
+          <rect height="14" rx="2.4" width="16" x="4" y="6" />
+          <path d="M4 12h16M9 15.5h6" />
         </svg>
       );
     case 'clients':
@@ -230,6 +239,7 @@ function PanelIcon({ type, size = 20 }) {
     plus: <><path d="M12 5v14M5 12h14" /></>,
     chevron: <><path d="m9 6 6 6-6 6" /></>,
     menu: <><path d="M4 7h16M4 12h16M4 17h16" /></>,
+    logout: <><path d="M10 6H6.5A1.5 1.5 0 0 0 5 7.5v9A1.5 1.5 0 0 0 6.5 18H10" /><path d="M14 8l4 4-4 4M18 12H9" /></>,
   };
 
   return <svg {...sharedProps}>{icons[type] || icons.grid}</svg>;
@@ -634,6 +644,7 @@ export default function Dashboard() {
   const [search, setSearch] = useState('');
   const [chartView, setChartView] = useState('monthly');
   const [chartDate, setChartDate] = useState(() => new Date());
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const badgeCounts = usePanelBadgeCounts();
   const notificationBadge = badgeCounts.notifications > 0 ? formatPanelBadgeCount(badgeCounts.notifications) : null;
@@ -706,6 +717,19 @@ export default function Dashboard() {
       document.removeEventListener('visibilitychange', refreshWhenVisible);
     };
   }, [loadDashboardData]);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileDrawerOpen ? 'hidden' : '';
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') setMobileDrawerOpen(false);
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [mobileDrawerOpen]);
 
   const { metrics, ranking } = data;
   const firstName = user?.name?.split(' ')[0] || 'Instalador';
@@ -993,9 +1017,28 @@ export default function Dashboard() {
         </nav>
 
         <button className="ref-panel-logout" onClick={logout} type="button">
-          <PanelIcon type="profile" />
+          <PanelIcon type="logout" />
           <span>Sair</span>
         </button>
+      </aside>
+
+      <div
+        aria-hidden="true"
+        className={`ref-panel-drawer-backdrop ${mobileDrawerOpen ? 'is-open' : ''}`}
+        onClick={() => setMobileDrawerOpen(false)}
+      />
+      <aside
+        aria-hidden={!mobileDrawerOpen}
+        aria-label="Menu mobile do painel"
+        className={`ref-panel-mobile-drawer ${mobileDrawerOpen ? 'is-open' : ''}`}
+        id="mobile-dashboard-menu"
+      >
+        <SidebarContent
+          badgeCounts={badgeCounts}
+          initials={initials}
+          onNavigate={() => setMobileDrawerOpen(false)}
+          userName={user?.name || 'Instalador'}
+        />
       </aside>
 
       <div className="ref-panel-main">
@@ -1022,14 +1065,20 @@ export default function Dashboard() {
         </header>
 
         <header className="ref-panel-mobile-header">
-          <button type="button">
+          <button
+            aria-controls="mobile-dashboard-menu"
+            aria-expanded={mobileDrawerOpen}
+            aria-label="Abrir menu"
+            onClick={() => setMobileDrawerOpen(true)}
+            type="button"
+          >
             <PanelIcon type="menu" />
           </button>
           <div>
             <BrandWordmark className="ref-panel-mobile-wordmark" size="sm" />
           </div>
           <nav aria-label="Ações rápidas do painel">
-            <Link aria-label="Buscar no painel" to="/dashboard"><PanelIcon type="search" size={18} /></Link>
+            <Link aria-label="Buscar clientes" to="/clients"><PanelIcon type="search" size={18} /></Link>
             <Link aria-label="Abrir notificações" to="/notifications"><PanelIcon type="bell" size={18} />{notificationBadge ? <em>{notificationBadge}</em> : null}</Link>
             <Link aria-label="Abrir perfil" to="/profile" className="ref-panel-avatar">{initials}</Link>
           </nav>
@@ -1056,7 +1105,10 @@ export default function Dashboard() {
               <Link className="ref-panel-primary" to="/budgets/new">
                 Novo orçamento <PanelIcon type="arrow" size={16} />
               </Link>
-              <Link className="ref-panel-secondary" to="/agenda">Ver agenda</Link>
+              <Link aria-label="Abrir agenda" className="ref-panel-secondary" to="/agenda">
+                <PanelIcon type="agenda" size={18} />
+                <span>Ver agenda</span>
+              </Link>
             </div>
           </section>
 
@@ -1064,7 +1116,7 @@ export default function Dashboard() {
 
           <section className="ref-panel-mobile-section-head">
             <h3>Resumo do mês</h3>
-            <Link to="/dashboard">Ver detalhes <PanelIcon type="chevron" size={14} /></Link>
+            <Link to="/budgets">Ver orçamentos <PanelIcon type="chevron" size={14} /></Link>
           </section>
 
           <section className="ref-panel-metrics" aria-label="Resumo do mês">

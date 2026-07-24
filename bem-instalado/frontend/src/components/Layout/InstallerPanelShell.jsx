@@ -67,6 +67,7 @@ function PanelIcon({ type, size = 20 }) {
     home: <><path d="M4 11.5 12 5l8 6.5" /><path d="M6.5 10.5V19h11v-8.5" /></>,
     budgets: <><path d="M4 7h2l1.8 8.2a1 1 0 0 0 1 .8h7.7a1 1 0 0 0 1-.8L19 9H8.2" /><circle cx="10" cy="19" r="1.3" /><circle cx="17" cy="19" r="1.3" /></>,
     admin: <><path d="M12 3.8 18.6 7v5c0 4.1-2.7 6.9-6.6 8.2-3.9-1.3-6.6-4.1-6.6-8.2V7L12 3.8Z" /><path d="M9.8 11.8 11.3 13.3 14.8 9.8" /></>,
+    close: <><path d="m6.5 6.5 11 11M17.5 6.5l-11 11" /></>,
   };
 
   return <svg {...sharedProps}>{icons[type] || icons.grid}</svg>;
@@ -102,7 +103,7 @@ function isActiveRoute(pathname, item) {
   return pathname === item.to || pathname.startsWith(`${item.to}/`);
 }
 
-function SidebarContent({ allowCollapse = false, badgeCounts, collapsed = false, initials, onNavigate, onToggleCollapse, userName }) {
+export function SidebarContent({ allowCollapse = false, badgeCounts, collapsed = false, initials, onNavigate, onToggleCollapse, userName }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
@@ -121,7 +122,7 @@ function SidebarContent({ allowCollapse = false, badgeCounts, collapsed = false,
         <BrandWordmark className="ref-panel-wordmark" size="sm" />
         <BrandMark className="ref-panel-logo ref-panel-collapsed-logo" />
         <button aria-label={allowCollapse ? 'Recolher menu' : 'Fechar menu'} onClick={onToggleCollapse || onNavigate} type="button">
-          <span>{allowCollapse && collapsed ? '>' : '<'}</span>
+          {allowCollapse ? <span>{collapsed ? '>' : '<'}</span> : <PanelIcon size={18} type="close" />}
         </button>
       </div>
 
