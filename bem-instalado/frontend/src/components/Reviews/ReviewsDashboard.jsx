@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { formatShortDate } from '../../utils/formatters';
+import DecoratingWallLoader from '../Layout/DecoratingWallLoader';
 
 const ratingFilters = ['all', 5, 4, 3, 2, 1];
 const REVIEWS_REFRESH_INTERVAL = 30000;
@@ -81,13 +82,10 @@ function getInitials(name) {
 
 function ReviewsLoadingState() {
   return (
-    <section className="reviews-dashboard-shell">
-      <div className="reviews-dashboard-empty">
-        <span><ReviewIcon type="refresh" /></span>
-        <strong>Carregando avaliações</strong>
-        <p>Buscando nota média, distribuição e comentários recentes.</p>
-      </div>
-    </section>
+    <DecoratingWallLoader
+      embedded
+      phrase="Reunindo avaliações e detalhes do seu trabalho."
+    />
   );
 }
 

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import DecoratingWallLoader from '../Layout/DecoratingWallLoader';
 import './Home.css';
 import { formatClientRequestLines, readStoredClientRequest } from '../../utils/clientRequest';
 import { formatCurrency, formatLongDate, formatShortDate } from '../../utils/formatters';
@@ -189,13 +190,7 @@ export default function InstallerProfile() {
 
   if (!payload) {
     return (
-      <div className="auth-scene flex min-h-screen items-center justify-center px-6">
-        <div className="lux-panel fade-up max-w-xl p-8 text-center">
-          <p className="eyebrow">Perfil público</p>
-          <h1 className="page-title mt-4 text-[3rem]">Carregando instalador</h1>
-          <p className="page-copy mt-4">Estamos trazendo as informações completas para você.</p>
-        </div>
-      </div>
+      <DecoratingWallLoader phrase="Preparando cada detalhe deste profissional." />
     );
   }
 

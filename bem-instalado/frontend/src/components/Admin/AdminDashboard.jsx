@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { useConfirm } from '../../contexts/ConfirmContext';
+import DecoratingWallLoader from '../Layout/DecoratingWallLoader';
 import PaginationControls from '../Layout/PaginationControls';
 import {
   formatCurrency,
@@ -677,9 +678,10 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <section className="admin-modern-shell">
-        <div className="admin-modern-empty">Carregando painel administrativo...</div>
-      </section>
+      <DecoratingWallLoader
+        embedded
+        phrase="Organizando os dados da operação."
+      />
     );
   }
 

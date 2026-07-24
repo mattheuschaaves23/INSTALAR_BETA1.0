@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router';
 import NativeOAuthBridge from './components/Auth/NativeOAuthBridge';
+import DecoratingWallLoader from './components/Layout/DecoratingWallLoader';
 import NativeAppUpdater from './components/Layout/NativeAppUpdater';
 import ThemeToggle from './components/Layout/ThemeToggle';
 import ClientLanding from './components/Public/ClientLanding';
@@ -54,13 +55,7 @@ const Subscription = lazy(() => import('./components/Subscription/Subscription')
 
 function RouteLoading() {
   return (
-    <main className="auth-scene flex min-h-screen items-center justify-center px-6" aria-busy="true">
-      <section className="lux-panel w-full max-w-md p-8 text-center" role="status">
-        <p className="eyebrow">InstalaPro</p>
-        <h1 className="page-title mt-4 text-[2.5rem]">Abrindo a tela</h1>
-        <p className="page-copy mt-4">Carregando as informações com segurança.</p>
-      </section>
-    </main>
+    <DecoratingWallLoader phrase="Preparando o próximo ambiente da sua experiência." />
   );
 }
 

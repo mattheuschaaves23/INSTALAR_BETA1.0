@@ -4,6 +4,7 @@ import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { useConfirm } from '../../contexts/ConfirmContext';
 import { formatDateTime, formatStatusLabel } from '../../utils/formatters';
+import DecoratingWallLoader from '../Layout/DecoratingWallLoader';
 import PageIntro from '../Layout/PageIntro';
 
 const IDEA_CATEGORY_LABEL = {
@@ -407,9 +408,10 @@ export default function SupportChat() {
 
   if (loading) {
     return (
-      <section className="page-shell space-y-7">
-        <div className="empty-state">Carregando suporte...</div>
-      </section>
+      <DecoratingWallLoader
+        embedded
+        phrase="Abrindo seu canal de atendimento."
+      />
     );
   }
 

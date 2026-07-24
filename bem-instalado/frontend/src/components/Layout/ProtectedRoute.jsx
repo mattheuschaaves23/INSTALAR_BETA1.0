@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { hasAdminAccess } from '../../utils/adminAccess';
+import DecoratingWallLoader from './DecoratingWallLoader';
 
 function getAccountType(user) {
   return user?.account_type === 'client' ? 'client' : 'installer';
@@ -15,17 +16,7 @@ export default function ProtectedRoute({ allowedAccountTypes = ['installer'], lo
   const { user, loading, authError, retryProfile, logout } = useAuth();
 
   if (loading) {
-    return (
-      <div className="auth-scene flex min-h-screen items-center justify-center px-6">
-        <div className="lux-panel fade-up max-w-lg p-8 text-center">
-          <p className="eyebrow">InstalaPro</p>
-          <h1 className="page-title mt-4 text-[3rem]">Abrindo seu acesso</h1>
-          <p className="page-copy mt-4">
-            Estamos validando sua conta antes de liberar a próxima tela.
-          </p>
-        </div>
-      </div>
-    );
+    return <DecoratingWallLoader phrase="Conferindo seu acesso com cuidado." />;
   }
 
   if (!user && authError) {

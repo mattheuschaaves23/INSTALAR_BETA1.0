@@ -6,6 +6,7 @@ import {
   isSubscriptionAccessCacheFresh,
   validateSubscriptionAccess,
 } from './subscriptionAccessCache';
+import DecoratingWallLoader from './DecoratingWallLoader';
 
 const BACKGROUND_CHECK_INTERVAL_MS = 5 * 60 * 1000;
 
@@ -100,15 +101,10 @@ export default function SubscriptionGate() {
 
   if (loading) {
     return (
-      <div className="auth-scene flex min-h-[55vh] items-center justify-center px-6">
-        <div className="lux-panel fade-up max-w-lg p-8 text-center">
-          <p className="eyebrow">Validando acesso</p>
-          <h1 className="page-title mt-4 text-[2.8rem]">Conferindo sua assinatura</h1>
-          <p className="page-copy mt-4">
-            Estamos verificando seu pagamento antes de liberar as ferramentas do painel.
-          </p>
-        </div>
-      </div>
+      <DecoratingWallLoader
+        embedded
+        phrase="Conferindo seu plano antes de liberar as ferramentas."
+      />
     );
   }
 
