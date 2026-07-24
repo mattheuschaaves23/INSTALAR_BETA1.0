@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router';
+import NativeOAuthBridge from './components/Auth/NativeOAuthBridge';
 import ClientLanding from './components/Public/ClientLanding';
 import { useAuth } from './contexts/AuthContext';
 
@@ -7,6 +8,7 @@ const IS_INSTALLER_APP = process.env.REACT_APP_INSTALLER_APP === 'true';
 const INSTALLER_APP_PATHS = [
   '/instalador',
   '/auth/social/callback',
+  '/auth/mobile/callback',
   '/dashboard',
   '/opportunities',
   '/clients',
@@ -21,7 +23,9 @@ const INSTALLER_APP_PATHS = [
 ];
 
 const ClientLogin = lazy(() => import('./components/Auth/ClientLogin'));
+const InstallerOnboarding = lazy(() => import('./components/Auth/InstallerOnboarding'));
 const Login = lazy(() => import('./components/Auth/Login'));
+const MobileOAuthRedirect = lazy(() => import('./components/Auth/MobileOAuthRedirect'));
 const OAuthCallback = lazy(() => import('./components/Auth/OAuthCallback'));
 const PasswordRecovery = lazy(() => import('./components/Auth/PasswordRecovery'));
 const Register = lazy(() => import('./components/Auth/Register'));
@@ -80,23 +84,26 @@ function InstallerAppGuard({ children }) {
 
   const target = user?.account_type === 'installer' || user?.is_admin
     ? '/dashboard'
-    : '/instalador/entrar';
+    : '/instalador/boas-vindas';
   return <Navigate replace to={target} />;
 }
 
 export default function App() {
   return (
-    <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
+    <BrowserRouter>
+      <NativeOAuthBridge />
       <InstallerAppGuard>
         <Suspense fallback={<RouteLoading />}>
           <Routes>
           <Route element={<ClientLanding />} path="/" />
           <Route element={<ClientLogin />} path="/cliente/entrar" />
           <Route element={<ClientLogin />} path="/login" />
+          <Route element={<InstallerOnboarding />} path="/instalador/boas-vindas" />
           <Route element={<Login />} path="/instalador/entrar" />
           <Route element={<PasswordRecovery />} path="/instalador/recuperar-senha" />
           <Route element={<PasswordRecovery />} path="/cliente/recuperar-senha" />
           <Route element={<OAuthCallback />} path="/auth/social/callback" />
+          <Route element={<MobileOAuthRedirect />} path="/auth/mobile/callback" />
           <Route element={<Navigate replace to="/" />} path="/register" />
           <Route element={<Register />} path="/instalador/cadastro" />
           <Route element={<Home />} path="/cliente" />

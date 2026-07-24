@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { startSocialLogin } from '../../services/auth';

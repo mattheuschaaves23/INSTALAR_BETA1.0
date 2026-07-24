@@ -22854,6 +22854,779 @@ html[data-installer-app='true'] body {
   padding-right: env(safe-area-inset-right, 0);
   padding-bottom: env(safe-area-inset-bottom, 0);
   padding-left: env(safe-area-inset-left, 0);
-  overscroll-behavior-y: none;
+  overflow-y: auto;
+  overscroll-behavior-y: auto;
+  touch-action: auto;
   -webkit-tap-highlight-color: transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* -------- Aplicativo do instalador: apresentação e login -------- */
+.installer-onboarding-page {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  background:
+    radial-gradient(28rem 22rem at 104% 2%, rgba(var(--site-accent-rgb), 0.18), transparent 66%),
+    radial-gradient(26rem 22rem at -12% 76%, rgba(var(--site-accent-deep-rgb), 0.12), transparent 68%),
+    #080706;
+  color: #fffaf0;
+  font-family: 'Public Sans', 'Segoe UI', sans-serif;
+}
+
+.installer-onboarding-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 2.6rem 2.6rem;
+  mask-image: linear-gradient(180deg, #000, transparent 72%);
+}
+
+.installer-onboarding-header {
+  position: relative;
+  z-index: 3;
+  min-height: 4.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.3rem 0.55rem;
+}
+
+.installer-onboarding-logo {
+  width: 10.4rem;
+}
+
+.installer-onboarding-header > button {
+  min-height: 2.6rem;
+  padding: 0 0.2rem 0 1rem;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.installer-onboarding-track {
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+}
+
+.installer-onboarding-track::-webkit-scrollbar {
+  display: none;
+}
+
+.installer-onboarding-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(15rem, 1.25fr) minmax(10.5rem, 0.75fr);
+  align-items: stretch;
+  gap: 1.15rem;
+  padding: 0.25rem 1.3rem 0.8rem;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.installer-onboarding-visual {
+  position: relative;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+}
+
+.installer-onboarding-slide.is-worker .installer-onboarding-visual {
+  overflow: hidden;
+  border: 1px solid rgba(var(--site-accent-rgb), 0.24);
+  border-radius: 2rem 2rem 5rem 2rem;
+  background: #100e0b;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 2rem 4rem rgba(0, 0, 0, 0.38);
+}
+
+.installer-onboarding-slide.is-worker .installer-onboarding-visual::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, transparent 42%, rgba(8, 7, 6, 0.7) 100%),
+    radial-gradient(22rem 16rem at 78% 18%, rgba(var(--site-accent-rgb), 0.16), transparent 70%);
+}
+
+.installer-onboarding-slide.is-worker img {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: cover;
+  object-position: 62% 24%;
+  filter: saturate(0.88) contrast(1.04);
+  transform: scale(1.12);
+  transform-origin: center top;
+}
+
+.installer-onboarding-worker-badge {
+  position: absolute;
+  z-index: 2;
+  left: 1rem;
+  bottom: 1rem;
+  min-width: 11.2rem;
+  display: grid;
+  grid-template-columns: 2.7rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.72rem;
+  padding: 0.72rem 0.82rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+  background: rgba(9, 8, 7, 0.84);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(16px);
+}
+
+.installer-onboarding-worker-badge > span,
+.installer-onboarding-check {
+  width: 2.55rem;
+  height: 2.55rem;
+  display: grid;
+  place-items: center;
+  border-radius: 0.85rem;
+  background: linear-gradient(135deg, var(--site-accent-strong), var(--site-accent));
+  color: #171006;
+  font-weight: 900;
+}
+
+.installer-onboarding-worker-badge small,
+.installer-onboarding-worker-badge strong {
+  display: block;
+}
+
+.installer-onboarding-worker-badge small {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.68rem;
+}
+
+.installer-onboarding-worker-badge strong {
+  margin-top: 0.13rem;
+  color: #fff;
+  font-size: 0.86rem;
+}
+
+.installer-onboarding-copy {
+  align-self: center;
+  max-width: 31rem;
+}
+
+.installer-onboarding-copy > p {
+  margin: 0;
+  color: var(--site-accent-strong);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.installer-onboarding-copy h1 {
+  margin: 0.72rem 0 0;
+  color: #fff;
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(2rem, 8.8vw, 3rem);
+  font-weight: 580;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+.installer-onboarding-copy > span {
+  display: block;
+  margin-top: 0.82rem;
+  color: rgba(255, 255, 255, 0.67);
+  font-size: 0.94rem;
+  line-height: 1.52;
+}
+
+.installer-onboarding-slide.is-requests .installer-onboarding-visual,
+.installer-onboarding-slide.is-organize .installer-onboarding-visual {
+  overflow: hidden;
+  border: 1px solid rgba(var(--site-accent-rgb), 0.2);
+  border-radius: 3.8rem 1.6rem 3.8rem 1.6rem;
+  background:
+    radial-gradient(circle at 50% 14%, rgba(var(--site-accent-rgb), 0.2), transparent 42%),
+    linear-gradient(145deg, #13100b, #060606 64%);
+}
+
+.installer-onboarding-phone {
+  width: min(72%, 16rem);
+  padding: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 1.7rem;
+  background: rgba(4, 4, 4, 0.9);
+  box-shadow:
+    0 0 0 0.38rem rgba(255, 255, 255, 0.025),
+    0 1.6rem 3.5rem rgba(0, 0, 0, 0.48);
+  transform: rotate(-2deg);
+}
+
+.installer-onboarding-phone-head {
+  min-height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.3rem;
+}
+
+.installer-onboarding-phone-head > span {
+  width: 3.2rem;
+  height: 0.3rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.installer-onboarding-phone-head > i {
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 999px;
+  background: var(--site-accent);
+  box-shadow: 0 0 0 0.2rem rgba(var(--site-accent-rgb), 0.12);
+}
+
+.installer-onboarding-phone article {
+  margin-top: 0.5rem;
+  display: grid;
+  grid-template-columns: 2.3rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.62rem;
+  padding: 0.7rem 0.62rem;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.installer-onboarding-request-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  border-radius: 0.75rem;
+  background: rgba(var(--site-accent-rgb), 0.14);
+  color: var(--site-accent-strong);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.installer-onboarding-phone strong,
+.installer-onboarding-phone small {
+  display: block;
+}
+
+.installer-onboarding-phone strong {
+  color: #fff;
+  font-size: 0.7rem;
+}
+
+.installer-onboarding-phone small {
+  margin-top: 0.18rem;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 0.58rem;
+}
+
+.installer-onboarding-phone article > b {
+  padding: 0.24rem 0.38rem;
+  border-radius: 999px;
+  background: rgba(var(--site-accent-rgb), 0.13);
+  color: var(--site-accent-strong);
+  font-size: 0.48rem;
+  text-transform: uppercase;
+}
+
+.installer-onboarding-phone-action {
+  margin-top: 0.72rem;
+  min-height: 2.45rem;
+  display: grid;
+  place-items: center;
+  border-radius: 0.8rem;
+  background: linear-gradient(135deg, var(--site-accent-strong), var(--site-accent));
+  color: #171006;
+  font-size: 0.67rem;
+  font-weight: 900;
+}
+
+.installer-onboarding-organize {
+  position: relative;
+  width: min(90%, 22rem);
+  height: min(86%, 21rem);
+}
+
+.installer-onboarding-orbit {
+  position: absolute;
+  border: 1px solid rgba(var(--site-accent-rgb), 0.16);
+  border-radius: 50%;
+}
+
+.installer-onboarding-orbit-one {
+  inset: 4% 8%;
+}
+
+.installer-onboarding-orbit-two {
+  inset: 16% 20%;
+}
+
+.installer-onboarding-mini-card {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 1rem;
+  background: rgba(10, 9, 8, 0.88);
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(16px);
+}
+
+.installer-onboarding-mini-card small,
+.installer-onboarding-mini-card strong {
+  display: block;
+}
+
+.installer-onboarding-mini-card small {
+  color: rgba(255, 255, 255, 0.54);
+  font-size: 0.6rem;
+}
+
+.installer-onboarding-mini-card strong {
+  margin-top: 0.17rem;
+  color: #fff;
+  font-size: 0.77rem;
+}
+
+.installer-onboarding-mini-card.is-main {
+  z-index: 2;
+  top: 37%;
+  left: 8%;
+  width: 84%;
+}
+
+.installer-onboarding-mini-card.is-budget {
+  top: 8%;
+  right: 0;
+  display: block;
+  transform: rotate(3deg);
+}
+
+.installer-onboarding-mini-card.is-budget strong {
+  color: var(--site-accent-strong);
+  font-size: 1rem;
+}
+
+.installer-onboarding-mini-card.is-client {
+  left: 0;
+  bottom: 6%;
+  transform: rotate(-3deg);
+}
+
+.installer-onboarding-mini-card.is-client > span {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--site-accent-soft);
+  color: var(--site-accent-strong);
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+
+.installer-onboarding-footer {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  gap: 1rem;
+  padding: 0.65rem 1.3rem max(1.15rem, env(safe-area-inset-bottom, 0));
+  background: linear-gradient(180deg, transparent, rgba(8, 7, 6, 0.96) 28%);
+}
+
+.installer-onboarding-dots {
+  min-height: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.installer-onboarding-dots button {
+  width: 0.42rem;
+  height: 0.42rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  transition: width 180ms ease, background-color 180ms ease;
+}
+
+.installer-onboarding-dots button.is-active {
+  width: 1.65rem;
+  background: var(--site-accent-strong);
+}
+
+.installer-onboarding-continue {
+  width: 100%;
+  min-height: 3.65rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 0 1.2rem 0 1.45rem;
+  border: 1px solid rgba(255, 231, 177, 0.58);
+  border-radius: 1rem;
+  background: linear-gradient(135deg, var(--site-accent-strong), var(--site-accent) 64%, var(--site-accent-deep));
+  color: #171006;
+  font-size: 1rem;
+  font-weight: 900;
+  box-shadow:
+    0 1rem 2.2rem rgba(var(--site-accent-rgb), 0.18),
+    0 1px 0 rgba(255, 255, 255, 0.34) inset;
+}
+
+.installer-onboarding-continue b {
+  font-size: 1.4rem;
+  font-weight: 500;
+}
+
+.installer-app-login-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  touch-action: pan-y;
+  background:
+    radial-gradient(26rem 19rem at 100% 0%, rgba(var(--site-accent-rgb), 0.13), transparent 68%),
+    #080706 !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.installer-app-login-frame {
+  display: block;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.installer-app-login-frame .installer-login-right {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 1rem 1.2rem max(1.2rem, env(safe-area-inset-bottom, 0));
+  background: transparent;
+}
+
+.installer-app-login-top {
+  width: min(100%, 28rem);
+  min-height: 3.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.installer-app-login-logo {
+  width: 10.6rem;
+}
+
+.installer-app-login-top > a {
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.installer-app-login-card {
+  width: min(100%, 28rem);
+  min-height: 0;
+  margin-top: clamp(0.9rem, 4vh, 2.3rem);
+  padding: 0.2rem 0 1rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.installer-app-login-kicker {
+  margin: 0;
+  color: var(--site-accent-strong);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.installer-app-login-card .installer-login-card-head {
+  margin-top: 0.55rem;
+  text-align: left;
+}
+
+.installer-app-login-card .installer-login-card-head h2 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(2.25rem, 11vw, 3.15rem);
+  font-weight: 580;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.installer-app-login-card .installer-login-card-head p {
+  margin-top: 0.65rem;
+  max-width: 21rem;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.9rem;
+}
+
+.installer-app-login-card .installer-login-field {
+  gap: 0.48rem;
+  margin-top: 1.25rem;
+}
+
+.installer-app-login-card .installer-login-field + .installer-login-field {
+  margin-top: 0.9rem;
+}
+
+.installer-app-login-card .installer-login-field > span {
+  font-size: 0.8rem;
+}
+
+.installer-app-login-card .installer-login-input-wrap {
+  min-height: 3.25rem;
+  gap: 0.75rem;
+  padding: 0 0.95rem;
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.installer-app-login-card .installer-login-input-wrap > svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.installer-app-login-card .installer-login-input-wrap input {
+  font-size: 0.92rem;
+}
+
+.installer-app-login-card .installer-login-options {
+  margin-top: 0.85rem;
+}
+
+.installer-app-login-card .installer-login-remember,
+.installer-app-login-card .installer-login-forgot {
+  font-size: 0.78rem;
+}
+
+.installer-app-login-card .installer-login-submit {
+  min-height: 3.35rem;
+  margin-top: 1.15rem;
+  border-radius: 0.9rem;
+  font-size: 0.96rem;
+}
+
+.installer-app-login-card .installer-login-divider {
+  margin-top: 1rem;
+  gap: 0.8rem;
+}
+
+.installer-app-login-card .installer-login-divider p {
+  color: rgba(255, 255, 255, 0.46);
+  font-size: 0.75rem;
+}
+
+.installer-login-socials {
+  grid-template-columns: 1fr;
+}
+
+.installer-app-login-card .installer-login-socials {
+  margin-top: 0.8rem;
+}
+
+.installer-app-login-card .installer-login-socials button {
+  min-height: 3.25rem;
+  border-radius: 0.9rem;
+  background: #f7f7f7;
+  color: #171717;
+  font-size: 0.88rem;
+}
+
+.installer-login-google-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+}
+
+.installer-login-socials button:disabled,
+.installer-login-submit:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.installer-app-login-card .installer-login-register {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+}
+
+.mobile-oauth-return-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background:
+    radial-gradient(30rem 24rem at 50% 12%, rgba(var(--site-accent-rgb), 0.14), transparent 68%),
+    #080706;
+  color: #fff;
+}
+
+.mobile-oauth-return-card {
+  width: min(100%, 28rem);
+  display: grid;
+  justify-items: center;
+  padding: 2rem 1.4rem;
+  text-align: center;
+}
+
+.mobile-oauth-return-logo {
+  width: 12rem;
+}
+
+.mobile-oauth-return-pulse {
+  width: 3rem;
+  height: 3rem;
+  margin-top: 2rem;
+  border: 1px solid rgba(var(--site-accent-rgb), 0.55);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 0.7rem rgba(var(--site-accent-rgb), 0.08),
+    0 0 0 1.4rem rgba(var(--site-accent-rgb), 0.035);
+  animation: mobileOAuthPulse 1.4s ease-in-out infinite alternate;
+}
+
+.mobile-oauth-return-card h1 {
+  margin: 2rem 0 0;
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 2rem;
+}
+
+.mobile-oauth-return-card p {
+  margin: 0.8rem 0 0;
+  color: rgba(255, 255, 255, 0.62);
+  line-height: 1.55;
+}
+
+.mobile-oauth-return-button {
+  width: 100%;
+  min-height: 3.5rem;
+  margin-top: 1.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: 0.9rem;
+  background: linear-gradient(135deg, var(--site-accent-strong), var(--site-accent));
+  color: #171006;
+  font-weight: 900;
+}
+
+.mobile-oauth-return-card > a:last-child {
+  margin-top: 1rem;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.82rem;
+}
+
+@keyframes mobileOAuthPulse {
+  to {
+    transform: scale(1.08);
+    box-shadow:
+      0 0 0 0.9rem rgba(var(--site-accent-rgb), 0.06),
+      0 0 0 1.8rem rgba(var(--site-accent-rgb), 0.02);
+  }
+}
+
+@media (max-height: 700px) {
+  .installer-onboarding-header {
+    min-height: 4rem;
+    padding-top: 0.5rem;
+  }
+
+  .installer-onboarding-slide {
+    grid-template-rows: minmax(12rem, 1.1fr) minmax(8.5rem, 0.9fr);
+    gap: 0.7rem;
+  }
+
+  .installer-onboarding-copy h1 {
+    font-size: clamp(1.75rem, 7.8vw, 2.35rem);
+  }
+
+  .installer-onboarding-copy > span {
+    margin-top: 0.55rem;
+    font-size: 0.84rem;
+  }
+
+  .installer-onboarding-footer {
+    gap: 0.7rem;
+  }
+
+  .installer-onboarding-continue {
+    min-height: 3.3rem;
+  }
+
+  .installer-app-login-card {
+    margin-top: 0.35rem;
+  }
+
+  .installer-app-login-card .installer-login-card-head h2 {
+    font-size: 2.15rem;
+  }
+
+  .installer-app-login-card .installer-login-card-head p {
+    margin-top: 0.4rem;
+  }
+
+  .installer-app-login-card .installer-login-field {
+    margin-top: 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .installer-onboarding-track {
+    scroll-behavior: auto;
+  }
+
+  .installer-onboarding-dots button,
+  .mobile-oauth-return-pulse {
+    transition: none;
+    animation: none;
+  }
 }

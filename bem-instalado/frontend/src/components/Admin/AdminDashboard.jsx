@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { useConfirm } from '../../contexts/ConfirmContext';

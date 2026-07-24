@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import PaginationControls from '../Layout/PaginationControls';

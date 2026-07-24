@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "br.com.instalapro.instaladores",
+      "sha256_cert_fingerprints": [
+        "4B:4F:56:22:FB:36:75:D1:8E:62:22:71:72:D1:9C:12:FD:4E:E1:19:E7:06:0E:8F:FB:6E:1B:23:27:DE:C0:D3"
+      ]
+    }
+  }
+]

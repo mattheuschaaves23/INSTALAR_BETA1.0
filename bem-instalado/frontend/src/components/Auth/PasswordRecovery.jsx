@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router';
 import toast from 'react-hot-toast';
 import AuthShell from '../Layout/AuthShell';
 import PasswordField from './PasswordField';

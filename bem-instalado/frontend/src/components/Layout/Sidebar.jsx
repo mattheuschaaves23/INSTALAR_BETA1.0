@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router';
 import { useAuth } from '../../contexts/AuthContext';
 import BrandMark from './BrandMark';
 import BrandWordmark from './BrandWordmark';

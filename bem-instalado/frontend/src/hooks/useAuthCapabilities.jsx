@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
 
+const IS_INSTALLER_APP = process.env.REACT_APP_INSTALLER_APP === 'true';
 const DEFAULT_CAPABILITIES = {
   password_reset: false,
-  oauth: { google: false },
+  oauth: { google: IS_INSTALLER_APP },
 };
 
 export default function useAuthCapabilities() {

@@ -14,6 +14,7 @@ const PASSWORD_RESET_EXPIRATION_MINUTES = Number(process.env.PASSWORD_RESET_EXPI
 const OAUTH_STATE_EXPIRES_IN = '10m';
 const TWO_FACTOR_SETUP_EXPIRES_IN = '10m';
 const OAUTH_ALLOWED_ROLES = new Set(['installer', 'client']);
+const OAUTH_ALLOWED_PLATFORMS = new Set(['web', 'android']);
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
 const OAUTH_REDIRECT_ERROR_CODES = new Set([
   'account_type_mismatch',
@@ -179,6 +180,11 @@ function normalizeOAuthRole(value) {
   return OAUTH_ALLOWED_ROLES.has(role) ? role : 'installer';
 }
 
+function normalizeOAuthPlatform(value) {
+  const platform = String(value || '').trim().toLowerCase();
+  return OAUTH_ALLOWED_PLATFORMS.has(platform) ? platform : 'web';
+}
+
 function normalizeAccountType(value) {
   const accountType = String(value || '').trim().toLowerCase();
   return OAUTH_ALLOWED_ROLES.has(accountType) ? accountType : '';
@@ -209,16 +215,29 @@ function sanitizeNextPath(value, role = 'installer') {
   return nextPath;
 }
 
-function redirectOAuthResult(req, res, { token, next, role, error }) {
+function redirectOAuthResult(req, res, { token, next, role, platform, error }) {
   const frontendUrl = getFrontendBaseUrl(req);
+  const targetPlatform = normalizeOAuthPlatform(platform);
+  const isAndroid = targetPlatform === 'android';
 
   if (token) {
     const hash = new URLSearchParams({
       token,
       next: sanitizeNextPath(next, role),
+      ...(isAndroid ? { platform: 'android' } : {}),
     });
 
-    return res.redirect(`${frontendUrl}/auth/social/callback#${hash.toString()}`);
+    const callbackPath = isAndroid ? '/auth/mobile/callback' : '/auth/social/callback';
+    return res.redirect(`${frontendUrl}${callbackPath}#${hash.toString()}`);
+  }
+
+  if (isAndroid) {
+    const hash = new URLSearchParams({
+      oauth_error: error || 'oauth_failed',
+      platform: 'android',
+    });
+
+    return res.redirect(`${frontendUrl}/auth/mobile/callback#${hash.toString()}`);
   }
 
   const loginPath = role === 'client' ? '/cliente/entrar' : '/instalador/entrar';
@@ -689,17 +708,18 @@ exports.startOAuth = async (req, res) => {
   const provider = normalizeProvider(req.params.provider);
   const role = normalizeOAuthRole(req.query.role);
   const next = sanitizeNextPath(req.query.next, role);
+  const platform = normalizeOAuthPlatform(req.query.platform);
 
   try {
     if (!provider) {
-      return redirectOAuthResult(req, res, { role, error: 'invalid_provider' });
+      return redirectOAuthResult(req, res, { role, platform, error: 'invalid_provider' });
     }
 
-    const state = signOAuthState({ provider, role, next });
+    const state = signOAuthState({ provider, role, next, platform });
     const redirectUri = getOAuthCallbackUrl(req, provider);
 
     if (!hasGoogleConfig()) {
-      return redirectOAuthResult(req, res, { role, error: 'google_not_configured' });
+      return redirectOAuthResult(req, res, { role, platform, error: 'google_not_configured' });
     }
 
     const authorizationParams = new URLSearchParams({
@@ -715,7 +735,7 @@ exports.startOAuth = async (req, res) => {
 
     return res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${authorizationParams.toString()}`);
   } catch (_error) {
-    return redirectOAuthResult(req, res, { role, next, error: 'oauth_start_failed' });
+    return redirectOAuthResult(req, res, { role, next, platform, error: 'oauth_start_failed' });
   }
 };
 
@@ -775,31 +795,39 @@ async function exchangeGoogleCode(req, code) {
 exports.handleOAuthCallback = async (req, res) => {
   let role = 'installer';
   let next = getDefaultNextPath(role);
+  let platform = 'web';
 
   try {
     const provider = normalizeProvider(req.params.provider);
-    const error = req.body?.error || req.query?.error;
-
-    if (error) {
-      return redirectOAuthResult(req, res, { role, next, error: String(error) });
-    }
 
     if (!provider) {
-      return redirectOAuthResult(req, res, { role, next, error: 'invalid_provider' });
+      return redirectOAuthResult(req, res, { role, next, platform, error: 'invalid_provider' });
     }
 
     const state = verifyOAuthState(req.body?.state || req.query?.state);
     role = normalizeOAuthRole(state.role);
     next = sanitizeNextPath(state.next, role);
+    platform = normalizeOAuthPlatform(state.platform);
+
+    const error = req.body?.error || req.query?.error;
+
+    if (error) {
+      return redirectOAuthResult(req, res, { role, next, platform, error: String(error) });
+    }
 
     if (state.provider !== provider) {
-      return redirectOAuthResult(req, res, { role, next, error: 'state_provider_mismatch' });
+      return redirectOAuthResult(req, res, {
+        role,
+        next,
+        platform,
+        error: 'state_provider_mismatch',
+      });
     }
 
     const code = String(req.body?.code || req.query?.code || '').trim();
 
     if (!code) {
-      return redirectOAuthResult(req, res, { role, next, error: 'code_missing' });
+      return redirectOAuthResult(req, res, { role, next, platform, error: 'code_missing' });
     }
 
     const oauthProfile = await exchangeGoogleCode(req, code);
@@ -810,6 +838,7 @@ exports.handleOAuthCallback = async (req, res) => {
       token: signToken(user),
       role,
       next,
+      platform,
     });
   } catch (error) {
     const redirectError = getOAuthRedirectErrorCode(error);
@@ -831,7 +860,7 @@ exports.handleOAuthCallback = async (req, res) => {
       req,
     }).catch(() => null);
 
-    return redirectOAuthResult(req, res, { role, next, error: redirectError });
+    return redirectOAuthResult(req, res, { role, next, platform, error: redirectError });
   }
 };
 

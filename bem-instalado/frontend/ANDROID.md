@@ -6,7 +6,7 @@ cliente, páginas públicas ou o painel administrativo.
 
 ## Requisitos
 
-- Node.js 22.12 ou mais recente
+- Node.js 22.22 ou mais recente
 - Java 21
 - Android SDK 36
 - Android 7 ou superior no aparelho
@@ -36,15 +36,35 @@ cd android
 ./gradlew assembleDebug
 ```
 
-O APK será criado em `android/app/build/outputs/apk/debug/app-debug.apk`. Esse
-arquivo usa a assinatura de depuração do Android e serve para instalação e
-testes diretos.
+O APK de desenvolvimento será criado em
+`android/app/build/outputs/apk/debug/app-debug.apk`. Ele serve para testes
+locais e não deve ser distribuído como versão pública.
 
 ## Publicação automática
 
 Tags no formato `android-v1.0.0` executam o fluxo `Android Instaladores` no
-GitHub Actions. O APK e seu arquivo SHA-256 são anexados automaticamente a uma
-versão pública no GitHub.
+GitHub Actions. O fluxo exige os segredos `ANDROID_KEYSTORE_BASE64`,
+`ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` e `ANDROID_KEY_PASSWORD`,
+gera um APK de release assinado, verifica a assinatura e anexa o APK e seu
+arquivo SHA-256 automaticamente a uma versão pública no GitHub.
 
-Para publicar na Google Play, configure um keystore permanente e gere um AAB de
-versão. O keystore nunca deve ser salvo no repositório.
+O keystore permanente nunca deve ser salvo no repositório. Mantenha também uma
+cópia de segurança privada; sem ele não será possível atualizar o aplicativo
+com a mesma identidade.
+
+## Login com Google
+
+O aplicativo abre o consentimento do Google no navegador seguro do sistema.
+Depois da autenticação, o backend retorna para
+`https://instalar-sigma.vercel.app/auth/mobile/callback` e o Android reabre o
+aplicativo por um App Link verificado. O arquivo público
+`public/.well-known/assetlinks.json` associa o domínio ao certificado da versão
+de produção.
+
+Se o domínio ainda não tiver sido verificado pelo aparelho, a página de retorno
+oferece a contingência `instalapro://auth/callback`. Os plugins oficiais
+`@capacitor/app` e `@capacitor/browser` recebem o link, fecham a aba de login e
+concluem a sessão dentro do aplicativo.
+
+Ao trocar o certificado de assinatura ou adotar o Play App Signing, atualize o
+SHA-256 em `assetlinks.json` antes de distribuir a nova versão.

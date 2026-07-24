@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { getProfileRequest } from '../../services/auth';
 import { clearAuthToken, setAuthToken } from '../../utils/safeStorage';
+import { getOAuthErrorMessage } from '../../utils/oauthMessages';
+
+const IS_INSTALLER_APP = process.env.REACT_APP_INSTALLER_APP === 'true';
 
 function readCallbackParams() {
   const rawHash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
@@ -12,6 +15,7 @@ function readCallbackParams() {
   return {
     token: params.get('token') || '',
     next: params.get('next') || '/dashboard',
+    oauthError: params.get('oauth_error') || '',
   };
 }
 
@@ -44,7 +48,12 @@ export default function OAuthCallback() {
     let isMounted = true;
 
     async function finishLogin() {
-      const { token, next } = readCallbackParams();
+      const { token, next, oauthError } = readCallbackParams();
+
+      if (oauthError) {
+        setError(getOAuthErrorMessage(oauthError));
+        return;
+      }
 
       if (!token) {
         setError('Token de acesso ausente.');
@@ -56,6 +65,16 @@ export default function OAuthCallback() {
         const profile = await getProfileRequest();
 
         if (!isMounted) {
+          return;
+        }
+
+        if (
+          IS_INSTALLER_APP
+          && profile?.account_type !== 'installer'
+          && !profile?.is_admin
+        ) {
+          clearAuthToken();
+          setError('Este aplicativo aceita somente contas de instalador.');
           return;
         }
 

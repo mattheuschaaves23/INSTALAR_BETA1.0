@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import BrandWordmark from '../Layout/BrandWordmark';
 
 const UPDATED_AT = '22 de julho de 2026';

@@ -1,4 +1,8 @@
+import { Browser } from '@capacitor/browser';
+import { Capacitor } from '@capacitor/core';
 import api from './api';
+
+const IS_INSTALLER_APP = process.env.REACT_APP_INSTALLER_APP === 'true';
 
 export async function loginRequest(payload) {
   const response = await api.post('/auth/login', payload, { timeout: 45000 });
@@ -24,19 +28,39 @@ function sanitizeNextPath(value, fallback) {
   return nextPath.startsWith('/') && !nextPath.startsWith('//') ? nextPath : fallback;
 }
 
-export function buildSocialLoginUrl(provider, { role = 'installer', next = '/dashboard' } = {}) {
+export function buildSocialLoginUrl(
+  provider,
+  { role = 'installer', next = '/dashboard', platform } = {}
+) {
   const normalizedRole = role === 'client' ? 'client' : 'installer';
   const fallbackNext = normalizedRole === 'client' ? '/cliente' : '/dashboard';
   const url = new URL(`${getSocialLoginBaseUrl()}/auth/oauth/${provider}`, window.location.origin);
+  const targetPlatform = platform === 'android' || (IS_INSTALLER_APP && normalizedRole === 'installer')
+    ? 'android'
+    : 'web';
 
   url.searchParams.set('role', normalizedRole);
   url.searchParams.set('next', sanitizeNextPath(next, fallbackNext));
+  if (targetPlatform === 'android') {
+    url.searchParams.set('platform', 'android');
+  }
 
   return url.toString();
 }
 
-export function startSocialLogin(provider, options) {
-  window.location.assign(buildSocialLoginUrl(provider, options));
+export async function startSocialLogin(provider, options) {
+  const url = buildSocialLoginUrl(provider, options);
+
+  if (IS_INSTALLER_APP && Capacitor.isNativePlatform()) {
+    await Browser.open({
+      url,
+      toolbarColor: '#080706',
+      presentationStyle: 'fullscreen',
+    });
+    return;
+  }
+
+  window.location.assign(url);
 }
 
 export async function registerRequest(payload) {

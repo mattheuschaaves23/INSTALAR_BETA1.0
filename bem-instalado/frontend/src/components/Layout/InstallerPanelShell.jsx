@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatPanelBadgeCount, getPanelBadgeValue, usePanelBadgeCounts } from './panelBadgeCounts';
 import { hasAdminAccess } from '../../utils/adminAccess';

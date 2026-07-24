@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { startSocialLogin } from '../../services/auth';
@@ -123,6 +123,29 @@ function InstallerLoginIcon({ name }) {
   );
 }
 
+function GoogleIcon() {
+  return (
+    <svg aria-hidden="true" className="installer-login-google-icon" viewBox="0 0 24 24">
+      <path
+        d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.55h3.23c1.89-1.74 2.99-4.31 2.99-7.42Z"
+        fill="#4285F4"
+      />
+      <path
+        d="M12 22c2.7 0 4.96-.89 6.61-2.42l-3.23-2.55c-.9.6-2.04.96-3.38.96-2.6 0-4.81-1.76-5.6-4.12H3.06v2.63A10 10 0 0 0 12 22Z"
+        fill="#34A853"
+      />
+      <path
+        d="M6.4 13.87A6.02 6.02 0 0 1 6.08 12c0-.65.11-1.28.32-1.87V7.5H3.06A10 10 0 0 0 2 12c0 1.61.38 3.13 1.06 4.5l3.34-2.63Z"
+        fill="#FBBC05"
+      />
+      <path
+        d="M12 6.01c1.47 0 2.79.51 3.83 1.5l2.87-2.87A9.64 9.64 0 0 0 12 2a10 10 0 0 0-8.94 5.5l3.34 2.63c.79-2.36 3-4.12 5.6-4.12Z"
+        fill="#EA4335"
+      />
+    </svg>
+  );
+}
+
 const installerBenefits = [
   {
     icon: 'user',
@@ -173,6 +196,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [oauthSubmitting, setOauthSubmitting] = useState(false);
 
   const submitLabel = useMemo(() => (needs2FA ? 'Validar acesso' : 'Entrar'), [needs2FA]);
 
@@ -255,14 +279,31 @@ export default function Login() {
     }
   };
 
-  const handleSocialLogin = (provider) => {
-    startSocialLogin(provider, { role: 'installer', next: '/dashboard' });
+  const handleSocialLogin = async (provider) => {
+    if (oauthSubmitting) {
+      return;
+    }
+
+    setOauthSubmitting(true);
+
+    try {
+      await startSocialLogin(provider, {
+        role: 'installer',
+        next: '/dashboard',
+        platform: IS_INSTALLER_APP ? 'android' : 'web',
+      });
+    } catch (_error) {
+      toast.error('Não foi possível abrir o login com o Google. Tente novamente.');
+    } finally {
+      setOauthSubmitting(false);
+    }
   };
 
   return (
-    <main className="installer-login-page">
-      <section className="installer-login-frame">
-        <div className="installer-login-left">
+    <main className={`installer-login-page${IS_INSTALLER_APP ? ' installer-app-login-page' : ''}`}>
+      <section className={`installer-login-frame${IS_INSTALLER_APP ? ' installer-app-login-frame' : ''}`}>
+        {!IS_INSTALLER_APP ? (
+          <div className="installer-login-left">
           <img alt="" className="installer-login-worker-photo" src="/auth/installer-login-worker-instalapro.jpg" />
           <div className="installer-login-left-overlay" />
 
@@ -295,17 +336,39 @@ export default function Login() {
               ))}
             </div>
           </div>
-        </div>
+          </div>
+        ) : null}
 
         <div className="installer-login-right">
-          <form className="installer-login-card" onSubmit={handleSubmit}>
-            <div className="installer-login-avatar">
-              <InstallerLoginIcon name="user" />
+          {IS_INSTALLER_APP ? (
+            <div className="installer-app-login-top">
+              <BrandWordmark className="installer-app-login-logo" size="md" />
+              <Link to="/instalador/boas-vindas">
+                <span aria-hidden="true">←</span>
+                Apresentação
+              </Link>
             </div>
+          ) : null}
+
+          <form
+            className={`installer-login-card${IS_INSTALLER_APP ? ' installer-app-login-card' : ''}`}
+            onSubmit={handleSubmit}
+          >
+            {!IS_INSTALLER_APP ? (
+              <div className="installer-login-avatar">
+                <InstallerLoginIcon name="user" />
+              </div>
+            ) : (
+              <p className="installer-app-login-kicker">ÁREA DO INSTALADOR</p>
+            )}
 
             <div className="installer-login-card-head">
-              <h2>Entrar como instalador</h2>
-              <p>Use o e-mail e a senha informados no cadastro.</p>
+              <h2>{IS_INSTALLER_APP ? 'Entrar' : 'Entrar como instalador'}</h2>
+              <p>
+                {IS_INSTALLER_APP
+                  ? 'Acesse sua conta para ver novas oportunidades.'
+                  : 'Use o e-mail e a senha informados no cadastro.'}
+              </p>
             </div>
 
             <label className="installer-login-field">
@@ -395,19 +458,23 @@ export default function Login() {
               <InstallerLoginIcon name="arrow" />
             </button>
 
-            {!IS_INSTALLER_APP && authCapabilities.oauth.google ? (
+            {authCapabilities.oauth.google ? (
               <>
                 <div className="installer-login-divider">
                   <span />
-                  <p>ou continue com</p>
+                  <p>ou</p>
                   <span />
                 </div>
 
                 <div className="installer-login-socials">
                   {authCapabilities.oauth.google ? (
-                    <button onClick={() => handleSocialLogin('google')} type="button">
-                      <span className="installer-login-google">G</span>
-                      <span>Entrar com Gmail</span>
+                    <button
+                      disabled={oauthSubmitting}
+                      onClick={() => handleSocialLogin('google')}
+                      type="button"
+                    >
+                      <GoogleIcon />
+                      <span>{oauthSubmitting ? 'Abrindo Google...' : 'Continuar com Google'}</span>
                     </button>
                   ) : null}
                 </div>
@@ -421,19 +488,21 @@ export default function Login() {
           </form>
         </div>
 
-        <div className="installer-login-trust-bar">
-          {trustItems.map((item) => (
-            <article key={item.title}>
-              <span className="installer-login-trust-icon">
-                <InstallerLoginIcon name={item.icon} />
-              </span>
-              <div>
-                <strong>{item.title}</strong>
-                <p>{item.copy}</p>
-              </div>
-            </article>
-          ))}
-        </div>
+        {!IS_INSTALLER_APP ? (
+          <div className="installer-login-trust-bar">
+            {trustItems.map((item) => (
+              <article key={item.title}>
+                <span className="installer-login-trust-icon">
+                  <InstallerLoginIcon name={item.icon} />
+                </span>
+                <div>
+                  <strong>{item.title}</strong>
+                  <p>{item.copy}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : null}
       </section>
     </main>
   );

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -28,7 +28,7 @@ const CHART_PADDING_X = 18;
 const CHART_PADDING_Y = 24;
 const DASHBOARD_REFRESH_INTERVAL = 30000;
 const INSTALLER_APP_DOWNLOAD_URL = 'https://github.com/mattheuschaaves23/Instalar/releases/latest/download/InstalaPro-Instaladores.apk';
-const INSTALLER_APP_VERSION = '1.0.4';
+const INSTALLER_APP_VERSION = '1.0.5';
 const CHART_VIEWS = ['weekly', 'monthly', 'yearly'];
 const CHART_VIEW_LABELS = {
   weekly: 'Semanal',

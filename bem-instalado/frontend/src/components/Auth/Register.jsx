@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthShell from '../Layout/AuthShell';
@@ -24,6 +24,7 @@ const highlights = [
 ];
 
 const PLAN_PRICE = Number(process.env.REACT_APP_SUBSCRIPTION_PRICE || 49.9);
+const IS_INSTALLER_APP = process.env.REACT_APP_INSTALLER_APP === 'true';
 const planBenefits = [
   'Dashboard com números do mês e evolução da operação.',
   'Agenda visual por dia para não perder instalação.',
@@ -177,13 +178,15 @@ export default function Register() {
             Entrar no painel
           </Link>
         </p>
-        <p className="mt-2 text-sm text-[var(--muted)]">
-          É cliente e quer buscar profissionais?{' '}
-          <Link className="font-semibold text-[var(--gold-strong)]" to="/cliente">
-            Ir para área do cliente
-          </Link>
-          .
-        </p>
+        {!IS_INSTALLER_APP && (
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            É cliente e quer buscar profissionais?{' '}
+            <Link className="font-semibold text-[var(--gold-strong)]" to="/cliente">
+              Ir para área do cliente
+            </Link>
+            .
+          </p>
+        )}
       </div>
     </AuthShell>
   );
