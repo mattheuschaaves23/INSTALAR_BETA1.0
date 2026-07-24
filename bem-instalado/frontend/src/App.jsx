@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router';
 import NativeOAuthBridge from './components/Auth/NativeOAuthBridge';
+import NativeAppUpdater from './components/Layout/NativeAppUpdater';
 import ClientLanding from './components/Public/ClientLanding';
 import { useAuth } from './contexts/AuthContext';
 
@@ -92,6 +93,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <NativeOAuthBridge />
+      <NativeAppUpdater />
       <InstallerAppGuard>
         <Suspense fallback={<RouteLoading />}>
           <Routes>

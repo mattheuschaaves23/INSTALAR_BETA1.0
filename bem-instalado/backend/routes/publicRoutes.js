@@ -7,6 +7,7 @@ const optionalAuthMiddleware = require('../middleware/optionalAuthMiddleware');
 const monitoringController = require('../controllers/monitoringController');
 const profileUpload = require('../middleware/profileUpload');
 const assetController = require('../controllers/assetController');
+const installerAppReleaseController = require('../controllers/installerAppReleaseController');
 
 const router = express.Router();
 
@@ -43,6 +44,7 @@ const publicUploadSingle = (req, res, next) => {
 };
 
 router.get('/installers', publicSearchLimiter, controller.getInstallers);
+router.get('/installer-app-release', publicSearchLimiter, installerAppReleaseController.getInstallerAppRelease);
 router.get('/assets/:assetKey', publicSearchLimiter, assetController.getPublicAsset);
 router.post('/client-errors', optionalAuthMiddleware, clientErrorLimiter, monitoringController.reportClientError);
 router.post('/service-request-uploads', serviceRequestLimiter, publicUploadSingle, serviceRequestController.uploadPublicRequestPhoto);
