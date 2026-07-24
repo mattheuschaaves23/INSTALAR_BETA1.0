@@ -26,6 +26,8 @@ const CHART_HEIGHT = 280;
 const CHART_PADDING_X = 18;
 const CHART_PADDING_Y = 24;
 const DASHBOARD_REFRESH_INTERVAL = 30000;
+const INSTALLER_APP_DOWNLOAD_URL = 'https://github.com/mattheuschaaves23/Instalar/releases/latest/download/InstalaPro-Instaladores.apk';
+const INSTALLER_APP_VERSION = '1.0.2';
 const CHART_VIEWS = ['weekly', 'monthly', 'yearly'];
 const CHART_VIEW_LABELS = {
   weekly: 'Semanal',
@@ -231,6 +233,53 @@ function PanelIcon({ type, size = 20 }) {
   };
 
   return <svg {...sharedProps}>{icons[type] || icons.grid}</svg>;
+}
+
+function InstallerAppDownloadCard() {
+  if (IS_INSTALLER_APP) {
+    return null;
+  }
+
+  return (
+    <aside aria-labelledby="installer-app-download-title" className="installer-app-download">
+      <div aria-hidden="true" className="installer-app-download-visual">
+        <span className="installer-app-download-orbit" />
+        <span className="installer-app-download-phone">
+          <i />
+          <svg fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" viewBox="0 0 24 24">
+            <path d="M9 6V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1" />
+            <rect height="14" rx="2.5" width="16" x="4" y="6" />
+            <path d="M4 12h16M9 15.5h6" />
+          </svg>
+        </span>
+      </div>
+
+      <div className="installer-app-download-copy">
+        <span className="installer-app-download-kicker"><i /> Aplicativo do instalador</span>
+        <h2 id="installer-app-download-title">Seu painel também no celular</h2>
+        <p>Acesse oportunidades, agenda, clientes e orçamentos de onde estiver.</p>
+        <div className="installer-app-download-meta">
+          <span>Android 7+</span>
+          <span>Versão {INSTALLER_APP_VERSION}</span>
+        </div>
+      </div>
+
+      <a
+        className="installer-app-download-button"
+        href={INSTALLER_APP_DOWNLOAD_URL}
+        rel="noreferrer"
+        target="_blank"
+      >
+        <svg aria-hidden="true" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.9" viewBox="0 0 24 24">
+          <path d="M12 3v12" />
+          <path d="m7 11 5 5 5-5" />
+          <path d="M5 21h14" />
+        </svg>
+        <span><small>Baixar agora</small><strong>Aplicativo Android</strong></span>
+        <b aria-hidden="true">→</b>
+      </a>
+    </aside>
+  );
 }
 
 function compactCurrency(value) {
@@ -1011,6 +1060,8 @@ export default function Dashboard() {
             </div>
           </section>
 
+          <InstallerAppDownloadCard />
+
           <section className="ref-panel-mobile-section-head">
             <h3>Resumo do mês</h3>
             <Link to="/dashboard">Ver detalhes <PanelIcon type="chevron" size={14} /></Link>
@@ -1250,6 +1301,8 @@ export default function Dashboard() {
             </Link>
           </div>
         </div>
+
+        <InstallerAppDownloadCard />
 
         <div className="dashboard-neo-metrics">
           {dashboardCards.map((card) => (
