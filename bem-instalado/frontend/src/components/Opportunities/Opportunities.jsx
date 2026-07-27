@@ -10,7 +10,7 @@ import { useSubscription } from '../../contexts/SubscriptionContext';
 const FILTERS = [
   { value: 'open', label: 'Novas' },
   { value: 'interested', label: 'Meus interesses' },
-  { value: 'selected', label: 'Escolhidas' },
+  { value: 'selected', label: 'Escolheram você' },
 ];
 
 function OpportunityIcon({ type }) {
@@ -106,8 +106,8 @@ export default function Opportunities() {
   const pageStats = useMemo(
     () => [
       { label: 'Novas', value: stats.open || opportunities.filter((item) => !item.interested_by_me).length, detail: 'Ainda sem seu interesse' },
-      { label: 'Interesses', value: stats.interested || opportunities.filter((item) => item.my_interest_status === 'interested').length, detail: 'Aguardando escolha do cliente' },
-      { label: 'Escolhidas', value: stats.selected || opportunities.filter((item) => item.selected_by_me).length, detail: 'WhatsApp liberado pelo cliente' },
+      { label: 'Interesses', value: stats.interested || opportunities.filter((item) => item.my_interest_status === 'interested').length, detail: 'Enviados aos clientes' },
+      { label: 'Escolheram você', value: stats.selected || opportunities.filter((item) => item.selected_by_me).length, detail: 'Contato liberado pelo cliente' },
       { label: 'Na sua região', value: stats.matched || opportunities.filter((item) => item.match_score >= 78).length, detail: 'Priorizadas por cidade/UF' },
     ],
     [opportunities, stats]
@@ -134,7 +134,7 @@ export default function Opportunities() {
         await refreshSubscription();
       }
 
-      toast.success('Interesse enviado. O cliente vai escolher com quem quer falar.');
+      toast.success('Interesse enviado. Agora é só aguardar a escolha do cliente.');
     } catch (error) {
       toast.error(error.response?.data?.error || 'Não foi possível enviar interesse.');
     } finally {
@@ -236,7 +236,7 @@ export default function Opportunities() {
                     </div>
 
                     <div className="opportunity-meta">
-                      <span><OpportunityIcon type="user" />{opportunity.client_name || 'Cliente interessado'}</span>
+                      <span><OpportunityIcon type="user" />{opportunity.client_name || 'Cliente da região'}</span>
                       <span><OpportunityIcon type="map" />{joinRegion(opportunity)}</span>
                       <span><OpportunityIcon type="phone" />{opportunity.client_phone || opportunity.client_phone_masked || 'WhatsApp se o cliente escolher você'}</span>
                       <span><OpportunityIcon type="clock" />{opportunity.urgency_label || 'Prazo a combinar'}</span>
@@ -252,13 +252,30 @@ export default function Opportunities() {
                     ) : null}
 
                     {opportunity.details ? <p className="opportunity-details">{opportunity.details}</p> : null}
+
+                    {Array.isArray(opportunity.photo_urls) && opportunity.photo_urls.length > 0 ? (
+                      <div className="opportunity-photo-grid" aria-label="Fotos enviadas pelo cliente">
+                        {opportunity.photo_urls.map((photoUrl, index) => (
+                          <a href={photoUrl} key={`${opportunity.id}-photo-${index}`} rel="noreferrer" target="_blank">
+                            <img
+                              alt={`Foto ${index + 1} do pedido`}
+                              decoding="async"
+                              loading="lazy"
+                              src={photoUrl}
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 
                 <div className="opportunity-actions">
-                  <span className={opportunity.selected_by_me ? 'is-accepted' : opportunity.interested_by_me ? 'is-interested' : ''}>
+                  <span className={opportunity.selected_by_me ? 'is-accepted' : opportunity.not_selected ? 'is-closed' : opportunity.interested_by_me ? 'is-interested' : ''}>
                     {opportunity.selected_by_me
                       ? 'Cliente escolheu você'
+                      : opportunity.not_selected
+                        ? 'Cliente escolheu outro profissional'
                       : opportunity.interested_by_me
                         ? 'Interesse enviado'
                         : 'Nova solicitação'}
@@ -268,6 +285,10 @@ export default function Opportunities() {
                     <a className="gold-button" href={opportunity.whatsapp_url} rel="noreferrer" target="_blank">
                       Chamar no WhatsApp
                     </a>
+                  ) : opportunity.not_selected ? (
+                    <button className="gold-button" disabled type="button">
+                      Pedido finalizado
+                    </button>
                   ) : opportunity.interested_by_me ? (
                     <button className="gold-button" disabled type="button">
                       Aguardando cliente
@@ -280,7 +301,7 @@ export default function Opportunities() {
                         onClick={() => handleInterest(opportunity)}
                         type="button"
                       >
-                        {sendingInterestId === opportunity.id ? 'Enviando...' : 'Tenho interesse'}
+                        {sendingInterestId === opportunity.id ? 'Enviando...' : 'Quero atender este pedido'}
                       </button>
                     ) : (
                       <Link

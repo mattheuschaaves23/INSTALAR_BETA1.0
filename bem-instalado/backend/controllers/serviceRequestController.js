@@ -203,13 +203,14 @@ function serializeOpportunity(row) {
     address_reference: selectedByMe ? row.address_reference : null,
     city: row.city,
     state: row.state,
-    details: selectedByMe ? row.details : null,
+    details: row.details || null,
     photo_count: Number(row.photo_count || 0),
-    photo_names: selectedByMe ? row.photo_names || [] : [],
-    photo_urls: selectedByMe ? row.photo_urls || [] : [],
+    photo_names: row.photo_names || [],
+    photo_urls: row.photo_urls || [],
     status: row.status,
     interested_by_me: interestedByMe,
     selected_by_me: selectedByMe,
+    not_selected: row.status === 'selected' && interestedByMe && !selectedByMe,
     my_interest_status: row.my_interest_status || null,
     my_interest_at: row.my_interest_at || null,
     selected_at: row.selected_at || null,
@@ -279,6 +280,10 @@ function serializeClientInterest(row, request) {
     whatsapp_url: selected && row.phone ? generateWhatsAppLink(row.phone, buildClientMessage(row, request)) : null,
   };
 }
+
+exports.__test = {
+  serializeOpportunity,
+};
 
 async function getInstaller(installerId) {
   const result = await pool.query(
@@ -704,13 +709,15 @@ exports.getOpportunities = async (req, res) => {
 
     if (status === 'selected') {
       filters.push("sri.status = 'selected'");
+    } else if (status === 'interested') {
+      filters.push("sri.status = 'interested'");
+      filters.push("sr.status IN ('open', 'selected')");
+      filters.push("(sr.status = 'selected' OR sr.expires_at IS NULL OR sr.expires_at > NOW())");
     } else {
       filters.push("sr.status = 'open'");
       filters.push('(sr.expires_at IS NULL OR sr.expires_at > NOW())');
 
-      if (status === 'interested') {
-        filters.push("sri.status = 'interested'");
-      } else if (status === 'open') {
+      if (status === 'open') {
         filters.push('sri.id IS NULL');
       }
     }
@@ -1116,6 +1123,17 @@ exports.selectServiceRequestInterest = async (req, res) => {
       return res.status(404).json({ error: 'Instalador interessado não encontrado.' });
     }
 
+    if (
+      request.status === 'selected'
+      && Number(request.selected_installer_id) !== Number(interest.installer_id)
+    ) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({
+        error: 'Este pedido já tem um instalador escolhido. A escolha final não pode ser alterada.',
+        code: 'INSTALLER_ALREADY_SELECTED',
+      });
+    }
+
     await client.query(
       `
         UPDATE service_request_interests
@@ -1138,6 +1156,40 @@ exports.selectServiceRequestInterest = async (req, res) => {
       `,
       [interest.installer_id, requestId]
     );
+
+    if (request.status !== 'selected') {
+      await client.query(
+        `
+          INSERT INTO notifications (user_id, title, message, type, read)
+          VALUES ($1, 'Você foi escolhido', $2, 'success', FALSE)
+        `,
+        [
+          interest.installer_id,
+          `O cliente escolheu você para conversar sobre o pedido #${requestId}. O contato já está liberado em Oportunidades.`,
+        ]
+      );
+
+      await client.query(
+        `
+          INSERT INTO notifications (user_id, title, message, type, read)
+          SELECT
+            installer_id,
+            'Pedido finalizado',
+            $2,
+            'info',
+            FALSE
+          FROM service_request_interests
+          WHERE request_id = $1
+            AND installer_id <> $3
+            AND status = 'interested'
+        `,
+        [
+          requestId,
+          `O cliente escolheu outro profissional no pedido #${requestId}. Continue acompanhando as novas oportunidades da sua região.`,
+          interest.installer_id,
+        ]
+      );
+    }
 
     await client.query('COMMIT');
 

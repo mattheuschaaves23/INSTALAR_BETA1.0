@@ -197,7 +197,7 @@ const roleCards = [
     id: 'cliente',
     type: 'client',
     title: 'Área do cliente',
-    description: 'Acompanhe pedidos, converse com instaladores e escolha o profissional ideal.',
+    description: 'Publique seu pedido, compare os interessados e escolha quem chamar no final.',
     label: 'Ir para clientes',
     to: REQUEST_PATH,
   },

@@ -112,8 +112,8 @@ const benefitItems = [
   },
   {
     icon: 'chat',
-    title: 'Contato direto',
-    copy: 'Fale diretamente com o instalador sem intermediarios.',
+    title: 'Contato protegido',
+    copy: 'Seu WhatsApp só é liberado para o instalador escolhido.',
   },
 ];
 

@@ -24,7 +24,7 @@ const AUTO_LOCATION_SESSION_KEY = 'papelperto_client_location_checked';
 const INSTALLERS_PER_PAGE = 6;
 const MAX_REQUEST_PHOTOS = 4;
 const MAX_REQUEST_PHOTO_SIZE = 4 * 1024 * 1024;
-const SHOW_PUBLIC_INSTALLER_DIRECTORY = true;
+const SHOW_PUBLIC_INSTALLER_DIRECTORY = false;
 const INITIAL_FILTERS = { search: '', city: '', state: '' };
 
 const CATEGORY_OPTIONS = [
@@ -530,8 +530,8 @@ function getRequestCompleteness(request) {
 
 function getClientRequestStatusLabel(status) {
   return {
-    open: 'Aguardando instaladores',
-    selected: 'Instalador escolhido',
+    open: 'Recebendo interessados',
+    selected: 'Contato liberado',
     closed: 'Serviço concluído',
     canceled: 'Pedido cancelado',
     expired: 'Pedido expirado',
@@ -1298,6 +1298,11 @@ export default function Home() {
       return;
     }
 
+    const confirmed = await confirm(
+      `Chamar ${interest.display_name}? Essa escolha é final e libera seu WhatsApp e o endereço completo somente para esse instalador.`
+    );
+    if (!confirmed) return;
+
     setSelectingInterestId(interest.id);
 
     try {
@@ -1325,7 +1330,7 @@ export default function Home() {
         });
       }
 
-      toast.success('Instalador escolhido. O contato pelo WhatsApp foi liberado.');
+      toast.success('Instalador escolhido. Agora vocês já podem conversar pelo WhatsApp.');
     } catch (error) {
       toast.error(error.response?.data?.error || 'Não foi possível escolher o instalador.');
     } finally {
@@ -1358,7 +1363,7 @@ export default function Home() {
     }
 
     if (phoneDigits.length < 10) {
-      toast.error('Informe um WhatsApp válido para os instaladores chamarem você.');
+      toast.error('Informe um WhatsApp válido para o instalador escolhido falar com você.');
       return;
     }
 
@@ -1729,15 +1734,14 @@ export default function Home() {
     setSortBy('match');
     setInstallersPage(1);
     setHasGuidedRequest(true);
-    setShowPublishForm(false);
+    setShowPublishForm(true);
     setPublishedRequest(null);
     setRequestInterests([]);
     writeStoredClientRequest(requestSnapshot);
-    await loadDirectory(nextFilters);
 
     if (typeof document !== 'undefined') {
       window.requestAnimationFrame(() => {
-        document.getElementById('resultados')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('publicar-pedido')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
   };
@@ -1934,9 +1938,9 @@ export default function Home() {
         <section className="client-app-request-card fade-up" id="busca">
           <div className="client-app-request-head">
             <div>
-              <p className="client-app-kicker">Encontre um profissional</p>
-              <h1>Encontre seu instalador</h1>
-              <p>Responda quatro etapas rápidas. Você só fala com quem escolher.</p>
+              <p className="client-app-kicker">Publique o que você precisa</p>
+              <h1>Receba interesse de instaladores próximos</h1>
+              <p>Responda quatro etapas rápidas. Depois compare os interessados e escolha quem chamar.</p>
             </div>
 
             <div className="client-app-request-side">
@@ -2407,7 +2411,7 @@ export default function Home() {
                 </button>
               ) : (
                 <button className="client-app-search-submit" type="submit">
-                  Encontrar instaladores
+                  Continuar para publicar
                 </button>
               )}
             </div>
@@ -2419,18 +2423,14 @@ export default function Home() {
           <>
             <section className="client-app-result-overview fade-up" id="resultados">
               <span className="client-app-result-overview-icon" aria-hidden="true">
-                <AppIcon name={loading ? 'search' : filteredInstallers.length > 0 ? 'check-badge' : 'map-pin'} />
+                <AppIcon name={publishedRequest ? 'check-badge' : 'users'} />
               </span>
               <div>
                 <p className="client-app-kicker">Seu pedido</p>
                 <h2>
-                  {loading
-                    ? 'Buscando instaladores...'
-                    : filteredInstallers.length > 0
-                      ? `${filteredInstallers.length} instalador${filteredInstallers.length === 1 ? '' : 'es'} encontrado${filteredInstallers.length === 1 ? '' : 's'}`
-                      : publishedRequest
-                        ? 'Seu pedido está publicado'
-                        : 'Nenhum instalador encontrado'}
+                  {publishedRequest
+                    ? 'Seu pedido está publicado'
+                    : 'Tudo pronto para receber interessados'}
                 </h2>
                 <span>
                   {[requestSnapshot.serviceLabel, filters.city, filters.state].filter(Boolean).join(' · ')}
@@ -2610,7 +2610,7 @@ export default function Home() {
 
                         <div className="client-app-detail-line">
                           <AppIcon name="shield" />
-                          <span>{isVerified ? 'Perfil verificado' : 'Contato direto com o profissional'}</span>
+                          <span>{isVerified ? 'Perfil verificado' : 'Dados profissionais disponíveis'}</span>
                           <span className="client-app-dot">•</span>
                           <span>{(installer.available_dates || []).length > 0 ? 'Datas disponíveis' : 'Perfil completo'}</span>
                         </div>
@@ -2702,7 +2702,7 @@ export default function Home() {
 
                       <div className="client-app-detail-line">
                         <AppIcon name="shield" />
-                        <span>{isVerified ? 'Profissional verificado' : 'Contato direto disponível'}</span>
+                        <span>{isVerified ? 'Profissional verificado' : 'Perfil profissional disponível'}</span>
                         <span className="client-app-dot">•</span>
                         <span>
                           {(installer.availability_slots || []).length > 0 || (installer.available_dates || []).length > 0
@@ -2735,19 +2735,19 @@ export default function Home() {
         {hasGuidedRequest && (showPublishForm || publishedRequest) ? (
           <section className="client-app-opportunity-publish fade-up" id="publicar-pedido">
             <div className="client-app-opportunity-copy">
-              <p className="client-app-kicker">{publishedRequest ? 'Pedido enviado' : 'Próximo passo'}</p>
-              <h3>{publishedRequest ? 'Agora é só aguardar' : 'Publicar para receber interessados'}</h3>
+              <p className="client-app-kicker">{publishedRequest ? 'Pedido publicado' : 'Último passo'}</p>
+              <h3>{publishedRequest ? 'Instaladores da região já podem responder' : 'Publique para os instaladores da região'}</h3>
               <span>
                 {publishedRequest
-                  ? 'Quando alguém se interessar, o perfil aparecerá logo abaixo.'
-                  : 'Informe nome e WhatsApp. Seu contato só será liberado para quem você escolher.'}
+                  ? 'Quando alguém quiser atender, o perfil aparecerá logo abaixo para você comparar.'
+                  : 'Seu telefone e endereço completo ficam privados até você escolher quem chamar.'}
               </span>
             </div>
 
             {publishedRequest ? (
               <div className="client-app-opportunity-success">
                 <strong>Pedido #{publishedRequest.id} publicado</strong>
-                <span>O pedido está disponível para profissionais que atendem à região. Seu contato continua privado.</span>
+                <span>Vários profissionais podem demonstrar interesse. Você decide qual deles chamar no final.</span>
                 <div className="client-app-tracking-actions">
                   <button className="client-app-ghost-button" onClick={copyRequestTrackingLink} type="button">
                     Copiar link para acompanhar
@@ -2834,11 +2834,11 @@ export default function Home() {
             <div className="client-app-interest-head">
               <div>
                 <p className="client-app-kicker">Quem se interessou</p>
-                <h3>{selectedInterest ? 'Instalador escolhido' : 'Compare antes de escolher'}</h3>
+                <h3>{selectedInterest ? 'Contato liberado' : 'Compare quem quer atender você'}</h3>
                 <span>
                   {selectedInterest
-                    ? 'O WhatsApp do profissional escolhido está liberado.'
-                    : 'Abra os perfis e escolha somente quando se sentir seguro.'}
+                    ? 'Você e o profissional escolhido já podem conversar pelo WhatsApp.'
+                    : 'Veja os perfis e chame somente um instalador quando estiver pronto.'}
                 </span>
               </div>
               <button className="client-app-ghost-button" onClick={() => loadRequestInterests()} type="button">
@@ -2870,9 +2870,15 @@ export default function Home() {
                       </small>
                     </div>
                     <div className="client-app-interest-actions">
+                      <Link
+                        className="ghost-button"
+                        to={`/installers/${interest.installer_id}?pedido=${publishedRequest.id}`}
+                      >
+                        Ver perfil
+                      </Link>
                       {interest.selected && interest.whatsapp_url ? (
                         <a className="gold-button" href={interest.whatsapp_url} rel="noreferrer" target="_blank">
-                          Chamar no WhatsApp
+                          Conversar no WhatsApp
                         </a>
                       ) : (
                         <button
@@ -2881,7 +2887,7 @@ export default function Home() {
                           onClick={() => selectInterestedInstaller(interest)}
                           type="button"
                         >
-                          {selectingInterestId === interest.id ? 'Escolhendo...' : 'Escolher'}
+                          {selectingInterestId === interest.id ? 'Liberando contato...' : 'Chamar este instalador'}
                         </button>
                       )}
                     </div>
@@ -2892,7 +2898,7 @@ export default function Home() {
           </section>
         ) : null}
 
-        {hasGuidedRequest && filteredInstallers.length > 0 && !publishedRequest ? (
+        {SHOW_PUBLIC_INSTALLER_DIRECTORY && hasGuidedRequest && filteredInstallers.length > 0 && !publishedRequest ? (
           <section className="client-app-trust-strip fade-up">
             <article>
               <AppIcon name="shield" />
@@ -2911,8 +2917,8 @@ export default function Home() {
             <article>
               <AppIcon name="shield" />
               <div>
-                <strong>Contato direto</strong>
-                <span>Fale com quem vai atender</span>
+                <strong>Contato protegido</strong>
+                <span>Liberado só após sua escolha</span>
               </div>
             </article>
           </section>

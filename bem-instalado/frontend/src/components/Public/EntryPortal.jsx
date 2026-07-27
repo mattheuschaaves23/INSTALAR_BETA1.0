@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { useAuth } from '../../contexts/AuthContext';
 import BrandWordmark from '../Layout/BrandWordmark';
 
-const clientPoints = ['Busca por região', 'Horários visíveis', 'Contato direto'];
+const clientPoints = ['Pedido em minutos', 'Interessados da região', 'Contato protegido'];
 const installerPoints = ['Agenda e clientes', 'Orçamentos rápidos', 'Painel profissional'];
 
 export default function EntryPortal() {
@@ -17,13 +17,13 @@ export default function EntryPortal() {
           <BrandWordmark className="mb-5" size="md" />
           <h1 className="entry-portal-title">Escolha como você quer entrar</h1>
           <p className="entry-portal-copy">
-            Um espaço para clientes encontrarem profissionais e um painel para instaladores
+            Um espaço para clientes publicarem pedidos e um painel para instaladores
             organizarem o próprio negócio.
           </p>
 
           <div className="entry-portal-keyline">
-            <span className="entry-portal-key">Pesquisa simples</span>
-            <span className="entry-portal-key">Contato rápido</span>
+            <span className="entry-portal-key">Pedido simples</span>
+            <span className="entry-portal-key">Escolha segura</span>
             <span className="entry-portal-key">Gestão profissional</span>
           </div>
         </header>
@@ -40,9 +40,9 @@ export default function EntryPortal() {
             </div>
 
             <div className="entry-panel-v2-body">
-              <h2 className="entry-panel-v2-title">Encontrar o instalador</h2>
+              <h2 className="entry-panel-v2-title">Publicar meu pedido</h2>
               <p className="entry-panel-v2-copy">
-                Procure profissionais da sua região, veja horários e fale com quem faz a instalação.
+                Conte o que precisa. Instaladores da região demonstram interesse e você escolhe quem chamar.
               </p>
 
               <div className="entry-panel-v2-points">
@@ -56,7 +56,7 @@ export default function EntryPortal() {
 
             <div className="entry-panel-v2-actions">
               <Link className="entry-panel-v2-primary" to="/cliente">
-                Ver instaladores
+                Criar pedido
               </Link>
             </div>
           </article>

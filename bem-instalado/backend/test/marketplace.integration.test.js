@@ -34,6 +34,7 @@ test('cadastro, pagamento, pedido, interesse e escolha do instalador', { skip: !
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
 
   let installerId = null;
+  let secondInstallerId = null;
   let clientId = null;
   try {
     const registration = await requestJson(baseUrl, '/api/auth/register', {
@@ -99,7 +100,31 @@ test('cadastro, pagamento, pedido, interesse e escolha do instalador', { skip: !
 
     const search = await requestJson(baseUrl, '/api/public/installers?city=Palhoca&state=SC');
     assert.equal(search.response.status, 200, JSON.stringify(search.body));
-    assert.ok(search.body.installers.some((item) => item.id === installerId));
+    const publicInstaller = search.body.installers.find((item) => item.id === installerId);
+    assert.ok(publicInstaller);
+    assert.equal(publicInstaller.phone, undefined);
+    assert.equal(publicInstaller.whatsapp_link, null);
+
+    const secondRegistration = await requestJson(baseUrl, '/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'Segundo Instalador Teste',
+        email: `segundo-${email}`,
+        password: 'TesteSeguro123!',
+        phone: '48977777777',
+        business_name: 'Outro Papel Teste',
+      }),
+    });
+    assert.equal(secondRegistration.response.status, 201, JSON.stringify(secondRegistration.body));
+    secondInstallerId = secondRegistration.body.user.id;
+    const secondInstallerHeaders = { Authorization: `Bearer ${secondRegistration.body.token}` };
+
+    await pool.query(
+      `UPDATE users SET city = 'Palhoça', state = 'SC', latitude = -27.6460, longitude = -48.6685,
+        service_radius_km = 80, certificate_file = $1,
+        certification_verified = TRUE, public_profile = TRUE WHERE id = $2`,
+      ['https://example.test/segundo-certificado.pdf', secondInstallerId]
+    );
 
     const order = await requestJson(baseUrl, '/api/public/service-requests', {
       method: 'POST',
@@ -145,9 +170,10 @@ test('cadastro, pagamento, pedido, interesse e escolha do instalador', { skip: !
     const privateOpportunity = available.body.opportunities.find((item) => item.id === serviceRequest.id);
     assert.ok(privateOpportunity);
     assert.equal(privateOpportunity.client_name, null);
+    assert.equal(privateOpportunity.client_phone, null);
     assert.equal(privateOpportunity.address_reference, null);
-    assert.equal(privateOpportunity.details, null);
-    assert.deepEqual(privateOpportunity.photo_urls, []);
+    assert.equal(privateOpportunity.details, 'Detalhes privados do ambiente');
+    assert.deepEqual(privateOpportunity.photo_urls, ['https://example.test/foto-privada.jpg']);
     assert.ok(privateOpportunity.distance_km < 1);
 
     const interest = await requestJson(baseUrl, `/api/opportunities/${serviceRequest.id}/interest`, {
@@ -155,17 +181,24 @@ test('cadastro, pagamento, pedido, interesse e escolha do instalador', { skip: !
     });
     assert.equal(interest.response.status, 200, JSON.stringify(interest.body));
 
+    const secondInterest = await requestJson(baseUrl, `/api/opportunities/${serviceRequest.id}/interest`, {
+      method: 'POST', headers: secondInstallerHeaders, body: JSON.stringify({}),
+    });
+    assert.equal(secondInterest.response.status, 200, JSON.stringify(secondInterest.body));
+
     const interested = await requestJson(
       baseUrl,
       `/api/public/service-requests/${serviceRequest.id}/interests`,
       { headers: { 'X-Client-Request-Token': serviceRequest.client_access_token } }
     );
     assert.equal(interested.response.status, 200, JSON.stringify(interested.body));
-    assert.equal(interested.body.interests.length, 1);
+    assert.equal(interested.body.interests.length, 2);
+    const chosenInterest = interested.body.interests.find((item) => item.installer_id === installerId);
+    assert.ok(chosenInterest);
 
     const selection = await requestJson(
       baseUrl,
-      `/api/public/service-requests/${serviceRequest.id}/interests/${interested.body.interests[0].id}/select`,
+      `/api/public/service-requests/${serviceRequest.id}/interests/${chosenInterest.id}/select`,
       {
         method: 'POST',
         headers: { 'X-Client-Request-Token': serviceRequest.client_access_token },
@@ -183,6 +216,18 @@ test('cadastro, pagamento, pedido, interesse e escolha do instalador', { skip: !
     assert.equal(selectedOpportunity.client_name, 'Cliente Teste');
     assert.equal(selectedOpportunity.address_reference, 'Rua protegida, 123');
     assert.equal(selectedOpportunity.photo_urls.length, 1);
+
+    const notSelectedOpportunities = await requestJson(baseUrl, '/api/opportunities?status=interested', {
+      headers: secondInstallerHeaders,
+    });
+    assert.equal(notSelectedOpportunities.response.status, 200, JSON.stringify(notSelectedOpportunities.body));
+    const notSelectedOpportunity = notSelectedOpportunities.body.opportunities.find(
+      (item) => item.id === serviceRequest.id
+    );
+    assert.ok(notSelectedOpportunity);
+    assert.equal(notSelectedOpportunity.not_selected, true);
+    assert.equal(notSelectedOpportunity.client_phone, null);
+    assert.equal(notSelectedOpportunity.address_reference, null);
 
     const completion = await requestJson(baseUrl, `/api/public/service-requests/${serviceRequest.id}/status`, {
       method: 'PATCH',
@@ -279,6 +324,7 @@ test('cadastro, pagamento, pedido, interesse e escolha do instalador', { skip: !
     assert.equal(disableTwoFactor.response.status, 200, JSON.stringify(disableTwoFactor.body));
   } finally {
     if (installerId) await pool.query('DELETE FROM users WHERE id = $1', [installerId]);
+    if (secondInstallerId) await pool.query('DELETE FROM users WHERE id = $1', [secondInstallerId]);
     if (clientId) await pool.query('DELETE FROM users WHERE id = $1', [clientId]);
     await pool.query('DELETE FROM service_requests WHERE client_name = $1', ['Cliente Teste']);
     await new Promise((resolve) => server.close(resolve));

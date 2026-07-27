@@ -1,7 +1,6 @@
 const crypto = require('crypto');
 const pool = require('../config/database');
 const { buildAvailableDates } = require('../utils/installerAvailability');
-const generateWhatsAppLink = require('../utils/whatsapp');
 const reverseGeocode = require('../utils/reverseGeocode');
 const forwardGeocode = require('../utils/forwardGeocode');
 const { normalizeSearchText } = require('../utils/textSearch');
@@ -275,7 +274,6 @@ exports.getInstallers = async (req, res) => {
           u.bio,
           u.installation_method,
           u.service_hours,
-          u.phone,
           COALESCE(u.installation_days, ARRAY[]::TEXT[]) AS installation_days,
           u.base_service_cost,
           u.travel_fee,
@@ -504,12 +502,7 @@ exports.getInstallers = async (req, res) => {
           ...publicInstaller,
           average_rating: Number(installer.average_rating || 0),
           safety: buildSafetySummary(installer),
-          whatsapp_link: installer.phone
-            ? generateWhatsAppLink(
-                installer.phone,
-                `Olá ${installer.display_name}, encontrei seu perfil no PapelPerto, da InstalaPro, e gostaria de conversar sobre uma instalação.`
-              )
-            : null,
+          whatsapp_link: null,
           featured_installer: Boolean(installer.featured_installer),
           certificate_verified: Boolean(installer.certification_verified),
           has_certificate: Boolean(installer.certificate_file),
@@ -621,7 +614,6 @@ exports.getInstallerProfile = async (req, res) => {
             u.certificate_name,
             u.certification_verified,
             u.featured_installer,
-            u.phone,
             u.city,
             u.state,
             u.service_region,
@@ -754,12 +746,7 @@ exports.getInstallerProfile = async (req, res) => {
           certificate_name: installer.certificate_name || '',
           certificate_verified: Boolean(installer.certification_verified),
           safety: buildSafetySummary(installer),
-          whatsapp_link: installer.phone
-            ? generateWhatsAppLink(
-                installer.phone,
-                `Olá ${installer.display_name}, encontrei seu perfil no PapelPerto, da InstalaPro, e quero conversar sobre meu projeto.`
-              )
-            : null,
+          whatsapp_link: null,
           available_dates: availableDates,
           availability_slots: manualSlots,
         };

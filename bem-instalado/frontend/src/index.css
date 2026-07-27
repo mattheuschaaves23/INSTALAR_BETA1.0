@@ -21103,6 +21103,11 @@ body,
   color: var(--ref-gold);
 }
 
+.opportunity-actions > span.is-closed {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--route-muted);
+}
+
 .opportunity-meta,
 .opportunity-tags {
   display: flex;
@@ -21141,6 +21146,32 @@ body,
   max-width: 62rem;
   color: var(--route-muted);
   line-height: 1.55;
+}
+
+.opportunity-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 7.5rem));
+  gap: 0.55rem;
+}
+
+.opportunity-photo-grid a {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border: 1px solid var(--route-line);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.opportunity-photo-grid img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 180ms ease;
+}
+
+.opportunity-photo-grid a:hover img {
+  transform: scale(1.04);
 }
 
 .opportunity-actions {
@@ -21209,6 +21240,10 @@ body,
 }
 
 @media (max-width: 560px) {
+  .opportunity-photo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .settings-color-row,
   .settings-segment {
     grid-template-columns: 1fr;
