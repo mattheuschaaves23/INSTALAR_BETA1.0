@@ -18329,6 +18329,41 @@ body,
   font-weight: 500;
 }
 
+.installer-app-download-actions {
+  min-width: 16rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.installer-app-download-actions .installer-app-download-button {
+  width: 100%;
+}
+
+.installer-app-download-button--ios {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.035)),
+    #11100e;
+  color: #f7f4ed;
+  box-shadow: none;
+  cursor: default;
+}
+
+.installer-app-download-button--ios:hover {
+  filter: none;
+  transform: none;
+  box-shadow: none;
+}
+
+.installer-app-download-button--ios small {
+  color: #a7a39a;
+}
+
+.installer-app-download-button--ios b {
+  color: var(--site-accent);
+  letter-spacing: 0.1em;
+}
+
 @keyframes installerAppOrbit {
   to {
     transform: rotate(360deg);
@@ -19459,6 +19494,12 @@ body,
     width: 100%;
     min-width: 0;
     min-height: 3.6rem;
+  }
+
+  .installer-app-download-actions {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
   }
 
   .installer-app-download--page {
@@ -24395,6 +24436,18 @@ html[data-site-theme='light'] .installer-app-download {
 
 html[data-site-theme='light'] .installer-app-download-copy h2 {
   color: var(--ref-text);
+}
+
+html[data-site-theme='light'] .installer-app-download-button--ios {
+  border-color: rgba(38, 28, 13, 0.14);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.5)),
+    #eee9df;
+  color: #21190d;
+}
+
+html[data-site-theme='light'] .installer-app-download-button--ios small {
+  color: #776c59;
 }
 
 html[data-site-theme='light'] .installer-app-download-phone,

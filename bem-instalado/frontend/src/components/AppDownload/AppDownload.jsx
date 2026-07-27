@@ -24,6 +24,16 @@ function DownloadIcon() {
   );
 }
 
+function IphoneIcon() {
+  return (
+    <svg aria-hidden="true" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.9" viewBox="0 0 24 24">
+      <rect height="19" rx="3" width="12" x="6" y="2.5" />
+      <path d="M10 5h4" />
+      <path d="M11.95 18.5h.1" />
+    </svg>
+  );
+}
+
 export default function AppDownload() {
   const [release, setRelease] = useState({
     downloadUrl: FALLBACK_DOWNLOAD_URL,
@@ -58,10 +68,10 @@ export default function AppDownload() {
       <header className="installer-app-page-header">
         <div>
           <p>APLICATIVO</p>
-          <h1>Baixar app</h1>
-          <span>Leve seu painel de trabalho com você.</span>
+          <h1>iPhone e Android</h1>
+          <span>O mesmo painel, preparado para os dois sistemas.</span>
         </div>
-        <span className="installer-app-page-status"><i /> Versão atualizada</span>
+        <span className="installer-app-page-status"><i /> Android + iOS</span>
       </header>
 
       <aside aria-labelledby="installer-app-download-title" className="installer-app-download installer-app-download--page">
@@ -79,47 +89,56 @@ export default function AppDownload() {
 
         <div className="installer-app-download-copy">
           <span className="installer-app-download-kicker"><i /> InstalaPro para instaladores</span>
-          <h2 id="installer-app-download-title">Seu trabalho inteiro no celular</h2>
+          <h2 id="installer-app-download-title">Seu trabalho inteiro no iPhone e Android</h2>
           <p>Acesse oportunidades, agenda, clientes e orçamentos de onde estiver.</p>
           <div className="installer-app-download-meta">
             <span>Android 7+</span>
+            <span>iOS 15+</span>
             <span>Versão {release.version}</span>
             {release.size ? <span>{release.size}</span> : null}
           </div>
         </div>
 
-        <a
-          className="installer-app-download-button"
-          href={release.downloadUrl}
-          rel="noreferrer"
-          target="_blank"
-        >
-          <DownloadIcon />
-          <span><small>Baixar agora</small><strong>Aplicativo Android</strong></span>
-          <b aria-hidden="true">→</b>
-        </a>
+        <div className="installer-app-download-actions">
+          <a
+            className="installer-app-download-button"
+            href={release.downloadUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            <DownloadIcon />
+            <span><small>Disponível agora</small><strong>Baixar para Android</strong></span>
+            <b aria-hidden="true">→</b>
+          </a>
+
+          <div aria-label="Aplicativo para iPhone aguardando publicação na App Store" className="installer-app-download-button installer-app-download-button--ios">
+            <IphoneIcon />
+            <span><small>Pronto para publicar</small><strong>Aplicativo para iPhone</strong></span>
+            <b aria-hidden="true">•••</b>
+          </div>
+        </div>
       </aside>
 
       <div className="installer-app-page-notes">
         <article>
-          <span>1</span>
+          <span>A</span>
           <div>
-            <strong>Baixe o arquivo</strong>
-            <p>Toque no botão acima para baixar o APK oficial.</p>
+            <strong>Android disponível</strong>
+            <p>Baixe o APK oficial e receba as próximas atualizações pelo próprio aplicativo.</p>
           </div>
         </article>
         <article>
-          <span>2</span>
+          <span>i</span>
           <div>
-            <strong>Autorize a instalação</strong>
-            <p>Se o Android pedir, permita instalar por este navegador.</p>
+            <strong>iPhone preparado</strong>
+            <p>O aplicativo iOS está pronto e será liberado após a publicação na App Store.</p>
           </div>
         </article>
         <article>
-          <span>3</span>
+          <span>✓</span>
           <div>
-            <strong>Entre na sua conta</strong>
-            <p>Use o mesmo login de instalador utilizado no site.</p>
+            <strong>Uma única conta</strong>
+            <p>O mesmo login de instalador funciona no site, Android e iPhone.</p>
           </div>
         </article>
       </div>

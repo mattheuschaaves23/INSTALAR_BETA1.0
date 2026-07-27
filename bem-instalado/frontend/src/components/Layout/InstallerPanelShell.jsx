@@ -30,7 +30,7 @@ const PANEL_NAV_ITEMS = [
   { to: '/notifications', label: 'Notificações', icon: 'bell', badgeKey: 'notifications' },
   { to: '/settings', label: 'Configurações', icon: 'settings' },
   { to: '/support', label: 'Suporte', icon: 'help' },
-  { to: '/download-app', label: 'Baixar app', icon: 'download', section: 'APLICATIVO', webOnly: true },
+  { to: '/download-app', label: 'Aplicativos', icon: 'download', section: 'APLICATIVO', webOnly: true },
 ];
 
 const ADMIN_NAV_ITEM = { to: '/admin', label: 'Painel ADM', icon: 'admin', section: 'SISTEMA' };
