@@ -109,8 +109,8 @@ export function AuthProvider({ children }) {
     return result;
   };
 
-  const logout = () => {
-    void clearAuthToken();
+  const logout = async () => {
+    await clearAuthToken();
     setUser(null);
     setAuthError('');
   };

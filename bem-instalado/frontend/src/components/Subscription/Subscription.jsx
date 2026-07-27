@@ -11,6 +11,7 @@ import {
   formatShortDate,
   formatStatusLabel,
 } from '../../utils/formatters';
+import { isNativeStoreApp } from '../../utils/nativePlatform';
 
 const defaultPricing = {
   amount: Number(process.env.REACT_APP_SUBSCRIPTION_PRICE || 49.9),
@@ -29,6 +30,7 @@ const defaultBenefits = [
 
 export default function Subscription() {
   const { user } = useAuth();
+  const isStoreApp = isNativeStoreApp();
   const [subscription, setSubscription] = useState(null);
   const [payment, setPayment] = useState(null);
   const [isPaying, setIsPaying] = useState(false);
@@ -80,7 +82,7 @@ export default function Subscription() {
   }, [loadSubscription]);
 
   useEffect(() => {
-    if (!payment?.automaticConfirmation || payment?.payment?.status !== 'pending' || !payment?.payment?.external_id) {
+    if (isStoreApp || !payment?.automaticConfirmation || payment?.payment?.status !== 'pending' || !payment?.payment?.external_id) {
       return undefined;
     }
 
@@ -89,9 +91,13 @@ export default function Subscription() {
     }, 20000);
 
     return () => window.clearInterval(interval);
-  }, [payment?.automaticConfirmation, payment?.payment?.external_id, payment?.payment?.status, syncPaymentStatus]);
+  }, [isStoreApp, payment?.automaticConfirmation, payment?.payment?.external_id, payment?.payment?.status, syncPaymentStatus]);
 
   const handlePay = async () => {
+    if (isStoreApp) {
+      return;
+    }
+
     if (subscription?.payment_mode === 'disabled') {
       toast.error(subscription?.payment_notice || 'Pagamento temporariamente indisponível.');
       return;
@@ -173,7 +179,7 @@ export default function Subscription() {
             : isTrialAccess
               ? `Aproveite todas as ferramentas grátis até ${formatShortDate(subscription?.trial?.ends_at)}.`
               : 'Durante o lançamento, todas as ferramentas estão liberadas sem cobrança.'
-          : isExpiredTrial
+          : isExpiredTrial && !isStoreApp
             ? 'Seu teste grátis terminou. Escolha Pix mensal ou cartão de crédito mensal para continuar.'
             : 'Consulte aqui o status do seu plano e dos pagamentos.'}
         eyebrow="Assinatura"
@@ -185,7 +191,9 @@ export default function Subscription() {
               ? `${subscription?.trial?.days_total || 7} dias sem cobrança.`
               : hasComplimentaryAccess
                 ? 'Acesso sem cobrança.'
-                : `${formatCurrency(pricing.amount)} por ${pricing.period}.`,
+                : isStoreApp
+                  ? 'Assinatura vinculada à sua conta.'
+                  : `${formatCurrency(pricing.amount)} por ${pricing.period}.`,
           },
           {
             label: 'Status',
@@ -211,7 +219,7 @@ export default function Subscription() {
                 : hasComplimentaryAccess
                   ? 'Ferramentas liberadas sem cobrança.'
                   : 'Ferramentas premium liberadas.'
-              : 'Os módulos do painel ficam bloqueados até a assinatura ser ativada.',
+              : 'Os módulos do painel ficam bloqueados enquanto a assinatura estiver inativa.',
           },
         ]}
         title={isAdminAccess
@@ -254,7 +262,8 @@ export default function Subscription() {
           <div className="subscription-inline-note mt-6">
             <p className="eyebrow">Plano e benefícios</p>
             <p className="mt-3 text-xl font-semibold text-[var(--gold-strong)]">
-              {pricing.label || 'Plano instalador'} • {formatCurrency(pricing.amount)}/{pricing.period || 'mês'}
+              {pricing.label || 'Plano instalador'}
+              {!isStoreApp ? ` • ${formatCurrency(pricing.amount)}/${pricing.period || 'mês'}` : ''}
             </p>
             <div className="mt-3 grid gap-2">
               {planBenefits.map((benefit) => (
@@ -265,7 +274,20 @@ export default function Subscription() {
             </div>
           </div>
 
-          {!hasComplimentaryAccess ? (
+          {!hasComplimentaryAccess && isStoreApp ? (
+            <div className="subscription-inline-note mt-6">
+              <p className="eyebrow">Situação da conta</p>
+              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+                Sua assinatura não está ativa. Este aplicativo permite consultar a situação da conta,
+                atualizar o perfil e falar com o suporte.
+              </p>
+              <Link className="ghost-button mt-4 w-full sm:w-auto" to="/support">
+                Falar com o suporte
+              </Link>
+            </div>
+          ) : null}
+
+          {!hasComplimentaryAccess && !isStoreApp ? (
             <div className="mt-6">
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="subscription-inline-note">
@@ -316,14 +338,14 @@ export default function Subscription() {
             </div>
           ) : null}
 
-          <div className="subscription-inline-note mt-6">
+          {!isStoreApp ? <div className="subscription-inline-note mt-6">
             <p className="text-sm leading-7 text-[var(--muted)]">
               {subscription?.payment_notice
                 || 'Pagamento temporariamente indisponível. Um novo método será configurado futuramente.'}
             </p>
-          </div>
+          </div> : null}
 
-          {subscription?.provider_error ? (
+          {!isStoreApp && subscription?.provider_error ? (
             <div className="mt-4 break-words rounded-[22px] border border-[rgba(223,107,107,0.32)] bg-[rgba(159,47,47,0.1)] p-5 text-sm leading-7 text-[var(--text)]">
               {subscription.provider_error}
             </div>
@@ -331,7 +353,7 @@ export default function Subscription() {
         </section>
 
         <aside className="grid gap-6">
-          {payment ? (
+          {!isStoreApp && payment ? (
             <section className="lux-panel fade-up min-w-0 p-6" style={{ animationDelay: '0.08s' }}>
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="min-w-0">
@@ -438,7 +460,9 @@ export default function Subscription() {
                 ? isAdminAccess
                   ? 'O acesso é vinculado à função administrativa desta conta.'
                   : isTrialAccess
-                    ? `O teste termina em ${formatShortDate(subscription?.trial?.ends_at)}. Depois, você poderá escolher Pix mensal ou cartão mensal para assinar.`
+                    ? isStoreApp
+                      ? `O teste termina em ${formatShortDate(subscription?.trial?.ends_at)}. Depois dessa data, o acesso passa a depender de uma assinatura ativa na conta.`
+                      : `O teste termina em ${formatShortDate(subscription?.trial?.ends_at)}. Depois, você poderá escolher Pix mensal ou cartão mensal para assinar.`
                     : 'O acesso de lançamento é gratuito e não gera cobrança automática.'
                 : 'O usuário pode entrar na conta, ajustar perfil e acompanhar o status da assinatura nesta tela.'}
             </p>

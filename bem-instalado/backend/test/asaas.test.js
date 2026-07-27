@@ -2,8 +2,10 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const {
+  cancelRecurringSubscription,
   createPixPayment,
   createRecurringCheckout,
+  deleteAsaasCustomer,
   findPaymentByCheckoutId,
   findPaymentByExternalId,
   findOrCreateCustomer,
@@ -13,6 +15,30 @@ const {
   parseRecurringCheckout,
   validateWebhookToken,
 } = require('../services/asaas');
+
+test('cancela assinatura e remove cliente da Asaas antes da exclusão da conta', async () => {
+  const requests = [];
+  const fetchImpl = async (url, options) => {
+    requests.push({ url, options });
+    return new Response(null, { status: 204 });
+  };
+
+  const subscription = await cancelRecurringSubscription('sub_123', {
+    accessToken: 'test-key',
+    fetchImpl,
+  });
+  const customer = await deleteAsaasCustomer('cus_123', {
+    accessToken: 'test-key',
+    fetchImpl,
+  });
+
+  assert.equal(subscription.canceled, true);
+  assert.equal(customer.deleted, true);
+  assert.match(requests[0].url, /\/subscriptions\/sub_123$/);
+  assert.match(requests[1].url, /\/customers\/cus_123$/);
+  assert.equal(requests[0].options.method, 'DELETE');
+  assert.equal(requests[1].options.method, 'DELETE');
+});
 
 test('só habilita cobrança quando chave e token seguro do webhook estão configurados', () => {
   const previousApiKey = process.env.ASAAS_API_KEY;

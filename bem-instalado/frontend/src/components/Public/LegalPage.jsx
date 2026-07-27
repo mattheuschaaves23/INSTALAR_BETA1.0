@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import BrandWordmark from '../Layout/BrandWordmark';
 
-const UPDATED_AT = '22 de julho de 2026';
+const UPDATED_AT = '27 de julho de 2026';
 
 const privacySections = [
   ['1. Quais dados usamos', 'Coletamos os dados informados no cadastro e no pedido, como nome, telefone, e-mail, cidade, endereço aproximado ou completo, fotos do ambiente e preferências do serviço. Para instaladores, também tratamos dados profissionais, documentos de verificação, certificado e portfólio.'],
@@ -9,7 +9,7 @@ const privacySections = [
   ['3. Compartilhamento', 'As informações necessárias do pedido são exibidas a instaladores elegíveis. Telefone e demais formas de contato são liberados conforme o fluxo de interesse e escolha. Também podemos usar provedores de hospedagem, banco de dados, e-mail e armazenamento, limitados à operação do serviço.'],
   ['4. Localização', 'A localização do navegador é usada somente com sua permissão. Como o GPS pode variar, mostramos o endereço encontrado para você revisar e corrigir antes de publicar. A busca por cidade também pode ser preenchida manualmente.'],
   ['5. Armazenamento e segurança', 'Pedidos, contas e registros de segurança são mantidos em banco de dados protegido. Identificadores de acompanhamento ficam no navegador para você retomar o pedido. Fotos e certificados usam armazenamento próprio de arquivos, com limites de formato e tamanho.'],
-  ['6. Prazo e exclusão', 'Mantemos os dados pelo período necessário para prestar o serviço, cumprir obrigações legais e tratar disputas. Você pode solicitar correção, acesso, portabilidade, oposição ou exclusão, quando aplicável.'],
+  ['6. Prazo e exclusão', 'Mantemos os dados pelo período necessário para prestar o serviço, cumprir obrigações legais e tratar disputas. A conta pode ser excluída diretamente nas configurações. Assinaturas recorrentes são canceladas antes da exclusão e registros financeiros obrigatórios podem ser conservados pelo prazo legal.'],
   ['7. Seus direitos pela LGPD', 'Você pode confirmar o tratamento, acessar e corrigir dados, pedir anonimização ou exclusão de dados desnecessários e revogar consentimentos. Para exercer esses direitos, use o suporte da plataforma ou o canal informado na sua conta.'],
 ];
 
@@ -44,7 +44,7 @@ export default function LegalPage({ type }) {
         <p className="legal-page-eyebrow">TRANSPARÊNCIA E SEGURANÇA</p>
         <h1>{title}</h1>
         <p className="legal-page-intro">{intro}</p>
-        <p className="legal-page-version">Versão 2026-07-22 · atualizada em {UPDATED_AT}</p>
+        <p className="legal-page-version">Versão 2026-07-27 · atualizada em {UPDATED_AT}</p>
 
         <div className="legal-page-sections">
           {sections.map(([sectionTitle, body]) => (
@@ -66,6 +66,7 @@ export default function LegalPage({ type }) {
         <nav className="legal-page-links" aria-label="Documentos legais">
           <Link to="/privacidade">Política de Privacidade</Link>
           <Link to="/termos">Termos de Uso</Link>
+          <Link to="/excluir-conta">Excluir conta e dados</Link>
         </nav>
       </article>
     </main>

@@ -1,6 +1,7 @@
 import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';
 import api from './api';
+import { getNativeStorePlatform } from '../utils/nativePlatform';
 
 const IS_INSTALLER_APP = process.env.REACT_APP_INSTALLER_APP === 'true';
 
@@ -35,9 +36,12 @@ export function buildSocialLoginUrl(
   const normalizedRole = role === 'client' ? 'client' : 'installer';
   const fallbackNext = normalizedRole === 'client' ? '/cliente' : '/dashboard';
   const url = new URL(`${getSocialLoginBaseUrl()}/auth/oauth/${provider}`, window.location.origin);
-  const targetPlatform = platform === 'android' || (IS_INSTALLER_APP && normalizedRole === 'installer')
-    ? 'android'
-    : 'web';
+  const nativePlatform = getNativeStorePlatform();
+  const targetPlatform = platform === 'android' || platform === 'ios'
+    ? platform
+    : normalizedRole === 'installer'
+      ? nativePlatform
+      : 'web';
 
   url.searchParams.set('role', normalizedRole);
   url.searchParams.set('next', sanitizeNextPath(next, fallbackNext));

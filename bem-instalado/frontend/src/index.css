@@ -20659,6 +20659,79 @@ body,
   align-content: start;
 }
 
+.settings-panel--danger {
+  grid-column: 1 / -1;
+  border-color: rgba(214, 91, 91, 0.24);
+  background:
+    radial-gradient(circle at top right, rgba(214, 91, 91, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(var(--site-panel-soft-rgb), 0.72), rgba(var(--site-panel-rgb), 0.94));
+}
+
+.settings-panel--danger .settings-section-head > span {
+  color: #e16e6e;
+  background: rgba(214, 91, 91, 0.1);
+}
+
+.settings-danger-copy {
+  max-width: 70rem;
+  margin: 0;
+  color: var(--route-muted);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.settings-delete-form {
+  display: grid;
+  gap: 0.65rem;
+  max-width: 46rem;
+}
+
+.settings-delete-form > label {
+  color: var(--ref-text);
+  font-size: 0.8rem;
+}
+
+.settings-delete-form > div {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) auto;
+  gap: 0.7rem;
+}
+
+.settings-delete-form input {
+  min-width: 0;
+  min-height: 2.9rem;
+  border: 1px solid var(--route-line);
+  border-radius: 0.8rem;
+  outline: none;
+  padding: 0 0.9rem;
+  color: var(--ref-text);
+  background: rgba(var(--site-panel-rgb), 0.68);
+  font: inherit;
+  font-size: 0.86rem;
+  letter-spacing: 0.08em;
+}
+
+.settings-delete-form input:focus {
+  border-color: rgba(214, 91, 91, 0.65);
+  box-shadow: 0 0 0 3px rgba(214, 91, 91, 0.09);
+}
+
+.settings-delete-form .danger-button {
+  min-height: 2.9rem;
+  white-space: nowrap;
+}
+
+.settings-privacy-link {
+  width: fit-content;
+  color: var(--route-muted);
+  font-size: 0.78rem;
+  text-underline-offset: 0.2rem;
+}
+
+.settings-privacy-link:hover {
+  color: var(--ref-gold);
+}
+
 .settings-save-state {
   display: flex;
   align-items: center;
@@ -20946,6 +21019,14 @@ body,
   }
 
   .settings-live-preview button {
+    width: 100%;
+  }
+
+  .settings-delete-form > div {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-delete-form .danger-button {
     width: 100%;
   }
 }
@@ -22454,10 +22535,16 @@ body,
 .legal-page-note { margin-top: 32px; padding: 22px; border-radius: 18px; background: rgba(229, 185, 47, 0.08); border: 1px solid rgba(229, 185, 47, 0.2); }
 .legal-page-note strong { display: block; margin-bottom: 7px; }
 .legal-page-links { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 22px; font-size: 14px; }
+.account-deletion-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.account-deletion-actions .gold-button,
+.account-deletion-actions .ghost-button { min-height: 48px; text-decoration: none; }
 
 @media (max-width: 640px) {
   .legal-page { padding: 16px; }
   .legal-page-card { border-radius: 20px; }
+  .account-deletion-actions { display: grid; }
+  .account-deletion-actions .gold-button,
+  .account-deletion-actions .ghost-button { width: 100%; }
 }
 
 /* Linguagem visual do painel: conteúdo plano; caixas apenas quando ajudam na ação. */
@@ -22899,6 +22986,10 @@ body,
 
 .panel-flat-language .settings-panel--status {
   align-content: start;
+}
+
+.panel-flat-language .settings-panel--danger {
+  border-top-color: rgba(214, 91, 91, 0.3);
 }
 
 .panel-flat-language .settings-shortcuts {

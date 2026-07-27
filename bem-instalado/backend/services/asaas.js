@@ -462,6 +462,42 @@ async function getPixPayment(providerPaymentId, options = {}) {
   return parsePixPayment(payment, pixQrCode);
 }
 
+async function cancelRecurringSubscription(providerSubscriptionId, options = {}) {
+  const id = encodeURIComponent(String(providerSubscriptionId || '').trim());
+  if (!id) return { canceled: false, reason: 'not-configured' };
+
+  try {
+    await asaasRequest(`/subscriptions/${id}`, {
+      ...options,
+      method: 'DELETE',
+    });
+    return { canceled: true };
+  } catch (error) {
+    if (error?.status === 404) {
+      return { canceled: false, reason: 'not-found' };
+    }
+    throw error;
+  }
+}
+
+async function deleteAsaasCustomer(customerId, options = {}) {
+  const id = encodeURIComponent(String(customerId || '').trim());
+  if (!id) return { deleted: false, reason: 'not-configured' };
+
+  try {
+    await asaasRequest(`/customers/${id}`, {
+      ...options,
+      method: 'DELETE',
+    });
+    return { deleted: true };
+  } catch (error) {
+    if (error?.status === 404) {
+      return { deleted: false, reason: 'not-found' };
+    }
+    throw error;
+  }
+}
+
 async function findPaymentByCheckoutId(checkoutId, options = {}) {
   const id = String(checkoutId || '').trim();
   if (!id) return null;
@@ -505,8 +541,10 @@ function validateWebhookToken(providedToken, expectedToken = getAsaasConfig().we
 
 module.exports = {
   asaasRequest,
+  cancelRecurringSubscription,
   createPixPayment,
   createRecurringCheckout,
+  deleteAsaasCustomer,
   findOrCreateCustomer,
   findPaymentByCheckoutId,
   findPaymentByExternalId,

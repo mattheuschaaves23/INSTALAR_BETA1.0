@@ -3,6 +3,8 @@ import { Link } from 'react-router';
 import toast from 'react-hot-toast';
 import PageIntro from '../Layout/PageIntro';
 import { useAuth } from '../../contexts/AuthContext';
+import { useConfirm } from '../../contexts/ConfirmContext';
+import api from '../../services/api';
 import {
   ACCENT_PRESETS,
   readSitePreferences,
@@ -55,6 +57,7 @@ function SettingsIcon({ type }) {
     card: <><rect x="4" y="6.5" width="16" height="11" rx="2" /><path d="M4 10h16" /></>,
     bell: <><path d="M18 10.8a6 6 0 0 0-12 0c0 5-2 5.7-2 5.7h16s-2-.7-2-5.7" /><path d="M10 20a2.4 2.4 0 0 0 4 0" /></>,
     help: <><circle cx="12" cy="12" r="8.5" /><path d="M9.8 9.4a2.4 2.4 0 1 1 3.6 2.1c-.9.5-1.4 1.1-1.4 2.2" /><path d="M12 17.2h.01" /></>,
+    trash: <><path d="M4.5 7h15" /><path d="M9 7V4.8h6V7" /><path d="m7 7 .7 12h8.6L17 7" /><path d="M10 10.5v5M14 10.5v5" /></>,
   };
 
   return <svg {...sharedProps}>{icons[type] || icons.palette}</svg>;
@@ -82,9 +85,12 @@ function PreferenceSegment({ label, options, value, onChange }) {
 }
 
 export default function Settings() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const confirm = useConfirm();
   const [preferences, setPreferences] = useState(() => readSitePreferences());
   const [savedAt, setSavedAt] = useState(() => new Date());
+  const [deletePhrase, setDeletePhrase] = useState('');
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   const currentPreset = useMemo(
     () => ACCENT_PRESETS.find((preset) => preset.value === preferences.accentColor),
@@ -105,6 +111,37 @@ export default function Settings() {
     setPreferences(nextPreferences);
     setSavedAt(new Date());
     toast.success('Configurações restauradas.');
+  };
+
+  const handleDeleteAccount = async (event) => {
+    event.preventDefault();
+
+    if (deletePhrase.trim().toUpperCase() !== 'EXCLUIR') {
+      toast.error('Digite EXCLUIR para confirmar.');
+      return;
+    }
+
+    const accepted = await confirm({
+      title: 'Excluir conta definitivamente?',
+      message: 'A conta, o perfil, os pedidos e os dados vinculados serão removidos. Uma assinatura recorrente ativa será cancelada. Esta ação não pode ser desfeita.',
+      confirmText: 'Excluir minha conta',
+      cancelText: 'Manter minha conta',
+      tone: 'danger',
+    });
+
+    if (!accepted) {
+      return;
+    }
+
+    try {
+      setIsDeletingAccount(true);
+      await api.delete('/users/account', { data: { confirmation: 'EXCLUIR' } });
+      await logout();
+      window.location.replace('/instalador/entrar?conta=excluida');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Não foi possível excluir a conta agora.');
+      setIsDeletingAccount(false);
+    }
   };
 
   const stats = [
@@ -255,6 +292,58 @@ export default function Settings() {
           <small>
             As preferências ficam neste dispositivo e são aplicadas quando o painel abre.
           </small>
+        </article>
+
+        <article className="settings-panel settings-panel--danger">
+          <div className="settings-section-head">
+            <span><SettingsIcon type="trash" /></span>
+            <div>
+              <p>Privacidade</p>
+              <h2>Exclusão da conta</h2>
+            </div>
+          </div>
+
+          {user?.is_admin ? (
+            <p className="settings-danger-copy">
+              A conta administrativa principal não pode ser excluída por esta tela. Transfira a
+              administração antes de solicitar a exclusão pelo suporte.
+            </p>
+          ) : (
+            <>
+              <p className="settings-danger-copy">
+                A exclusão é definitiva. Perfil, fotos, pedidos, agenda, orçamentos e demais dados
+                ligados à conta serão removidos. Registros financeiros exigidos por lei podem ser
+                conservados pelo provedor de pagamento durante o prazo legal.
+              </p>
+
+              <form className="settings-delete-form" onSubmit={handleDeleteAccount}>
+                <label htmlFor="delete-account-confirmation">
+                  Para confirmar, digite <strong>EXCLUIR</strong>
+                </label>
+                <div>
+                  <input
+                    autoComplete="off"
+                    id="delete-account-confirmation"
+                    onChange={(event) => setDeletePhrase(event.target.value)}
+                    placeholder="EXCLUIR"
+                    spellCheck="false"
+                    value={deletePhrase}
+                  />
+                  <button
+                    className="danger-button"
+                    disabled={isDeletingAccount || deletePhrase.trim().toUpperCase() !== 'EXCLUIR'}
+                    type="submit"
+                  >
+                    {isDeletingAccount ? 'Excluindo conta...' : 'Excluir minha conta'}
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
+
+          <Link className="settings-privacy-link" to="/excluir-conta">
+            Entenda o processo e quais dados são excluídos
+          </Link>
         </article>
       </section>
     </div>

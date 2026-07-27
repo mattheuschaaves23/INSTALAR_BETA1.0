@@ -10,6 +10,12 @@
     "captureInput": true,
     "minWebViewVersion": 60
   },
+  "ios": {
+    "backgroundColor": "#101010",
+    "contentInset": "automatic",
+    "preferredContentMode": "mobile",
+    "scrollEnabled": true
+  },
   "server": {
     "androidScheme": "https",
     "errorPath": "native-error.html"

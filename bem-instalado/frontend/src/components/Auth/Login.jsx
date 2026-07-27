@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { startSocialLogin } from '../../services/auth';
 import { clearOAuthErrorFromUrl, getOAuthErrorMessage } from '../../utils/oauthMessages';
 import { getAuthRequestErrorMessage } from '../../utils/authErrorMessage';
+import { getNativeStorePlatform, isIosInstallerApp } from '../../utils/nativePlatform';
 import useAuthCapabilities from '../../hooks/useAuthCapabilities';
 import BrandWordmark from '../Layout/BrandWordmark';
 
@@ -197,6 +198,7 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [oauthSubmitting, setOauthSubmitting] = useState(false);
+  const canUseGoogle = authCapabilities.oauth.google && !isIosInstallerApp();
 
   const submitLabel = useMemo(() => (needs2FA ? 'Validar acesso' : 'Entrar'), [needs2FA]);
 
@@ -290,7 +292,7 @@ export default function Login() {
       await startSocialLogin(provider, {
         role: 'installer',
         next: '/dashboard',
-        platform: IS_INSTALLER_APP ? 'android' : 'web',
+        platform: getNativeStorePlatform(),
       });
     } catch (_error) {
       toast.error('Não foi possível abrir o login com o Google. Tente novamente.');
@@ -458,7 +460,7 @@ export default function Login() {
               <InstallerLoginIcon name="arrow" />
             </button>
 
-            {authCapabilities.oauth.google ? (
+            {canUseGoogle ? (
               <>
                 <div className="installer-login-divider">
                   <span />
@@ -467,7 +469,7 @@ export default function Login() {
                 </div>
 
                 <div className="installer-login-socials">
-                  {authCapabilities.oauth.google ? (
+                  {canUseGoogle ? (
                     <button
                       disabled={oauthSubmitting}
                       onClick={() => handleSocialLogin('google')}

@@ -44,6 +44,36 @@ async function storeProfileAsset({ userId, kind, file }) {
   };
 }
 
+async function deleteProfileAssetsForUser(userId) {
+  if (!isObjectStorageConfigured()) {
+    return { deleted: 0 };
+  }
+
+  const owner = String(userId || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80);
+  if (!owner) return { deleted: 0 };
+
+  const { del, list } = require('@vercel/blob');
+  const prefix = `uploads/${owner}/`;
+  let cursor;
+  let deleted = 0;
+
+  do {
+    const result = await list({ prefix, cursor, limit: 1000 });
+    const targets = (result.blobs || [])
+      .map((blob) => blob.url || blob.pathname)
+      .filter(Boolean);
+
+    if (targets.length) {
+      await del(targets);
+      deleted += targets.length;
+    }
+
+    cursor = result.hasMore ? result.cursor : undefined;
+  } while (cursor);
+
+  return { deleted };
+}
+
 function encodeAssetKey(pathname) {
   return Buffer.from(String(pathname || ''), 'utf8').toString('base64url');
 }
@@ -79,6 +109,7 @@ async function streamStoredAsset(pathname, res, { cacheControl = 'private, max-a
 
 module.exports = {
   decodeAssetKey,
+  deleteProfileAssetsForUser,
   isObjectStorageConfigured,
   protectedAssetUrl,
   publicAssetUrl,

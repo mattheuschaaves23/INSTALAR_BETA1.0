@@ -21,6 +21,7 @@ const INSTALLER_APP_PATHS = [
   '/notifications',
   '/profile',
   '/settings',
+  '/excluir-conta',
   '/subscription',
   '/support',
 ];
@@ -48,6 +49,7 @@ const Profile = lazy(() => import('./components/Profile/Profile'));
 const Home = lazy(() => import('./components/Public/Home'));
 const InstallerProfile = lazy(() => import('./components/Public/InstallerProfile'));
 const LegalPage = lazy(() => import('./components/Public/LegalPage'));
+const AccountDeletionPage = lazy(() => import('./components/Public/AccountDeletionPage'));
 const ReviewsDashboard = lazy(() => import('./components/Reviews/ReviewsDashboard'));
 const Settings = lazy(() => import('./components/Settings/Settings'));
 const SupportChat = lazy(() => import('./components/Support/SupportChat'));
@@ -111,6 +113,7 @@ export default function App() {
           <Route element={<InstallerProfile />} path="/installers/:id" />
           <Route element={<LegalPage type="privacy" />} path="/privacidade" />
           <Route element={<LegalPage type="terms" />} path="/termos" />
+          <Route element={<AccountDeletionPage />} path="/excluir-conta" />
 
           <Route element={<ProtectedRoute allowedAccountTypes={['client']} loginPath="/cliente/entrar" />}>
             <Route element={<Home />} path="/cliente/pedidos" />

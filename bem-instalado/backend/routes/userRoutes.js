@@ -17,6 +17,7 @@ const uploadSingleProfileAsset = (req, res, next) => {
 };
 
 router.get('/profile', auth, controller.getProfile);
+router.delete('/account', auth, controller.deleteOwnAccount);
 router.get('/dashboard', auth, requireInstaller, controller.getDashboard);
 router.get('/reviews/summary', auth, requireInstaller, controller.getReviewsSummary);
 router.get('/reviews-dashboard', auth, requireInstaller, controller.getReviewsDashboard);

@@ -1,0 +1,61 @@
+name: iOS Instaladores
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/ios.yml"
+      - "bem-instalado/frontend/ios/**"
+      - "bem-instalado/frontend/src/**"
+      - "bem-instalado/frontend/package.json"
+      - "bem-instalado/frontend/package-lock.json"
+      - "bem-instalado/frontend/capacitor.config.json"
+      - "bem-instalado/frontend/.env.ios"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-ios:
+    runs-on: macos-26
+
+    defaults:
+      run:
+        working-directory: bem-instalado/frontend
+
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v6
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.22
+          cache: npm
+          cache-dependency-path: bem-instalado/frontend/package-lock.json
+
+      - name: Exibir versão do Xcode
+        run: xcodebuild -version
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Gerar aplicativo web dos instaladores
+        run: npm run build:ios:web
+
+      - name: Sincronizar projeto iOS
+        run: npx cap sync ios
+
+      - name: Compilar sem assinatura no simulador
+        working-directory: bem-instalado/frontend/ios/App
+        run: |
+          xcodebuild \
+            -project App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination "generic/platform=iOS Simulator" \
+            CODE_SIGNING_ALLOWED=NO \
+            build

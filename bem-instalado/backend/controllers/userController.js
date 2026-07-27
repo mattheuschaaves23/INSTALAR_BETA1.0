@@ -1,12 +1,17 @@
 const pool = require('../config/database');
 const {
   decodeAssetKey,
+  deleteProfileAssetsForUser,
   isObjectStorageConfigured,
   protectedAssetUrl,
   publicAssetUrl,
   storeProfileAsset,
   streamStoredAsset,
 } = require('../services/objectStorage');
+const {
+  cancelRecurringSubscription,
+  deleteAsaasCustomer,
+} = require('../services/asaas');
 const forwardGeocode = require('../utils/forwardGeocode');
 const { buildAvailableDates, normalizeInstallationDays } = require('../utils/installerAvailability');
 const { validateUploadFile } = require('../utils/uploadValidation');
@@ -81,6 +86,119 @@ function calculateProfileCompleteness(profile) {
   const completed = checkpoints.filter(Boolean).length;
   return Math.round((completed / checkpoints.length) * 100);
 }
+
+exports.deleteOwnAccount = async (req, res) => {
+  const confirmation = String(req.body?.confirmation || '').trim().toUpperCase();
+
+  if (confirmation !== 'EXCLUIR') {
+    return res.status(400).json({
+      error: 'Digite EXCLUIR para confirmar a remoção definitiva da conta.',
+      code: 'ACCOUNT_DELETE_CONFIRMATION_REQUIRED',
+    });
+  }
+
+  let db;
+
+  try {
+    const [userResult, subscriptionResult] = await Promise.all([
+      pool.query(
+        `
+          SELECT id, is_admin, asaas_customer_id
+          FROM users
+          WHERE id = $1 AND deleted_at IS NULL
+          LIMIT 1
+        `,
+        [req.userId]
+      ),
+      pool.query(
+        `
+          SELECT DISTINCT provider_subscription_id
+          FROM subscriptions
+          WHERE user_id = $1
+            AND provider = 'asaas'
+            AND COALESCE(provider_subscription_id, '') <> ''
+        `,
+        [req.userId]
+      ),
+    ]);
+    const account = userResult.rows[0];
+
+    if (!account) {
+      return res.status(404).json({
+        error: 'Conta não encontrada.',
+        code: 'ACCOUNT_NOT_FOUND',
+      });
+    }
+
+    if (account.is_admin) {
+      return res.status(409).json({
+        error: 'Contas administrativas precisam transferir a administração antes da exclusão.',
+        code: 'ACCOUNT_ADMIN_TRANSFER_REQUIRED',
+      });
+    }
+
+    for (const subscription of subscriptionResult.rows) {
+      await cancelRecurringSubscription(subscription.provider_subscription_id);
+    }
+
+    if (account.asaas_customer_id) {
+      try {
+        await deleteAsaasCustomer(account.asaas_customer_id);
+      } catch (error) {
+        // A Asaas pode precisar manter registros financeiros por obrigação legal.
+        // A conta local ainda pode ser removida depois que toda recorrência foi cancelada.
+        console.warn('Não foi possível remover o cadastro do cliente na Asaas.', error?.code || error?.status);
+      }
+    }
+
+    await deleteProfileAssetsForUser(req.userId);
+
+    db = await pool.connect();
+    await db.query('BEGIN');
+    await db.query('DELETE FROM service_requests WHERE client_user_id = $1', [req.userId]);
+    await db.query('DELETE FROM installer_reviews WHERE reviewer_user_id = $1', [req.userId]);
+    await db.query('DELETE FROM audit_logs WHERE actor_user_id = $1', [req.userId]);
+    await db.query('DELETE FROM application_errors WHERE user_id = $1', [req.userId]);
+    const deletionResult = await db.query(
+      'DELETE FROM users WHERE id = $1 AND deleted_at IS NULL RETURNING id',
+      [req.userId]
+    );
+
+    if (!deletionResult.rows[0]) {
+      await db.query('ROLLBACK');
+      return res.status(404).json({
+        error: 'Conta não encontrada.',
+        code: 'ACCOUNT_NOT_FOUND',
+      });
+    }
+
+    await db.query('COMMIT');
+    return res.json({
+      success: true,
+      message: 'Sua conta e os dados associados foram excluídos.',
+    });
+  } catch (error) {
+    if (db) {
+      await db.query('ROLLBACK').catch(() => null);
+    }
+
+    if (error?.code?.startsWith('ASAAS_')) {
+      return res.status(502).json({
+        error: 'Não foi possível cancelar a cobrança recorrente. Tente novamente ou fale com o suporte.',
+        code: 'ACCOUNT_DELETE_BILLING_CLEANUP_FAILED',
+      });
+    }
+
+    console.error('Falha ao excluir conta do usuário.');
+    console.error(error);
+    return res.status(500).json({
+      error: 'Não foi possível excluir a conta agora. Tente novamente.',
+      code: 'ACCOUNT_DELETE_FAILED',
+    });
+  } finally {
+    db?.release();
+  }
+};
 
 function buildMotivationalNotes(metrics) {
   const notes = [];
