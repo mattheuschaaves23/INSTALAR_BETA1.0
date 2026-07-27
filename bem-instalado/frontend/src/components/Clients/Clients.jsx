@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import PaginationControls from '../Layout/PaginationControls';
+import PlanUsage from '../Subscription/PlanUsage';
+import { useSubscription } from '../../contexts/SubscriptionContext';
 
 const CLIENTS_PER_PAGE = 6;
 
@@ -131,6 +133,13 @@ function ClientUiIcon({ type }) {
           <path d="M7 7.5v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-10" />
         </svg>
       );
+    case 'edit':
+      return (
+        <svg {...props}>
+          <path d="m4.5 19.5 4.2-1 9.8-9.8-3.2-3.2-9.8 9.8-1 4.2Z" />
+          <path d="m13.8 7 3.2 3.2" />
+        </svg>
+      );
     case 'home':
       return (
         <svg {...props}>
@@ -202,7 +211,7 @@ function getClientInitials(name) {
     .join('');
 }
 
-function ClientCard({ client, onDelete }) {
+function ClientCard({ client, onDelete, onEdit }) {
   return (
     <article className="client-intake-client-card">
       <div className="client-intake-client-head">
@@ -213,9 +222,14 @@ function ClientCard({ client, onDelete }) {
           <p>{client.phone || 'Telefone não informado'}</p>
         </div>
 
-        <button className="client-intake-delete" onClick={() => onDelete(client.id)} type="button">
-          <ClientUiIcon type="trash" />
-        </button>
+        <div className="flex gap-2">
+          <button aria-label={`Editar ${client.name}`} className="client-intake-delete" onClick={() => onEdit(client)} type="button">
+            <ClientUiIcon type="edit" />
+          </button>
+          <button aria-label={`Excluir ${client.name}`} className="client-intake-delete" onClick={() => onDelete(client.id)} type="button">
+            <ClientUiIcon type="trash" />
+          </button>
+        </div>
       </div>
 
       <div className="client-intake-client-body">
@@ -238,8 +252,10 @@ function ClientCard({ client, onDelete }) {
 
 export default function Clients() {
   const navigate = useNavigate();
+  const { refreshSubscription } = useSubscription();
   const [clients, setClients] = useState([]);
   const [form, setForm] = useState(initialForm);
+  const [editingClientId, setEditingClientId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [saving, setSaving] = useState(false);
   const [searchingZip, setSearchingZip] = useState(false);
@@ -284,6 +300,15 @@ export default function Clients() {
 
   const handleClear = () => {
     setForm(initialForm);
+    setEditingClientId(null);
+  };
+
+  const handleEdit = (client) => {
+    setEditingClientId(client.id);
+    setForm(Object.fromEntries(
+      Object.keys(initialForm).map((key) => [key, client[key] || ''])
+    ));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleZipLookup = async () => {
@@ -333,11 +358,16 @@ export default function Clients() {
     setSaving(true);
 
     try {
-      await api.post('/clients', form);
+      if (editingClientId) {
+        await api.put(`/clients/${editingClientId}`, form);
+      } else {
+        await api.post('/clients', form);
+      }
       setForm(initialForm);
+      setEditingClientId(null);
       setCurrentPage(1);
-      toast.success('Cliente cadastrado com sucesso.');
-      loadClients();
+      toast.success(editingClientId ? 'Cliente atualizado com sucesso.' : 'Cliente cadastrado com sucesso.');
+      await Promise.all([loadClients(), refreshSubscription()]);
     } catch (error) {
       toast.error(error.response?.data?.error || 'Não foi possível salvar o cliente.');
     } finally {
@@ -349,7 +379,8 @@ export default function Clients() {
     try {
       await api.delete(`/clients/${id}`);
       toast.success('Cliente removido.');
-      loadClients();
+      if (editingClientId === id) handleClear();
+      await Promise.all([loadClients(), refreshSubscription()]);
     } catch (error) {
       toast.error(error.response?.data?.error || 'Não foi possível remover o cliente.');
     }
@@ -368,18 +399,19 @@ export default function Clients() {
         </button>
 
         <div className="client-intake-topbar-copy">
-          <h1>Novo cliente</h1>
-          <p>Cadastre um novo cliente</p>
+          <h1>{editingClientId ? 'Editar cliente' : 'Novo cliente'}</h1>
+          <p>{editingClientId ? 'Atualize os dados do cliente' : 'Cadastre um novo cliente'}</p>
         </div>
 
         <button className="client-intake-save" form="client-intake-form" type="submit">
           <ClientUiIcon type="save" />
-          <span>Salvar cliente</span>
+          <span>{editingClientId ? 'Salvar alterações' : 'Salvar cliente'}</span>
         </button>
       </header>
 
       <div className="client-intake-layout">
         <div className="client-intake-main">
+          <PlanUsage className="fade-up" usageKey="clients" />
           <form className="client-intake-form-shell fade-up" id="client-intake-form" onSubmit={handleSubmit}>
             <div className="client-intake-form-head">
               <div>
@@ -543,7 +575,7 @@ export default function Clients() {
 
               <div className="client-intake-actions">
                 <button className="client-intake-primary" disabled={saving} type="submit">
-                  {saving ? 'Salvando...' : 'Salvar cliente'}
+                  {saving ? 'Salvando...' : editingClientId ? 'Salvar alterações' : 'Salvar cliente'}
                 </button>
                 <button className="client-intake-secondary" onClick={handleClear} type="button">
                   Limpar campos
@@ -563,7 +595,7 @@ export default function Clients() {
 
             <div className="client-intake-panel-list">
               {paginatedClients.map((client) => (
-                <ClientCard client={client} key={client.id} onDelete={handleDelete} />
+                <ClientCard client={client} key={client.id} onDelete={handleDelete} onEdit={handleEdit} />
               ))}
             </div>
 
@@ -619,7 +651,7 @@ export default function Clients() {
 
             <div className="client-intake-panel-list">
               {paginatedClients.map((client) => (
-                <ClientCard client={client} key={client.id} onDelete={handleDelete} />
+                  <ClientCard client={client} key={client.id} onDelete={handleDelete} onEdit={handleEdit} />
               ))}
             </div>
 

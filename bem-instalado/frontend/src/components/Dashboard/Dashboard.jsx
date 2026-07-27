@@ -19,6 +19,8 @@ import {
   formatShortDate,
   formatStatusLabel,
 } from '../../utils/formatters';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import PlanUsage, { ProFeatureNotice } from '../Subscription/PlanUsage';
 
 const IS_INSTALLER_APP = process.env.REACT_APP_INSTALLER_APP === 'true';
 
@@ -28,7 +30,7 @@ const CHART_PADDING_X = 18;
 const CHART_PADDING_Y = 24;
 const DASHBOARD_REFRESH_INTERVAL = 30000;
 const INSTALLER_APP_DOWNLOAD_URL = 'https://github.com/mattheuschaaves23/Instalar/releases/latest/download/InstalaPro-Instaladores.apk';
-const INSTALLER_APP_VERSION = '1.0.9';
+const INSTALLER_APP_VERSION = '1.0.10';
 const CHART_VIEWS = ['weekly', 'monthly', 'yearly'];
 const CHART_VIEW_LABELS = {
   weekly: 'Semanal',
@@ -618,6 +620,7 @@ function buildStatusSegments(budgets) {
 
 export default function Dashboard() {
   const { logout, user } = useAuth();
+  const { isPro } = useSubscription();
   const isDashboardMountedRef = useRef(false);
   const [today, setToday] = useState(() => new Date());
   const [data, setData] = useState({
@@ -973,6 +976,7 @@ export default function Dashboard() {
     },
   ];
   const upcomingAppointments = filteredRecentBudgets.slice(0, 3);
+  const visibleRecentBudgets = filteredRecentBudgets.slice(0, isPro ? 5 : 3);
   const installationsThisWeek = Number(metrics.installations_this_week || 0);
   const completedThisWeek = Number(metrics.completed_this_week || 0);
   const rankingItems = ranking.slice(0, 4);
@@ -995,7 +999,7 @@ export default function Dashboard() {
           <span className="ref-panel-avatar">{initials}</span>
           <div>
             <strong>{user?.name || 'Instalador'}</strong>
-            <small>Instalador Pro</small>
+            <small>{isPro ? 'Instalador Pro' : 'Plano Grátis'}</small>
           </div>
         </div>
 
@@ -1114,13 +1118,15 @@ export default function Dashboard() {
 
           <InstallerAppDownloadCard />
 
+          <PlanUsage usageKey="monthly_budgets" />
+
           <section className="ref-panel-mobile-section-head">
             <h3>Resumo do mês</h3>
             <Link to="/budgets">Ver orçamentos <PanelIcon type="chevron" size={14} /></Link>
           </section>
 
           <section className="ref-panel-metrics" aria-label="Resumo do mês">
-            {referenceCards.map((card, index) => (
+            {referenceCards.slice(0, isPro ? 4 : 3).map((card, index) => (
               <article className="ref-panel-metric-card" key={card.label} style={{ animationDelay: `${index * 70}ms` }}>
                 <span className="ref-panel-metric-icon">
                   <PanelIcon type={card.type} />
@@ -1147,7 +1153,7 @@ export default function Dashboard() {
             <span />
           </div>
 
-          <section className="ref-panel-grid">
+          {isPro ? <section className="ref-panel-grid">
             <article className="ref-panel-card ref-panel-chart-card">
               <div className="ref-panel-card-head">
                 <div>
@@ -1191,7 +1197,11 @@ export default function Dashboard() {
                 </div>
               </div>
             </article>
-          </section>
+          </section> : (
+            <ProFeatureNotice title="Visão comercial Pro">
+              Libere gráficos semanais, mensais e anuais, distribuição das propostas, conversão, ticket médio e análise financeira completa.
+            </ProFeatureNotice>
+          )}
 
           <section className="ref-panel-mobile-stack">
             <article className="ref-panel-card ref-panel-agenda-card">
@@ -1233,7 +1243,7 @@ export default function Dashboard() {
               </Link>
             </article>
 
-            <article className="ref-panel-card ref-panel-ranking-card">
+            {isPro ? <article className="ref-panel-card ref-panel-ranking-card">
               <div className="ref-panel-card-head is-inline">
                 <h3>Ranking</h3>
                 <span>Top instaladores</span>
@@ -1247,14 +1257,26 @@ export default function Dashboard() {
               )) : (
                 <p className="ref-panel-empty-copy">O ranking aparecerá quando houver serviços e avaliações reais.</p>
               )}
-            </article>
+            </article> : (
+              <article className="ref-panel-card ref-panel-ranking-card">
+                <div className="ref-panel-card-head is-inline">
+                  <h3>Seu perfil</h3>
+                  <Link to="/profile">Completar</Link>
+                </div>
+                <div className="ref-panel-ranking-row">
+                  <em>#{metrics.ranking_position || '--'}</em>
+                  <span>Posição no ranking</span>
+                  <strong>{metrics.profile_completeness || 0}%</strong>
+                </div>
+              </article>
+            )}
 
             <article className="ref-panel-card ref-panel-quotes-card">
               <div className="ref-panel-card-head is-inline">
                 <h3>Orçamentos recentes</h3>
                 <Link to="/budgets">Ver todos</Link>
               </div>
-              {filteredRecentBudgets.map((budget) => (
+              {visibleRecentBudgets.map((budget) => (
                 <Link className="ref-panel-quote-row" key={budget.id} to="/budgets">
                   <span>#{budget.id}</span>
                   <strong>{budget.client_name || 'Cliente não informado'}</strong>
@@ -1263,7 +1285,7 @@ export default function Dashboard() {
               ))}
             </article>
 
-            <article className="ref-panel-card ref-panel-finance-card">
+            {isPro ? <article className="ref-panel-card ref-panel-finance-card">
               <div className="ref-panel-card-head">
                 <div>
                   <h3>Resumo financeiro</h3>
@@ -1276,7 +1298,7 @@ export default function Dashboard() {
                   <strong data-tone={item.tone}>{item.value}</strong>
                 </div>
               ))}
-            </article>
+            </article> : null}
           </section>
         </main>
 
@@ -1356,8 +1378,10 @@ export default function Dashboard() {
 
         <InstallerAppDownloadCard />
 
+        <PlanUsage usageKey="monthly_budgets" />
+
         <div className="dashboard-neo-metrics">
-          {dashboardCards.map((card) => (
+          {dashboardCards.slice(0, isPro ? 4 : 3).map((card) => (
             <article className="dashboard-neo-card" key={card.label}>
               <div className="dashboard-neo-card-top">
                 <DashboardIcon tone={card.tone} type={card.type} />
@@ -1371,7 +1395,7 @@ export default function Dashboard() {
           ))}
         </div>
 
-        <div className="dashboard-neo-main-grid">
+        {isPro ? <div className="dashboard-neo-main-grid">
           <article className="dashboard-neo-panel dashboard-neo-panel--chart">
             <div className="dashboard-neo-panel-head">
               <div>
@@ -1553,7 +1577,11 @@ export default function Dashboard() {
               </div>
             </div>
           </article>
-        </div>
+        </div> : (
+          <ProFeatureNotice title="Visão comercial Pro">
+            Libere gráficos, distribuição das propostas, conversão, ticket médio e análise financeira completa.
+          </ProFeatureNotice>
+        )}
 
         <div className="dashboard-neo-bottom-grid">
           <article className="dashboard-neo-panel">
@@ -1580,7 +1608,7 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {filteredRecentBudgets.length > 0 ? (
-                    filteredRecentBudgets.map((budget) => (
+                    visibleRecentBudgets.map((budget) => (
                       <tr key={budget.id}>
                         <td data-label="Orçamento">#{budget.id}</td>
                         <td data-label="Cliente">{budget.client_name || 'Cliente não informado'}</td>
@@ -1608,20 +1636,20 @@ export default function Dashboard() {
           <article className="dashboard-neo-panel dashboard-neo-panel--summary">
             <div className="dashboard-neo-panel-head">
               <div>
-                <h3>Resumo financeiro</h3>
-                <p>Leitura rápida do que entra, do que está em aberto e do desempenho do perfil.</p>
+                <h3>{isPro ? 'Resumo financeiro' : 'Seu perfil'}</h3>
+                <p>{isPro ? 'Leitura rápida do que entra, do que está em aberto e do desempenho do perfil.' : 'Posição pública e conclusão do cadastro.'}</p>
               </div>
               <span className="dashboard-neo-filter">Hoje</span>
             </div>
 
-            <div className="dashboard-neo-summary-list">
+            {isPro ? <div className="dashboard-neo-summary-list">
               {quickSummary.map((item) => (
                 <div className="dashboard-neo-summary-row" key={item.label}>
                   <span>{item.label}</span>
                   <strong data-tone={item.tone}>{item.value}</strong>
                 </div>
               ))}
-            </div>
+            </div> : null}
 
             <div className="dashboard-neo-note">
               <p>

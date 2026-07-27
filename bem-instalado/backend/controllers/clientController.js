@@ -1,4 +1,9 @@
 const pool = require('../config/database');
+const {
+  getInstallerPlanAccess,
+  isLimitReached,
+  upgradeRequired,
+} = require('../services/planAccess');
 
 function normalizeNullableString(value) {
   if (value === null || value === undefined) {
@@ -27,6 +32,16 @@ exports.createClient = async (req, res) => {
 
     if (!name || !phone) {
       return res.status(400).json({ error: 'Nome e telefone são obrigatórios.' });
+    }
+
+    const planAccess = req.planAccess || await getInstallerPlanAccess(req.userId);
+    if (isLimitReached(planAccess, 'clients')) {
+      return upgradeRequired(res, {
+        code: 'FREE_CLIENT_LIMIT',
+        error: `O plano Grátis permite até ${planAccess.limits.clients} clientes. Você pode editar ou excluir os atuais, ou assinar o Pro para cadastrar sem limite.`,
+        planAccess,
+        feature: 'unlimited_clients',
+      });
     }
 
     const { rows } = await pool.query(

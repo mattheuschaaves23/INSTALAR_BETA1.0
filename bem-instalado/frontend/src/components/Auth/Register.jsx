@@ -26,9 +26,9 @@ const highlights = [
 const PLAN_PRICE = Number(process.env.REACT_APP_SUBSCRIPTION_PRICE || 49.9);
 const IS_INSTALLER_APP = process.env.REACT_APP_INSTALLER_APP === 'true';
 const planBenefits = [
-  'Dashboard com números do mês e evolução da operação.',
+  'Dashboard com os números essenciais do mês.',
   'Agenda visual por dia para não perder instalação.',
-  'Orçamentos com PDF profissional e histórico completo.',
+  'Orçamentos com PDF pronto para compartilhar.',
   'Perfil público para atrair novos clientes.',
   'Suporte interno com chat para dúvidas e melhorias.',
 ];
@@ -77,8 +77,8 @@ export default function Register() {
         account_type: 'installer',
       });
 
-      toast.success('Conta criada. Seu teste grátis de 7 dias já começou.');
-      navigate('/subscription');
+      toast.success('Conta criada. Seu plano Grátis permanente já está ativo.');
+      navigate('/dashboard');
     } catch (error) {
       toast.error(error.response?.data?.error || 'Não foi possível criar a conta.');
     }
@@ -153,9 +153,9 @@ export default function Register() {
 
         <section className="rounded-[18px] border border-[var(--line)] bg-[rgba(255,255,255,0.02)] p-4">
           <p className="field-label">Plano do instalador</p>
-          <p className="mt-1 text-lg font-semibold text-[var(--gold-strong)]">7 dias grátis</p>
+          <p className="mt-1 text-lg font-semibold text-[var(--gold-strong)]">Grátis, sem prazo para acabar</p>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            Depois do teste, você decide se quer assinar por R$ {PLAN_PRICE.toFixed(2)}/mês.
+            Comece sem cobrança. Quando precisar de mais volume, assine o Pro por R$ {PLAN_PRICE.toFixed(2)}/mês.
           </p>
           <div className="mt-3 grid gap-2">
             {planBenefits.map((benefit) => (

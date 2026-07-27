@@ -2,102 +2,128 @@ import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router';
 import api from '../../services/api';
-import PageIntro from '../Layout/PageIntro';
-import { useAuth } from '../../contexts/AuthContext';
-import { setSubscriptionAccessCache } from '../Layout/subscriptionAccessCache';
-import {
-  formatCurrency,
-  formatDateTime,
-  formatShortDate,
-  formatStatusLabel,
-} from '../../utils/formatters';
+import { useConfirm } from '../../contexts/ConfirmContext';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import { formatCurrency, formatDateTime, formatStatusLabel } from '../../utils/formatters';
 import { isNativeStoreApp } from '../../utils/nativePlatform';
+import PageIntro from '../Layout/PageIntro';
 
-const defaultPricing = {
-  amount: Number(process.env.REACT_APP_SUBSCRIPTION_PRICE || 49.9),
-  currency: 'BRL',
-  period: 'mês',
-  label: 'Plano instalador',
-};
-
-const defaultBenefits = [
-  'Dashboard comercial completo com indicadores do mês.',
-  'Agenda visual por dia para organizar instalações.',
-  'Orçamentos em PDF prontos para enviar ao cliente.',
-  'Perfil público para captar mais clientes.',
-  'Suporte interno em tempo real com o administrador.',
+const FREE_ITEMS = [
+  '5 interesses por mês',
+  '15 clientes ativos',
+  '5 orçamentos por mês',
+  '1 ambiente por orçamento',
+  '3 fotos e 3 horários futuros',
+  'Agenda, suporte e avaliações essenciais',
 ];
 
+const PRO_ITEMS = [
+  'Interesses, clientes e orçamentos ilimitados',
+  'Vários ambientes e parcelamento em 2x a 12x',
+  'PDF profissional com a sua marca',
+  'Dashboard comercial completo',
+  'Análises avançadas de avaliações',
+  'Personalização de cor e densidade',
+];
+
+function PlanCard({ active, badge, children, cta, description, items, price, title }) {
+  return (
+    <article className={`relative rounded-[28px] border p-6 ${active ? 'border-[var(--gold)] bg-[var(--gold-soft)]' : 'border-[var(--line)] bg-[var(--surface-soft)]'}`}>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="eyebrow">{badge}</p>
+          <h2 className="mt-3 text-2xl font-semibold text-[var(--text)]">{title}</h2>
+        </div>
+        {active ? <span className="status-pill" data-tone="active">Plano atual</span> : null}
+      </div>
+      <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{description}</p>
+      <p className="mt-5 text-3xl font-semibold text-[var(--gold-strong)]">{price}</p>
+      <div className="mt-5 grid gap-2">
+        {items.map((item) => (
+          <p className="flex gap-2 text-sm leading-6 text-[var(--muted)]" key={item}>
+            <span aria-hidden="true" className="text-[var(--gold-strong)]">✓</span>
+            <span>{item}</span>
+          </p>
+        ))}
+      </div>
+      {cta ? <div className="mt-6">{cta}</div> : null}
+      {children}
+    </article>
+  );
+}
+
 export default function Subscription() {
-  const { user } = useAuth();
+  const confirm = useConfirm();
   const isStoreApp = isNativeStoreApp();
-  const [subscription, setSubscription] = useState(null);
-  const [payment, setPayment] = useState(null);
+  const {
+    subscription: contextSubscription,
+    planAccess,
+    isPro,
+    refreshSubscription,
+  } = useSubscription();
+  const [subscription, setSubscription] = useState(contextSubscription);
+  const [payment, setPayment] = useState(contextSubscription?.pending_payment || null);
   const [isPaying, setIsPaying] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
   const [paymentNeedsProfile, setPaymentNeedsProfile] = useState(false);
 
   const loadSubscription = useCallback(async () => {
-    try {
-      const response = await api.get('/subscriptions');
-      setSubscription(response.data);
-      setPayment(response.data.pending_payment || null);
-      setSubscriptionAccessCache(user?.id || user?.email, Boolean(response.data?.can_use_app));
-    } catch (error) {
-      toast.error(error.response?.data?.error || 'Não foi possível carregar a assinatura.');
+    const response = await api.get('/subscriptions');
+    setSubscription(response.data);
+    setPayment(response.data.pending_payment || null);
+    await refreshSubscription();
+    return response.data;
+  }, [refreshSubscription]);
+
+  useEffect(() => {
+    if (contextSubscription) {
+      setSubscription(contextSubscription);
+      setPayment((current) => current || contextSubscription.pending_payment || null);
     }
-  }, [user?.email, user?.id]);
+  }, [contextSubscription]);
+
+  useEffect(() => {
+    loadSubscription().catch((error) => {
+      toast.error(error.response?.data?.error || 'Não foi possível carregar os planos.');
+    });
+  }, [loadSubscription]);
 
   const syncPaymentStatus = useCallback(async (externalId, silent = false) => {
-    if (!externalId) {
-      return;
-    }
-
+    if (!externalId) return;
     try {
       const response = await api.get(`/subscriptions/payment/${externalId}`);
-
-      if (response.data.payment) {
-        setPayment(response.data);
-      }
-
+      if (response.data.payment) setPayment(response.data);
       if (response.data.status === 'paid') {
-        toast.success('Pagamento confirmado. O acesso premium foi liberado.');
+        toast.success('Pagamento confirmado. O plano Pro foi ativado.');
         setPayment(null);
         await loadSubscription();
-        return;
-      }
-
-      if (!silent) {
+      } else if (!silent) {
         toast('Pagamento ainda pendente.');
       }
     } catch (error) {
-      if (!silent) {
-        toast.error(error.response?.data?.error || 'Não foi possível consultar o pagamento.');
-      }
+      if (!silent) toast.error(error.response?.data?.error || 'Não foi possível consultar o pagamento.');
     }
   }, [loadSubscription]);
 
   useEffect(() => {
-    loadSubscription();
-  }, [loadSubscription]);
-
-  useEffect(() => {
-    if (isStoreApp || !payment?.automaticConfirmation || payment?.payment?.status !== 'pending' || !payment?.payment?.external_id) {
+    if (
+      isStoreApp
+      || !payment?.automaticConfirmation
+      || payment?.payment?.status !== 'pending'
+      || !payment?.payment?.external_id
+    ) {
       return undefined;
     }
-
-    const interval = window.setInterval(() => {
-      syncPaymentStatus(payment.payment.external_id, true);
-    }, 20000);
-
+    const interval = window.setInterval(
+      () => syncPaymentStatus(payment.payment.external_id, true),
+      20000
+    );
     return () => window.clearInterval(interval);
-  }, [isStoreApp, payment?.automaticConfirmation, payment?.payment?.external_id, payment?.payment?.status, syncPaymentStatus]);
+  }, [isStoreApp, payment, syncPaymentStatus]);
 
   const handlePay = async () => {
-    if (isStoreApp) {
-      return;
-    }
-
+    if (isStoreApp || isPro) return;
     if (subscription?.payment_mode === 'disabled') {
       toast.error(subscription?.payment_notice || 'Pagamento temporariamente indisponível.');
       return;
@@ -108,10 +134,8 @@ export default function Subscription() {
       const response = await api.post('/subscriptions/pay');
       setPayment(response.data);
       setPaymentNeedsProfile(false);
-      toast.success('Checkout mensal gerado com Pix e cartão.');
-      if (response.data?.ticketUrl) {
-        window.location.assign(response.data.ticketUrl);
-      }
+      toast.success('Checkout mensal aberto com Pix e cartão.');
+      if (response.data?.ticketUrl) window.location.assign(response.data.ticketUrl);
     } catch (error) {
       const code = error.response?.data?.code;
       setPaymentNeedsProfile([
@@ -119,9 +143,31 @@ export default function Subscription() {
         'PAYMENT_CUSTOMER_NAME_REQUIRED',
         'PAYMENT_CUSTOMER_DOCUMENT_REQUIRED',
       ].includes(code));
-      toast.error(error.response?.data?.error || 'Não foi possível gerar o pagamento.');
+      toast.error(error.response?.data?.error || 'Não foi possível abrir o checkout.');
     } finally {
       setIsPaying(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    const accepted = await confirm({
+      title: 'Voltar para o plano Grátis?',
+      message: 'A recorrência será cancelada. Seus clientes, orçamentos e demais dados não serão apagados.',
+      confirmText: 'Voltar para o Grátis',
+      cancelText: 'Manter o Pro',
+    });
+    if (!accepted) return;
+
+    try {
+      setIsCanceling(true);
+      const response = await api.delete('/subscriptions');
+      toast.success(response.data?.message || 'Plano Grátis ativado.');
+      setPayment(null);
+      await loadSubscription();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Não foi possível cancelar agora.');
+    } finally {
+      setIsCanceling(false);
     }
   };
 
@@ -134,341 +180,174 @@ export default function Subscription() {
     }
   };
 
-  const handleCopy = async (value, message) => {
-    if (!value) {
-      return;
-    }
-
-    try {
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(value);
-        toast.success(message);
-        return;
-      }
-
-      throw new Error('clipboard-unavailable');
-    } catch (_error) {
-      toast.error('Não foi possível copiar automaticamente. Copie manualmente o código.');
-    }
-  };
-
-  const canUseApp = Boolean(subscription?.can_use_app);
-  const isPaymentDisabled = subscription?.payment_mode === 'disabled';
-  const isAdminAccess = subscription?.access_mode === 'admin';
-  const isLaunchAccess = subscription?.access_mode === 'launch';
-  const isTrialAccess = subscription?.access_mode === 'trial';
-  const isTrialPlan = subscription?.plan === 'trial';
-  const isExpiredTrial = isTrialPlan && subscription?.is_expired;
-  const hasComplimentaryAccess = isAdminAccess || isLaunchAccess || isTrialAccess;
-  const trialDaysRemaining = subscription?.trial?.days_remaining || 0;
-  const trialDaysLabel = `${trialDaysRemaining} ${trialDaysRemaining === 1 ? 'dia' : 'dias'}`;
+  const usageRows = [
+    ['Interesses no mês', planAccess.usage?.monthly_interests, planAccess.limits?.monthly_interests],
+    ['Clientes', planAccess.usage?.clients, planAccess.limits?.clients],
+    ['Orçamentos no mês', planAccess.usage?.monthly_budgets, planAccess.limits?.monthly_budgets],
+    ['Fotos no portfólio', planAccess.usage?.portfolio_photos, planAccess.limits?.portfolio_photos],
+    ['Horários futuros', planAccess.usage?.availability_slots, planAccess.limits?.availability_slots],
+  ];
+  const pricing = subscription?.pricing || { amount: 49.9, period: 'mês' };
   const currentPaymentIsPending = payment?.payment?.status === 'pending';
-  const showRecipient = Boolean(payment?.recipientName || payment?.city);
-  const pricing = subscription?.pricing || defaultPricing;
-  const apiBenefits = Array.isArray(subscription?.plan_benefits) ? subscription.plan_benefits : [];
-  const planBenefits = apiBenefits.length
-    ? apiBenefits.map((benefit, index) => (/[\u00C3\u00C2\u00E2]/.test(String(benefit)) ? defaultBenefits[index] || benefit : benefit))
-    : defaultBenefits;
 
   return (
     <section className="page-shell space-y-7">
       <PageIntro
-        description={hasComplimentaryAccess
-          ? isAdminAccess
-            ? 'Sua conta administrativa possui acesso completo às ferramentas da plataforma.'
-            : isTrialAccess
-              ? `Aproveite todas as ferramentas grátis até ${formatShortDate(subscription?.trial?.ends_at)}.`
-              : 'Durante o lançamento, todas as ferramentas estão liberadas sem cobrança.'
-          : isExpiredTrial && !isStoreApp
-            ? 'Seu teste grátis terminou. Escolha Pix mensal ou cartão de crédito mensal para continuar.'
-            : 'Consulte aqui o status do seu plano e dos pagamentos.'}
-        eyebrow="Assinatura"
+        description={isPro
+          ? 'Seu plano Pro está ativo e todas as ferramentas avançadas estão liberadas.'
+          : 'O plano Grátis não expira. Assine o Pro quando precisar crescer sem limites.'}
+        eyebrow="Planos"
         stats={[
           {
-            label: 'Plano',
-            value: isTrialPlan ? 'TESTE GRÁTIS' : subscription?.plan ? subscription.plan.toUpperCase() : 'MENSAL',
-            detail: isTrialPlan
-              ? `${subscription?.trial?.days_total || 7} dias sem cobrança.`
-              : hasComplimentaryAccess
-                ? 'Acesso sem cobrança.'
-                : isStoreApp
-                  ? 'Assinatura vinculada à sua conta.'
-                  : `${formatCurrency(pricing.amount)} por ${pricing.period}.`,
-          },
-          {
-            label: 'Status',
-            value: isAdminAccess
-              ? 'ADMINISTRATIVO'
-              : isTrialAccess
-                ? 'TESTE GRÁTIS'
-                : isExpiredTrial
-                  ? 'ENCERRADO'
-                  : isLaunchAccess
-                    ? 'LANÇAMENTO'
-                    : formatStatusLabel(subscription?.status),
-            detail: subscription?.expires_at
-              ? `Expira em ${formatShortDate(subscription.expires_at)}`
-              : 'Ainda sem data de expiração registrada.',
+            label: 'Plano atual',
+            value: isPro ? 'PRO' : 'GRÁTIS',
+            detail: isPro ? 'Recursos avançados liberados.' : 'Sem prazo para acabar.',
           },
           {
             label: 'Acesso',
-            value: canUseApp ? 'LIBERADO' : 'BLOQUEADO',
-            detail: canUseApp
-              ? isTrialAccess
-                ? 'Todas as ferramentas liberadas durante o teste.'
-                : hasComplimentaryAccess
-                  ? 'Ferramentas liberadas sem cobrança.'
-                  : 'Ferramentas premium liberadas.'
-              : 'Os módulos do painel ficam bloqueados enquanto a assinatura estiver inativa.',
+            value: 'LIBERADO',
+            detail: 'O aplicativo continua funcionando em qualquer plano.',
+          },
+          {
+            label: 'Cobrança',
+            value: isPro ? formatCurrency(pricing.amount) : 'R$ 0',
+            detail: isPro ? `por ${pricing.period || 'mês'}` : 'Nenhuma cobrança no Grátis.',
           },
         ]}
-        title={isAdminAccess
-          ? 'Seu acesso administrativo está liberado.'
-          : isTrialAccess
-            ? 'Seu teste grátis está ativo.'
-            : isExpiredTrial
-              ? 'Seu teste grátis terminou.'
-              : isLaunchAccess
-                ? 'Seu acesso de lançamento está liberado.'
-                : 'Gerencie seu plano de instalador.'}
+        title={isPro ? 'Você está no InstalaPro Pro.' : 'Escolha o plano certo para o seu momento.'}
       />
 
-      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-        <section className="lux-panel fade-up min-w-0 p-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="min-w-0">
-              <p className="eyebrow">Estado da assinatura</p>
-              <h2 className="mt-3 text-2xl font-semibold text-[var(--text)]">
-                {isTrialAccess
-                  ? 'Teste grátis em andamento'
-                  : hasComplimentaryAccess
-                    ? 'Acesso liberado'
-                    : 'Controle de acesso premium'}
-              </h2>
-            </div>
-            <span className="status-pill" data-tone={isExpiredTrial ? 'inactive' : subscription?.status}>
-              {isExpiredTrial ? 'Encerrado' : isTrialAccess ? 'Teste grátis' : formatStatusLabel(subscription?.status)}
-            </span>
-          </div>
-
-          <p className="mt-5 text-sm leading-7 text-[var(--muted)]">
-            {hasComplimentaryAccess
-              ? isTrialAccess
-                ? `Você tem ${trialDaysLabel} de teste. Nenhuma cobrança será feita durante esse período.`
-                : 'Você já pode usar oportunidades, agenda, clientes e orçamentos. Nenhum pagamento é necessário para este acesso.'
-              : 'Acompanhe aqui a ativação e a validade da sua assinatura.'}
-          </p>
-
-          <div className="subscription-inline-note mt-6">
-            <p className="eyebrow">Plano e benefícios</p>
-            <p className="mt-3 text-xl font-semibold text-[var(--gold-strong)]">
-              {pricing.label || 'Plano instalador'}
-              {!isStoreApp ? ` • ${formatCurrency(pricing.amount)}/${pricing.period || 'mês'}` : ''}
-            </p>
-            <div className="mt-3 grid gap-2">
-              {planBenefits.map((benefit) => (
-                <p className="text-sm text-[var(--muted)]" key={benefit}>
-                  • {benefit}
-                </p>
-              ))}
-            </div>
-          </div>
-
-          {!hasComplimentaryAccess && isStoreApp ? (
-            <div className="subscription-inline-note mt-6">
-              <p className="eyebrow">Situação da conta</p>
-              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-                Sua assinatura não está ativa. Este aplicativo permite consultar a situação da conta,
-                atualizar o perfil e falar com o suporte.
-              </p>
-              <Link className="ghost-button mt-4 w-full sm:w-auto" to="/support">
-                Falar com o suporte
-              </Link>
-            </div>
-          ) : null}
-
-          {!hasComplimentaryAccess && !isStoreApp ? (
-            <div className="mt-6">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="subscription-inline-note">
-                  <p className="eyebrow">Pix mensal</p>
-                  <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                    A Asaas gera uma nova cobrança Pix a cada mês. Você paga pelo QR Code ou copia e cola.
-                  </p>
+      <div className="grid gap-6 xl:grid-cols-2">
+        <PlanCard
+          active={!isPro}
+          badge="Plano permanente"
+          description="O essencial para começar, atender clientes e organizar suas instalações."
+          items={FREE_ITEMS}
+          price="Grátis"
+          title="InstalaPro Grátis"
+        />
+        <PlanCard
+          active={isPro}
+          badge="Para crescer"
+          description="Mais volume, apresentação profissional e indicadores para tomar decisões."
+          items={PRO_ITEMS}
+          price={`${formatCurrency(pricing.amount)}/${pricing.period || 'mês'}`}
+          title="InstalaPro Pro"
+          cta={!isPro
+            ? isStoreApp
+              ? (
+                <div className="rounded-[18px] border border-[var(--line)] p-4 text-sm leading-6 text-[var(--muted)]">
+                  Para assinar, acesse sua conta pelo site. O aplicativo mostra o plano ativado automaticamente.
                 </div>
-                <div className="subscription-inline-note">
-                  <p className="eyebrow">Cartão mensal</p>
-                  <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                    A mensalidade é cobrada automaticamente no cartão cadastrado no checkout seguro da Asaas.
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-3">
-                <button
-                  className="gold-button w-full sm:w-auto"
-                  disabled={isPaymentDisabled || isPaying}
-                  onClick={handlePay}
-                  type="button"
-                >
-                  {isPaymentDisabled
-                    ? 'Pagamento indisponível'
-                    : isPaying
-                      ? 'Abrindo checkout...'
-                      : currentPaymentIsPending
-                        ? 'Reabrir checkout atual'
-                        : 'Escolher Pix ou cartão'}
-                </button>
-                {payment ? (
-                  <button
-                    className="ghost-button w-full sm:w-auto"
-                    disabled={isChecking || !payment?.payment?.external_id}
-                    onClick={handleCheck}
-                    type="button"
-                  >
-                    {isChecking ? 'Verificando...' : 'Verificar pagamento'}
-                  </button>
-                ) : null}
-                {paymentNeedsProfile ? (
-                  <Link className="ghost-button w-full sm:w-auto" to="/profile">
-                    Completar perfil para pagar
-                  </Link>
-                ) : null}
-              </div>
-            </div>
-          ) : null}
-
-          {!isStoreApp ? <div className="subscription-inline-note mt-6">
-            <p className="text-sm leading-7 text-[var(--muted)]">
-              {subscription?.payment_notice
-                || 'Pagamento temporariamente indisponível. Um novo método será configurado futuramente.'}
-            </p>
-          </div> : null}
-
-          {!isStoreApp && subscription?.provider_error ? (
-            <div className="mt-4 break-words rounded-[22px] border border-[rgba(223,107,107,0.32)] bg-[rgba(159,47,47,0.1)] p-5 text-sm leading-7 text-[var(--text)]">
-              {subscription.provider_error}
-            </div>
-          ) : null}
-        </section>
-
-        <aside className="grid gap-6">
-          {!isStoreApp && payment ? (
-            <section className="lux-panel fade-up min-w-0 p-6" style={{ animationDelay: '0.08s' }}>
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="min-w-0">
-                  <p className="eyebrow">
-                    {payment?.payment?.method === 'pix_credit_card'
-                      ? 'Checkout Asaas'
-                      : payment?.automaticConfirmation
-                        ? 'Pagamento Pix'
-                        : 'Pagamento manual'}
-                  </p>
-                  <h2 className="mt-3 text-2xl font-semibold text-[var(--text)]">Assinatura em aberto</h2>
-                </div>
-                <span className="status-pill" data-tone={payment?.payment?.status}>
-                  {formatStatusLabel(payment?.payment?.status)}
-                </span>
-              </div>
-
-              {payment.qrCodeImage ? (
-                <img
-                  alt="QR Code PIX"
-                  className="mt-5 w-full rounded-[24px] border border-[var(--line)] bg-white p-4"
-                  src={payment.qrCodeImage}
-                />
-              ) : null}
-
-              <div className="subscription-info-stack mt-5 text-sm text-[var(--muted)]">
-                <div className="subscription-info-row">
-                  <span>Valor</span>
-                  <strong className="text-[var(--text)]">{formatCurrency(payment?.payment?.amount)}</strong>
-                </div>
-
-                <div className="subscription-info-row">
-                  <span>Validação</span>
-                  <strong className="text-[var(--text)]">
-                    {payment?.automaticConfirmation ? 'Automática' : 'Manual'}
-                  </strong>
-                </div>
-
-                {payment.expirationDate ? (
-                  <div className="subscription-info-row">
-                    <span>Validade</span>
-                    <strong className="text-[var(--text)]">{formatDateTime(payment.expirationDate)}</strong>
-                  </div>
-                ) : null}
-
-                {showRecipient ? (
-                  <div className="subscription-info-row !items-start !justify-between gap-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-[var(--gold-strong)]">Recebedor</p>
-                    <p className="break-words text-right text-[var(--text)]">
-                      {[payment.recipientName, payment.city].filter(Boolean).join(' - ')}
-                    </p>
-                  </div>
-                ) : null}
-
-                {payment.copyPaste ? (
-                  <div className="subscription-info-row !items-start !justify-between gap-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-[var(--gold-strong)]">Código copia e cola</p>
-                    <p className="break-all text-right text-[var(--text)]">{payment.copyPaste}</p>
-                  </div>
-                ) : null}
-              </div>
-
-              <div className="mt-5 flex flex-wrap gap-3">
-                {payment.copyPaste ? (
+              )
+              : (
+                <div className="flex flex-wrap gap-3">
                   <button
                     className="gold-button w-full sm:w-auto"
-                    onClick={() => handleCopy(payment.copyPaste, 'Código PIX copiado.')}
+                    disabled={subscription?.payment_mode === 'disabled' || isPaying}
+                    onClick={handlePay}
                     type="button"
                   >
-                    Copiar código
+                    {isPaying
+                      ? 'Abrindo checkout...'
+                      : currentPaymentIsPending
+                        ? 'Continuar pagamento'
+                        : 'Assinar com Pix ou cartão'}
                   </button>
-                ) : null}
-                {payment.ticketUrl ? (
-                  <a className="ghost-button w-full sm:w-auto" href={payment.ticketUrl} rel="noreferrer" target="_blank">
-                    Continuar na Asaas
-                  </a>
-                ) : null}
+                  {paymentNeedsProfile ? (
+                    <Link className="ghost-button w-full sm:w-auto" to="/profile">
+                      Completar perfil
+                    </Link>
+                  ) : null}
+                </div>
+              )
+            : !isStoreApp && subscription?.access_mode === 'pro'
+              ? (
                 <button
                   className="ghost-button w-full sm:w-auto"
-                  disabled={isChecking || !payment?.payment?.external_id}
-                  onClick={handleCheck}
+                  disabled={isCanceling}
+                  onClick={handleCancel}
                   type="button"
                 >
-                  {isChecking ? 'Atualizando...' : 'Atualizar status'}
+                  {isCanceling ? 'Cancelando...' : 'Cancelar e voltar ao Grátis'}
                 </button>
-              </div>
+              )
+              : null}
+        />
+      </div>
 
-              <div className="subscription-inline-note mt-5">
-                <p className="text-sm leading-7 text-[var(--muted)]">
-                  {payment?.automaticConfirmation
-                    ? payment.copyPaste || payment.qrCodeImage
-                      ? 'A confirmação é automática. Depois de pagar, esta tela atualizará o acesso em poucos segundos.'
-                      : 'Escolha Pix ou cartão no checkout seguro da Asaas. O acesso será liberado após a confirmação.'
-                    : 'A confirmação manual está disponível somente no ambiente de desenvolvimento.'}
+      {!isPro ? (
+        <section className="lux-panel p-6">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="eyebrow">Uso do plano Grátis</p>
+              <h2 className="mt-3 text-2xl font-semibold text-[var(--text)]">Seus limites reiniciam todo mês</h2>
+            </div>
+            <p className="text-sm text-[var(--muted)]">Interesses e orçamentos reiniciam no primeiro dia do mês.</p>
+          </div>
+          <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {usageRows.map(([label, used, limit]) => (
+              <div className="rounded-[20px] border border-[var(--line)] bg-[var(--surface-soft)] p-4" key={label}>
+                <p className="text-sm text-[var(--muted)]">{label}</p>
+                <p className="mt-2 text-xl font-semibold text-[var(--text)]">
+                  {Number(used || 0)} / {limit === null ? '∞' : limit}
                 </p>
               </div>
-            </section>
-          ) : null}
+            ))}
+          </div>
+        </section>
+      ) : null}
 
-          <section className="lux-panel-soft fade-up rounded-[28px] p-6" style={{ animationDelay: '0.14s' }}>
-            <p className="eyebrow">Regra de acesso</p>
-            <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
-              {hasComplimentaryAccess
-                ? isAdminAccess
-                  ? 'O acesso é vinculado à função administrativa desta conta.'
-                  : isTrialAccess
-                    ? isStoreApp
-                      ? `O teste termina em ${formatShortDate(subscription?.trial?.ends_at)}. Depois dessa data, o acesso passa a depender de uma assinatura ativa na conta.`
-                      : `O teste termina em ${formatShortDate(subscription?.trial?.ends_at)}. Depois, você poderá escolher Pix mensal ou cartão mensal para assinar.`
-                    : 'O acesso de lançamento é gratuito e não gera cobrança automática.'
-                : 'O usuário pode entrar na conta, ajustar perfil e acompanhar o status da assinatura nesta tela.'}
-            </p>
-          </section>
-        </aside>
-      </div>
+      {!isStoreApp && payment ? (
+        <section className="lux-panel p-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="eyebrow">Checkout Asaas</p>
+              <h2 className="mt-3 text-2xl font-semibold text-[var(--text)]">Pagamento em aberto</h2>
+            </div>
+            <span className="status-pill" data-tone={payment?.payment?.status}>
+              {formatStatusLabel(payment?.payment?.status)}
+            </span>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-[18px] border border-[var(--line)] p-4">
+              <p className="text-xs uppercase tracking-[0.14em] text-[var(--muted)]">Valor</p>
+              <strong className="mt-2 block text-[var(--text)]">{formatCurrency(payment?.payment?.amount)}</strong>
+            </div>
+            <div className="rounded-[18px] border border-[var(--line)] p-4">
+              <p className="text-xs uppercase tracking-[0.14em] text-[var(--muted)]">Formas</p>
+              <strong className="mt-2 block text-[var(--text)]">Pix ou cartão</strong>
+            </div>
+            <div className="rounded-[18px] border border-[var(--line)] p-4">
+              <p className="text-xs uppercase tracking-[0.14em] text-[var(--muted)]">Validade</p>
+              <strong className="mt-2 block text-[var(--text)]">
+                {payment.expirationDate ? formatDateTime(payment.expirationDate) : 'No checkout'}
+              </strong>
+            </div>
+          </div>
+          <div className="mt-5 flex flex-wrap gap-3">
+            {payment.ticketUrl ? (
+              <a className="gold-button w-full sm:w-auto" href={payment.ticketUrl} rel="noreferrer" target="_blank">
+                Continuar na Asaas
+              </a>
+            ) : null}
+            <button
+              className="ghost-button w-full sm:w-auto"
+              disabled={isChecking || !payment?.payment?.external_id}
+              onClick={handleCheck}
+              type="button"
+            >
+              {isChecking ? 'Verificando...' : 'Verificar pagamento'}
+            </button>
+          </div>
+        </section>
+      ) : null}
+
+      {!isStoreApp && subscription?.provider_error ? (
+        <div className="rounded-[22px] border border-[rgba(223,107,107,0.32)] bg-[rgba(159,47,47,0.1)] p-5 text-sm text-[var(--text)]">
+          {subscription.provider_error}
+        </div>
+      ) : null}
     </section>
   );
 }

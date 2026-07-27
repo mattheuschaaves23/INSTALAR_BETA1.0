@@ -1,28 +1,4 @@
-const pool = require('../config/database');
-const { isLaunchAccessEnabled } = require('../utils/subscriptionAccess');
-
-function isSubscriptionActive(subscription) {
-  if (!subscription) {
-    return false;
-  }
-
-  const isExpired = Boolean(subscription.expires_at && new Date(subscription.expires_at) < new Date());
-  return subscription.status === 'active' && !isExpired;
-}
-
-async function isAdmin(userId) {
-  const result = await pool.query(
-    `
-      SELECT is_admin
-      FROM users
-      WHERE id = $1
-      LIMIT 1
-    `,
-    [userId]
-  );
-
-  return Boolean(result.rows[0]?.is_admin);
-}
+const { getInstallerPlanAccess } = require('../services/planAccess');
 
 module.exports = async (req, res, next) => {
   try {
@@ -35,31 +11,9 @@ module.exports = async (req, res, next) => {
       });
     }
 
-    if (await isAdmin(req.userId)) {
-      return next();
-    }
-
-    if (isLaunchAccessEnabled()) {
-      req.subscriptionAccessMode = 'launch';
-      return next();
-    }
-
-    const subscriptionResult = await pool.query(
-      `
-        SELECT *
-        FROM subscriptions
-        WHERE user_id = $1
-        ORDER BY created_at DESC
-        LIMIT 1
-      `,
-      [req.userId]
-    );
-
-    if (isSubscriptionActive(subscriptionResult.rows[0] || null)) {
-      return next();
-    }
-
-    return res.status(403).json({ error: 'Assinatura inativa.', code: 'SUBSCRIPTION_INACTIVE' });
+    req.planAccess = await getInstallerPlanAccess(req.userId);
+    req.subscriptionAccessMode = req.planAccess.access_mode;
+    return next();
   } catch (_error) {
     return res.status(500).json({ error: 'Erro ao validar assinatura.' });
   }

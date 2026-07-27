@@ -2,14 +2,9 @@ const crypto = require('crypto');
 const pool = require('../config/database');
 const { generatePix, getPixConfig } = require('../utils/pix');
 const { logAudit } = require('../utils/auditLog');
-const { isLaunchAccessEnabled } = require('../utils/subscriptionAccess');
+const { getInstallerPlanAccess } = require('../services/planAccess');
 const {
-  getSubscriptionTrialDays,
-  getTrialDaysRemaining,
-  isActiveTrial,
-  isTrialSubscription,
-} = require('../utils/subscriptionTrial');
-const {
+  cancelRecurringSubscription,
   createRecurringCheckout,
   findOrCreateCustomer,
   findPaymentByCheckoutId,
@@ -55,16 +50,12 @@ function getPublicAppUrl(req) {
 
 function getPlanBenefits() {
   return [
-    'Dashboard completo com métricas comerciais.',
-    'Agenda visual com confirmação de instalação.',
-    'Orçamentos em PDF prontos para enviar ao cliente.',
-    'Perfil público com avaliações e vitrine para clientes.',
-    'Suporte interno com o administrador.',
+    'Interesses, clientes e orçamentos sem limite.',
+    'Orçamentos com vários ambientes e parcelamento.',
+    'PDF profissional com a sua marca.',
+    'Dashboard comercial e avaliações avançadas.',
+    'Personalização completa do aplicativo.',
   ];
-}
-
-function formatTrialDays(count) {
-  return `${count} ${count === 1 ? 'dia' : 'dias'}`;
 }
 
 function isManualConfirmationEnabled() {
@@ -76,17 +67,6 @@ function getPaymentMode(complimentaryAccess = false) {
   if (isAsaasConfigured()) return 'asaas';
   if (isManualConfirmationEnabled()) return 'manual';
   return 'disabled';
-}
-
-function getSubscriptionAccessState(subscription) {
-  const isExpired = Boolean(subscription?.expires_at && new Date(subscription.expires_at) < new Date());
-  const canUseApp = Boolean(subscription && subscription.status === 'active' && !isExpired);
-
-  return {
-    canUseApp,
-    isExpired,
-    requiresPayment: !canUseApp,
-  };
 }
 
 function getProviderPayload(payment) {
@@ -171,15 +151,14 @@ async function getLatestSubscription(userId, db = pool) {
 async function ensureSubscription(userId, db = pool) {
   const existing = await getLatestSubscription(userId, db);
   if (existing) return existing;
-  const trialDays = getSubscriptionTrialDays();
 
   const created = await db.query(
     `
       INSERT INTO subscriptions (user_id, plan, status, expires_at)
-      VALUES ($1, 'trial', 'active', NOW() + ($2::int * INTERVAL '1 day'))
+      VALUES ($1, 'free', 'active', NULL)
       RETURNING *
     `,
-    [userId, trialDays]
+    [userId]
   );
 
   return created.rows[0];
@@ -346,7 +325,7 @@ async function activateSubscription(paymentId, req, paymentData = null) {
       `
         UPDATE subscriptions
         SET
-          plan = 'monthly',
+          plan = 'pro',
           status = 'active',
           expires_at = GREATEST(COALESCE(expires_at, NOW()), NOW()) + INTERVAL '1 month',
           updated_at = NOW()
@@ -455,13 +434,15 @@ async function applyPaymentReversal(localPayment, providerPayment, req, nextStat
             UPDATE subscriptions
             SET
               expires_at = CASE
-                WHEN expires_at IS NULL THEN NOW()
-                ELSE GREATEST(NOW(), expires_at - INTERVAL '1 month')
-              END,
-              status = CASE
                 WHEN expires_at IS NULL OR expires_at - INTERVAL '1 month' <= NOW()
-                  THEN 'inactive'
-                ELSE 'active'
+                  THEN NULL
+                ELSE expires_at - INTERVAL '1 month'
+              END,
+              status = 'active',
+              plan = CASE
+                WHEN expires_at IS NULL OR expires_at - INTERVAL '1 month' <= NOW()
+                  THEN 'free'
+                ELSE plan
               END,
               updated_at = NOW()
             WHERE id = $1
@@ -689,51 +670,55 @@ async function markWebhookEventProcessed(eventId) {
 exports.getSubscription = async (req, res) => {
   try {
     const pendingPayment = await getPendingPayment(req.userId);
-    const subscription = await getLatestSubscription(req.userId);
-    const accessState = getSubscriptionAccessState(subscription);
-    const launchAccess = isLaunchAccessEnabled();
+    const planAccess = await getInstallerPlanAccess(req.userId);
+    const subscription = await ensureSubscription(req.userId);
     const adminAccess = Boolean(req.user?.is_admin);
-    const trialAccess = isActiveTrial(subscription);
-    const complimentaryAccess = launchAccess || adminAccess || trialAccess;
+    const complimentaryAccess = adminAccess;
     const paymentMode = getPaymentMode(complimentaryAccess);
 
     return res.json({
-      ...(subscription || { status: 'inactive', plan: 'monthly' }),
-      can_use_app: accessState.canUseApp || complimentaryAccess,
-      is_expired: accessState.isExpired,
-      requires_payment: accessState.requiresPayment && !complimentaryAccess,
-      access_mode: adminAccess
-        ? 'admin'
-        : trialAccess
-          ? 'trial'
-          : launchAccess && !accessState.canUseApp
-            ? 'launch'
-            : 'subscription',
-      trial: {
-        active: trialAccess,
-        days_total: getSubscriptionTrialDays(),
-        days_remaining: getTrialDaysRemaining(subscription),
-        ends_at: isTrialSubscription(subscription) ? subscription.expires_at : null,
-      },
+      ...subscription,
+      plan: planAccess.plan,
+      status: 'active',
+      can_use_app: true,
+      can_use_premium: planAccess.can_use_premium,
+      is_expired: false,
+      requires_payment: false,
+      access_mode: planAccess.access_mode,
       pricing: {
         amount: SUBSCRIPTION_AMOUNT,
         currency: 'BRL',
         period: 'mês',
-        label: 'Plano instalador',
+        label: 'InstalaPro Pro',
       },
       plan_benefits: getPlanBenefits(),
+      plan_access: planAccess,
+      limits: planAccess.limits,
+      usage: planAccess.usage,
+      remaining: planAccess.remaining,
+      features: planAccess.features,
+      plans: {
+        free: {
+          label: 'InstalaPro Grátis',
+          price: 0,
+          description: 'Use as ferramentas essenciais sem prazo para acabar.',
+        },
+        pro: {
+          label: 'InstalaPro Pro',
+          price: SUBSCRIPTION_AMOUNT,
+          description: 'Recursos avançados e uso sem limites.',
+        },
+      },
       payment_mode: paymentMode,
       provider_error: paymentMode === 'disabled'
         ? 'O provedor de pagamento ainda não possui credenciais de produção.'
         : null,
       payment_notice: adminAccess
         ? 'Acesso administrativo liberado sem cobrança.'
-        : trialAccess
-          ? `Teste grátis ativo por mais ${formatTrialDays(getTrialDaysRemaining(subscription))}. Nenhuma cobrança será feita durante esse período.`
-          : launchAccess
-            ? 'Acesso de lançamento liberado sem cobrança.'
+        : planAccess.is_pro
+              ? 'Seu plano Pro está ativo.'
             : paymentMode === 'asaas'
-              ? 'Assinatura mensal por Pix ou cartão processada com segurança pela Asaas.'
+              ? 'O plano Grátis não expira. Quando quiser, assine o Pro por Pix ou cartão mensal com segurança pela Asaas.'
               : paymentMode === 'manual'
                 ? 'Pagamento manual habilitado apenas para desenvolvimento.'
                 : 'Pagamento indisponível até a configuração das credenciais da Asaas.',
@@ -800,7 +785,16 @@ exports.createPayment = async (req, res) => {
       return res.json(serializeStoredPayment(pendingPayment));
     }
 
+    const planAccess = await getInstallerPlanAccess(req.userId, db, { includeUsage: false });
     const subscription = await ensureSubscription(req.userId, db);
+
+    if (planAccess.is_pro && !req.user?.is_admin) {
+      await db.query('COMMIT');
+      return res.status(409).json({
+        error: 'Seu plano Pro já está ativo.',
+        code: 'SUBSCRIPTION_ALREADY_PRO',
+      });
+    }
 
     if (!useAsaas) {
       localPayment = await createManualPayment(req, subscription, db);
@@ -986,6 +980,61 @@ exports.confirmPayment = async (req, res) => {
     return res.json({ status: updatedPayment.status });
   } catch (_error) {
     return res.status(500).json({ error: 'Erro ao confirmar pagamento.' });
+  }
+};
+
+exports.cancelSubscription = async (req, res) => {
+  try {
+    await getInstallerPlanAccess(req.userId);
+    const subscription = await ensureSubscription(req.userId);
+
+    if (subscription.provider === 'asaas' && subscription.provider_subscription_id) {
+      await cancelRecurringSubscription(subscription.provider_subscription_id);
+    }
+
+    const result = await pool.query(
+      `
+        UPDATE subscriptions
+        SET
+          plan = 'free',
+          status = 'active',
+          expires_at = NULL,
+          provider_subscription_id = NULL,
+          billing_method = NULL,
+          updated_at = NOW()
+        WHERE id = $1
+        RETURNING *
+      `,
+      [subscription.id]
+    );
+
+    await pool.query(
+      `
+        INSERT INTO notifications (user_id, title, message, type, read)
+        VALUES ($1, 'Plano alterado', 'Seu plano voltou para o InstalaPro Grátis. Nenhum dado foi apagado.', 'info', FALSE)
+      `,
+      [req.userId]
+    );
+
+    await logAudit({
+      actorUserId: req.userId,
+      action: 'subscription.downgraded_to_free',
+      entityType: 'subscription',
+      entityId: subscription.id,
+      metadata: { previousPlan: subscription.plan, provider: subscription.provider || null },
+      req,
+    });
+
+    return res.json({
+      subscription: result.rows[0],
+      message: 'Plano Grátis ativado. Seus dados continuam salvos.',
+    });
+  } catch (error) {
+    console.error('Erro ao cancelar assinatura.', error.code || error.message);
+    return res.status(error?.code?.startsWith('ASAAS_') ? 502 : 500).json({
+      error: 'Não foi possível cancelar a recorrência agora. Tente novamente ou fale com o suporte.',
+      code: error.code || 'SUBSCRIPTION_CANCEL_FAILED',
+    });
   }
 };
 

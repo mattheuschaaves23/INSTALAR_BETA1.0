@@ -133,6 +133,9 @@ exports.resolveApplicationError = async (req, res) => {
 };
 
 async function setSubscriptionStatus(userId, status, expiresAt = null, specificSubscriptionId = null, db = pool) {
+  const nextPlan = status === 'active' ? 'pro' : 'free';
+  const nextStatus = 'active';
+  const nextExpiresAt = status === 'active' ? expiresAt : null;
   let targetSubscriptionId = specificSubscriptionId;
 
   if (!targetSubscriptionId) {
@@ -155,13 +158,14 @@ async function setSubscriptionStatus(userId, status, expiresAt = null, specificS
       `
         UPDATE subscriptions
         SET
-          status = $1,
-          expires_at = $2,
+          plan = $1,
+          status = $2,
+          expires_at = $3,
           updated_at = NOW()
-        WHERE id = $3
+        WHERE id = $4
         RETURNING id, user_id, plan, status, expires_at, updated_at
       `,
-      [status, expiresAt, targetSubscriptionId]
+      [nextPlan, nextStatus, nextExpiresAt, targetSubscriptionId]
     );
 
     if (updateResult.rows[0]) {
@@ -172,10 +176,10 @@ async function setSubscriptionStatus(userId, status, expiresAt = null, specificS
   const insertResult = await db.query(
     `
       INSERT INTO subscriptions (user_id, plan, status, expires_at)
-      VALUES ($1, 'monthly', $2, $3)
+      VALUES ($1, $2, $3, $4)
       RETURNING id, user_id, plan, status, expires_at, updated_at
     `,
-    [userId, status, expiresAt]
+    [userId, nextPlan, nextStatus, nextExpiresAt]
   );
 
   return insertResult.rows[0];
@@ -189,6 +193,7 @@ exports.getOverview = async (_req, res) => {
         WITH latest_subscriptions AS (
           SELECT DISTINCT ON (user_id)
             user_id,
+            plan,
             status,
             expires_at
           FROM subscriptions
@@ -221,13 +226,15 @@ exports.getOverview = async (_req, res) => {
           (
             SELECT COUNT(*)::int
             FROM latest_subscriptions
-            WHERE status = 'active'
+            WHERE LOWER(COALESCE(plan, '')) IN ('pro', 'monthly')
+              AND status = 'active'
               AND (expires_at IS NULL OR expires_at > NOW())
           ) AS active_subscriptions,
           (
             SELECT COUNT(*)::int
             FROM latest_subscriptions
-            WHERE status <> 'active'
+            WHERE LOWER(COALESCE(plan, '')) NOT IN ('pro', 'monthly')
+              OR status <> 'active'
               OR (expires_at IS NOT NULL AND expires_at <= NOW())
           ) AS inactive_subscriptions,
           (SELECT COUNT(*)::int FROM payments WHERE status = 'pending') AS pending_payments,
@@ -266,6 +273,7 @@ exports.getOverview = async (_req, res) => {
         WITH latest_subscriptions AS (
           SELECT DISTINCT ON (user_id)
             user_id,
+            plan,
             status,
             expires_at
           FROM subscriptions
@@ -282,7 +290,14 @@ exports.getOverview = async (_req, res) => {
           u.certification_verified,
           u.certificate_file,
           (u.certificate_file IS NOT NULL AND LENGTH(TRIM(u.certificate_file)) > 0) AS has_certificate,
-          COALESCE(ls.status, 'inactive') AS subscription_status,
+          CASE
+            WHEN LOWER(COALESCE(ls.plan, '')) IN ('pro', 'monthly')
+              AND ls.status = 'active'
+              AND (ls.expires_at IS NULL OR ls.expires_at > NOW())
+            THEN 'active'
+            ELSE 'inactive'
+          END AS subscription_status,
+          COALESCE(ls.plan, 'free') AS subscription_plan,
           ls.expires_at
         FROM users u
         LEFT JOIN latest_subscriptions ls ON ls.user_id = u.id
@@ -371,6 +386,7 @@ exports.listUsers = async (req, res) => {
         WITH latest_subscriptions AS (
           SELECT DISTINCT ON (user_id)
             user_id,
+            plan,
             status,
             expires_at
           FROM subscriptions
@@ -401,13 +417,15 @@ exports.listUsers = async (req, res) => {
           u.created_at,
           u.deleted_at,
           CASE
-            WHEN COALESCE(ls.status, 'inactive') = 'active'
+            WHEN LOWER(COALESCE(ls.plan, '')) IN ('pro', 'monthly')
+              AND COALESCE(ls.status, 'inactive') = 'active'
               AND (ls.expires_at IS NULL OR ls.expires_at > NOW())
             THEN 'active'
             WHEN COALESCE(ls.status, 'inactive') = 'canceled'
             THEN 'canceled'
             ELSE 'inactive'
           END AS subscription_status,
+          COALESCE(ls.plan, 'free') AS subscription_plan,
           ls.expires_at,
           COALESCE(bs.budgets_count, 0)::int AS budgets_count,
           COALESCE(bs.approved_count, 0)::int AS approved_count
@@ -422,13 +440,15 @@ exports.listUsers = async (req, res) => {
             $2 = 'all'
             OR (
               $2 = 'active'
+              AND LOWER(COALESCE(ls.plan, '')) IN ('pro', 'monthly')
               AND COALESCE(ls.status, 'inactive') = 'active'
               AND (ls.expires_at IS NULL OR ls.expires_at > NOW())
             )
             OR (
               $2 = 'inactive'
               AND (
-                COALESCE(ls.status, 'inactive') <> 'active'
+                LOWER(COALESCE(ls.plan, '')) NOT IN ('pro', 'monthly')
+                OR COALESCE(ls.status, 'inactive') <> 'active'
                 OR (ls.expires_at IS NOT NULL AND ls.expires_at <= NOW())
               )
             )
@@ -643,7 +663,9 @@ exports.updateUserSubscription = async (req, res) => {
       [
         targetUserId,
         'Assinatura atualizada pelo administrador',
-        `Seu plano foi atualizado para o status "${status}".`,
+        status === 'active'
+          ? 'Seu plano InstalaPro Pro foi ativado.'
+          : 'Seu plano voltou para o InstalaPro Grátis. Seus dados continuam salvos.',
         status === 'active' ? 'success' : 'warning',
       ]
     );
@@ -1324,8 +1346,8 @@ exports.updatePaymentStatus = async (req, res) => {
           payment.user_id,
           'Pagamento atualizado pelo administrador',
           status === 'failed'
-            ? 'Seu pagamento foi marcado como falho e a assinatura ficou inativa.'
-            : 'Seu pagamento foi cancelado e a assinatura ficou inativa.',
+            ? 'Seu pagamento foi marcado como falho e o plano voltou para o Grátis.'
+            : 'Seu pagamento foi cancelado e o plano voltou para o Grátis.',
         ]
       );
     }

@@ -17,6 +17,7 @@ router.use(auth);
 router.use(requireAccountType('installer'));
 router.get('/', controller.getSubscription);
 router.post('/pay', paymentCreationLimiter, controller.createPayment);
+router.delete('/', controller.cancelSubscription);
 router.get('/payment/:externalId', controller.checkPayment);
 router.post('/payment/:externalId/confirm', controller.confirmPayment);
 

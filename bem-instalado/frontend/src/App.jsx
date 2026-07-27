@@ -42,7 +42,6 @@ const Dashboard = lazy(() => import('./components/Dashboard/Dashboard'));
 const AdminRoute = lazy(() => import('./components/Layout/AdminRoute'));
 const Layout = lazy(() => import('./components/Layout/Layout'));
 const ProtectedRoute = lazy(() => import('./components/Layout/ProtectedRoute'));
-const SubscriptionGate = lazy(() => import('./components/Layout/SubscriptionGate'));
 const Notifications = lazy(() => import('./components/Notifications/Notifications'));
 const Opportunities = lazy(() => import('./components/Opportunities/Opportunities'));
 const Profile = lazy(() => import('./components/Profile/Profile'));
@@ -129,16 +128,14 @@ export default function App() {
                 <Route element={<AdminDashboard />} path="/admin" />
               </Route>
 
-              <Route element={<SubscriptionGate />}>
-                <Route element={<Dashboard />} path="/dashboard" />
-                <Route element={<Opportunities />} path="/opportunities" />
-                <Route element={<Clients />} path="/clients" />
-                <Route element={<Budgets />} path="/budgets" />
-                <Route element={<BudgetForm />} path="/budgets/new" />
-                <Route element={<Agenda />} path="/agenda" />
-                <Route element={<ReviewsDashboard />} path="/reviews" />
-                <Route element={<Notifications />} path="/notifications" />
-              </Route>
+              <Route element={<Dashboard />} path="/dashboard" />
+              <Route element={<Opportunities />} path="/opportunities" />
+              <Route element={<Clients />} path="/clients" />
+              <Route element={<Budgets />} path="/budgets" />
+              <Route element={<BudgetForm />} path="/budgets/new" />
+              <Route element={<Agenda />} path="/agenda" />
+              <Route element={<ReviewsDashboard />} path="/reviews" />
+              <Route element={<Notifications />} path="/notifications" />
             </Route>
           </Route>
           <Route element={<Navigate replace to="/" />} path="*" />

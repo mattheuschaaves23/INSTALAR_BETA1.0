@@ -383,7 +383,7 @@ export default function AdminDashboard() {
 
   const confirmSubscriptionAction = async (targetUser) => {
     const nextStatus = targetUser.subscription_status === 'active' ? 'inactive' : 'active';
-    const actionLabel = nextStatus === 'active' ? 'ativar a assinatura' : 'suspender a assinatura';
+    const actionLabel = nextStatus === 'active' ? 'ativar o plano Pro' : 'voltar para o plano Grátis';
     const confirmed = await confirm(
       `Confirma ${actionLabel} de ${targetUser.name}?`
     );
@@ -1095,7 +1095,7 @@ export default function AdminDashboard() {
                   </div>
 
                     <span className="status-pill" data-tone={item.subscription_status}>
-                      {formatStatusLabel(item.subscription_status)}
+                      {item.subscription_status === 'active' ? 'PRO' : 'GRÁTIS'}
                     </span>
                   </div>
 
@@ -1133,7 +1133,7 @@ export default function AdminDashboard() {
                       onClick={() => confirmSubscriptionAction(item)}
                       type="button"
                     >
-                      {item.subscription_status === 'active' ? 'Suspender assinatura' : 'Ativar assinatura'}
+                      {item.subscription_status === 'active' ? 'Voltar para o Grátis' : 'Ativar plano Pro'}
                     </button> : null}
 
                     {item.account_type === 'installer' ? <button

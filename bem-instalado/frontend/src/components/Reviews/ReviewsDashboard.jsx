@@ -4,6 +4,8 @@ import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { formatShortDate } from '../../utils/formatters';
 import DecoratingWallLoader from '../Layout/DecoratingWallLoader';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import { ProFeatureNotice } from '../Subscription/PlanUsage';
 
 const ratingFilters = ['all', 5, 4, 3, 2, 1];
 const REVIEWS_REFRESH_INTERVAL = 30000;
@@ -90,6 +92,7 @@ function ReviewsLoadingState() {
 }
 
 export default function ReviewsDashboard() {
+  const { isPro } = useSubscription();
   const isReviewsMountedRef = useRef(false);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -200,7 +203,7 @@ export default function ReviewsDashboard() {
       detail: `${summary.commented_count || 0} relatos escritos`,
       icon: 'message',
     },
-  ];
+  ].slice(0, isPro ? 4 : 1);
 
   return (
     <section className="reviews-dashboard-shell">
@@ -249,7 +252,7 @@ export default function ReviewsDashboard() {
         ))}
       </div>
 
-      <div className="reviews-dashboard-grid">
+      {isPro ? <div className="reviews-dashboard-grid">
         <article className="reviews-dashboard-panel fade-up" style={{ animationDelay: '0.1s' }}>
           <div className="reviews-dashboard-panel-head">
             <div>
@@ -295,7 +298,11 @@ export default function ReviewsDashboard() {
             ))}
           </div>
         </article>
-      </div>
+      </div> : (
+        <ProFeatureNotice className="fade-up" title="Análises avançadas">
+          O plano Pro libera evolução dos últimos 6 meses, comparação mensal, distribuição de notas e estatísticas de comentários.
+        </ProFeatureNotice>
+      )}
 
       <article className="reviews-dashboard-panel reviews-dashboard-list-panel fade-up" style={{ animationDelay: '0.18s' }}>
         <div className="reviews-dashboard-panel-head reviews-dashboard-list-head">
@@ -303,7 +310,7 @@ export default function ReviewsDashboard() {
             <p>Histórico</p>
             <h2>Avaliações recentes</h2>
           </div>
-          <div className="reviews-filter-tabs" aria-label="Filtrar por nota">
+          {isPro ? <div className="reviews-filter-tabs" aria-label="Filtrar por nota">
             {ratingFilters.map((item) => (
               <button
                 className={filterRating === item ? 'is-active' : ''}
@@ -314,7 +321,7 @@ export default function ReviewsDashboard() {
                 {item === 'all' ? 'Todas' : `${item}/5`}
               </button>
             ))}
-          </div>
+          </div> : null}
         </div>
 
         {filteredReviews.length ? (

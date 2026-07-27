@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { formatCurrency } from '../../utils/formatters';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import PlanUsage, { ProFeatureNotice } from '../Subscription/PlanUsage';
 
 const rollArea = 4.5;
 const INSTALLMENT_OPTIONS = Array.from({ length: 11 }, (_, index) => index + 2);
@@ -116,6 +118,7 @@ function createStepState(isDone, isActive) {
 
 export default function BudgetForm() {
   const navigate = useNavigate();
+  const { isPro, refreshSubscription } = useSubscription();
   const [clients, setClients] = useState([]);
   const [clientId, setClientId] = useState('');
   const [pricingMode, setPricingMode] = useState('roll');
@@ -184,8 +187,19 @@ export default function BudgetForm() {
   };
 
   const addEnvironment = () => {
+    if (!isPro) {
+      toast('Vários ambientes no mesmo orçamento estão disponíveis no plano Pro.');
+      return;
+    }
     setEnvironments((current) => [...current, createEnvironment(defaultRemovalPrice)]);
   };
+
+  useEffect(() => {
+    if (!isPro) {
+      setEnvironments((current) => current.slice(0, 1));
+      setInstallmentEnabled(false);
+    }
+  }, [isPro]);
 
   const removeEnvironment = (index) => {
     setEnvironments((current) => current.filter((_, currentIndex) => currentIndex !== index));
@@ -339,6 +353,7 @@ export default function BudgetForm() {
         })),
       });
 
+      await refreshSubscription();
       toast.success('Orçamento criado.');
       navigate('/budgets');
     } catch (error) {
@@ -364,6 +379,8 @@ export default function BudgetForm() {
             <span>Salvar orçamento</span>
           </button>
         </header>
+
+        <PlanUsage className="fade-up" usageKey="monthly_budgets" />
 
         <section className="budget-modern-stepper fade-up" style={{ animationDelay: '0.04s' }}>
           {steps.map((step, index) => (
@@ -401,7 +418,7 @@ export default function BudgetForm() {
 
                   <button className="budget-modern-inline-button" onClick={addEnvironment} type="button">
                     <BudgetIcon type="add" />
-                    Adicionar ambiente
+                    {isPro ? 'Adicionar ambiente' : 'Vários ambientes • Pro'}
                   </button>
                 </div>
 
@@ -649,10 +666,11 @@ export default function BudgetForm() {
                   <label className="budget-modern-toggle">
                     <input
                       checked={installmentEnabled}
+                      disabled={!isPro}
                       onChange={(event) => setInstallmentEnabled(event.target.checked)}
                       type="checkbox"
                     />
-                    <span>Permitir pagamento parcelado</span>
+                    <span>{isPro ? 'Permitir pagamento parcelado' : 'Pagamento parcelado • Pro'}</span>
                   </label>
 
                   {installmentEnabled ? (
@@ -671,6 +689,11 @@ export default function BudgetForm() {
                     </label>
                   ) : null}
                 </div>
+                {!isPro ? (
+                  <ProFeatureNotice className="mt-4" title="Orçamento profissional">
+                    No Pro, cada proposta pode ter vários ambientes, parcelamento em até 12x e PDF com a sua marca.
+                  </ProFeatureNotice>
+                ) : null}
               </div>
 
               <div className="budget-modern-section">

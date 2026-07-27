@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import toast from 'react-hot-toast';
 import PageIntro from '../Layout/PageIntro';
@@ -7,10 +7,13 @@ import { useConfirm } from '../../contexts/ConfirmContext';
 import api from '../../services/api';
 import {
   ACCENT_PRESETS,
+  DEFAULT_SITE_PREFERENCES,
   readSitePreferences,
   resetSitePreferences,
   saveSitePreferences,
 } from '../../utils/sitePreferences';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import { ProFeatureNotice } from '../Subscription/PlanUsage';
 
 const densityOptions = [
   { value: 'comfortable', label: 'Espaçosa', detail: 'Mais respiro' },
@@ -86,6 +89,7 @@ function PreferenceSegment({ label, options, value, onChange }) {
 
 export default function Settings() {
   const { user, logout } = useAuth();
+  const { isPro, loading: planLoading, subscription } = useSubscription();
   const confirm = useConfirm();
   const [preferences, setPreferences] = useState(() => readSitePreferences());
   const [savedAt, setSavedAt] = useState(() => new Date());
@@ -99,6 +103,14 @@ export default function Settings() {
   const firstName = user?.name?.split(' ')[0] || 'usuário';
 
   const savePreference = (patch) => {
+    if (subscription && !isPro && (
+      (patch.accentColor && patch.accentColor !== DEFAULT_SITE_PREFERENCES.accentColor)
+      || patch.density === 'compact'
+    )) {
+      toast('Cores personalizadas e modo compacto estão disponíveis no plano Pro.');
+      return;
+    }
+
     setPreferences((currentPreferences) => {
       const nextPreferences = saveSitePreferences({ ...currentPreferences, ...patch });
       setSavedAt(new Date());
@@ -112,6 +124,20 @@ export default function Settings() {
     setSavedAt(new Date());
     toast.success('Configurações restauradas.');
   };
+
+  useEffect(() => {
+    if (!planLoading && subscription && !isPro && (
+      preferences.accentColor !== DEFAULT_SITE_PREFERENCES.accentColor
+      || preferences.density === 'compact'
+    )) {
+      const nextPreferences = saveSitePreferences({
+        ...preferences,
+        accentColor: DEFAULT_SITE_PREFERENCES.accentColor,
+        density: 'comfortable',
+      });
+      setPreferences(nextPreferences);
+    }
+  }, [isPro, planLoading, preferences, subscription]);
 
   const handleDeleteAccount = async (event) => {
     event.preventDefault();
@@ -199,6 +225,7 @@ export default function Settings() {
                 className={preferences.accentColor === preset.value ? 'is-selected' : ''}
                 key={preset.value}
                 onClick={() => savePreference({ accentColor: preset.value })}
+                disabled={!isPro && preset.value !== DEFAULT_SITE_PREFERENCES.accentColor}
                 style={{ '--swatch-color': preset.value }}
                 type="button"
               >
@@ -213,10 +240,16 @@ export default function Settings() {
             <input
               aria-label="Escolher cor personalizada"
               onChange={(event) => savePreference({ accentColor: event.target.value })}
+              disabled={!isPro}
               type="color"
               value={preferences.accentColor}
             />
           </label>
+          {!isPro ? (
+            <ProFeatureNotice className="mt-4" title="Personalização Pro">
+              No plano Grátis, o dourado padrão mantém a identidade do InstalaPro. O Pro libera todas as cores.
+            </ProFeatureNotice>
+          ) : null}
 
           <div className="settings-live-preview">
             <div>
@@ -247,7 +280,7 @@ export default function Settings() {
           <PreferenceSegment
             label="Espaçamento"
             onChange={(value) => savePreference({ density: value })}
-            options={densityOptions}
+            options={isPro ? densityOptions : densityOptions.slice(0, 1)}
             value={preferences.density}
           />
 

@@ -7,7 +7,6 @@ const { generateSecret, verifyToken, generateQrCode } = require('../utils/totp')
 const { logAudit } = require('../utils/auditLog');
 const { normalizeEmail } = require('../utils/adminAccess');
 const { isEmailEnabled, sendPasswordResetEmail } = require('../services/email');
-const { getSubscriptionTrialDays } = require('../utils/subscriptionTrial');
 
 const REGISTER_PLAN_PRICE = Number(process.env.SUBSCRIPTION_PRICE || 49.9);
 const PASSWORD_RESET_EXPIRATION_MINUTES = Number(process.env.PASSWORD_RESET_EXPIRATION_MINUTES || 30);
@@ -344,19 +343,17 @@ async function fetchSanitizedUserById(userId) {
 }
 
 async function ensureUserSubscription(userId) {
-  const trialDays = getSubscriptionTrialDays();
-
   await pool.query(
     `
       INSERT INTO subscriptions (user_id, plan, status, expires_at)
-      SELECT $1, 'trial', 'active', NOW() + ($2::int * INTERVAL '1 day')
+      SELECT $1, 'free', 'active', NULL
       WHERE NOT EXISTS (
         SELECT 1
         FROM subscriptions
         WHERE user_id = $1
       )
     `,
-    [userId, trialDays]
+    [userId]
   );
 }
 
@@ -556,14 +553,12 @@ async function registerPasswordAccount(req, res, accountType) {
     const user = rows[0];
 
     if (accountType === 'installer') {
-      const trialDays = getSubscriptionTrialDays();
-
       await db.query(
         `
           INSERT INTO subscriptions (user_id, plan, status, expires_at)
-          VALUES ($1, 'trial', 'active', NOW() + ($2::int * INTERVAL '1 day'))
+          VALUES ($1, 'free', 'active', NULL)
         `,
-        [user.id, trialDays]
+        [user.id]
       );
     }
 
@@ -587,7 +582,7 @@ async function registerPasswordAccount(req, res, accountType) {
         subscription_price: REGISTER_PLAN_PRICE,
         currency: 'BRL',
         period: 'mensal',
-        trial_days: getSubscriptionTrialDays(),
+        free_plan: true,
       };
     }
 

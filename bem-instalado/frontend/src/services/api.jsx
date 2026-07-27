@@ -107,7 +107,6 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
-    const message = error.response?.data?.error || '';
     const code = error.response?.data?.code || '';
 
     if (typeof window !== 'undefined') {
@@ -122,14 +121,6 @@ api.interceptors.response.use(
 
       if (status === 403 && code === 'ACCOUNT_TYPE_FORBIDDEN') {
         redirectTo(error.response?.data?.account_type === 'client' ? '/cliente' : '/dashboard');
-      }
-
-      if (
-        status === 403 &&
-        (code === 'SUBSCRIPTION_INACTIVE' || message.toLowerCase().includes('assinatura inativa')) &&
-        window.location.pathname !== '/subscription'
-      ) {
-        redirectTo('/subscription');
       }
     }
 

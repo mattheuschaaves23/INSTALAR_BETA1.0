@@ -39,7 +39,7 @@ Principais recursos:
 - suporte dentro do aplicativo;
 - tema claro ou escuro.
 
-O cadastro inclui um teste grátis de 7 dias. O aplicativo não oferece compras,
+O cadastro inclui um plano Grátis permanente. O aplicativo não oferece compras,
 links de compra ou checkout. A situação de acesso é vinculada à conta do
 profissional.
 

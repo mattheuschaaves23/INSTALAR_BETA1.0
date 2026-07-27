@@ -7,6 +7,11 @@ const { normalizeSearchText } = require('../utils/textSearch');
 const forwardGeocode = require('../utils/forwardGeocode');
 const { validateUploadFile } = require('../utils/uploadValidation');
 const { expireOpenServiceRequests } = require('../utils/serviceRequestLifecycle');
+const {
+  getInstallerPlanAccess,
+  isLimitReached,
+  upgradeRequired,
+} = require('../services/planAccess');
 
 const CURRENT_TERMS_VERSION = '2026-07-22';
 
@@ -664,6 +669,8 @@ exports.getOpportunities = async (req, res) => {
       return res.status(403).json({ error: 'Acesso restrito a instaladores.' });
     }
 
+    const planAccess = req.planAccess || await getInstallerPlanAccess(req.userId);
+
     if (!installer.is_admin && (!installer.city || !installer.state)) {
       return res.status(403).json({
         error: 'Informe cidade e estado no perfil para ver pedidos da sua região.',
@@ -794,21 +801,27 @@ exports.getOpportunities = async (req, res) => {
       opportunities,
       eligibility: {
         can_express_interest: Boolean(
-          installer.is_admin || (installer.certification_verified && installer.public_profile)
+          (installer.is_admin || (installer.certification_verified && installer.public_profile))
+          && !isLimitReached(planAccess, 'monthly_interests')
         ),
         certification_verified: Boolean(installer.certification_verified),
         public_profile: Boolean(installer.public_profile),
-        requirement_code: installer.is_admin || (installer.certification_verified && installer.public_profile)
-          ? null
+        requirement_code: isLimitReached(planAccess, 'monthly_interests')
+          ? 'FREE_INTEREST_LIMIT'
+          : installer.is_admin || (installer.certification_verified && installer.public_profile)
+            ? null
           : !installer.certification_verified
             ? 'CERTIFICATION_REQUIRED'
             : 'PUBLIC_PROFILE_REQUIRED',
-        message: installer.is_admin || (installer.certification_verified && installer.public_profile)
-          ? ''
+        message: isLimitReached(planAccess, 'monthly_interests')
+          ? `Você usou os ${planAccess.limits.monthly_interests} interesses deste mês. No Pro, os interesses são ilimitados.`
+          : installer.is_admin || (installer.certification_verified && installer.public_profile)
+            ? ''
           : !installer.certification_verified
             ? 'Você pode ver pedidos, mas só poderá enviar interesse após a validação do certificado.'
             : 'Você pode ver pedidos, mas precisa publicar o perfil antes de enviar interesse.',
       },
+      plan_access: planAccess,
       stats: {
         open: opportunities.filter((item) => !item.interested_by_me && item.status === 'open').length,
         interested: opportunities.filter((item) => item.my_interest_status === 'interested').length,
@@ -859,6 +872,26 @@ exports.expressInterest = async (req, res) => {
 
     if (!request) {
       return res.status(404).json({ error: 'Oportunidade não encontrada ou já encerrada.' });
+    }
+
+    const existingInterest = await pool.query(
+      `
+        SELECT id
+        FROM service_request_interests
+        WHERE request_id = $1 AND installer_id = $2
+        LIMIT 1
+      `,
+      [requestId, req.userId]
+    );
+    const planAccess = req.planAccess || await getInstallerPlanAccess(req.userId);
+
+    if (!existingInterest.rowCount && isLimitReached(planAccess, 'monthly_interests')) {
+      return upgradeRequired(res, {
+        code: 'FREE_INTEREST_LIMIT',
+        error: `O plano Grátis permite ${planAccess.limits.monthly_interests} novos interesses por mês. Os contatos já conquistados continuam liberados.`,
+        planAccess,
+        feature: 'unlimited_interests',
+      });
     }
 
     if (!installer.is_admin) {

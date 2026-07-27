@@ -7,6 +7,7 @@ import AppErrorBoundary from './components/Layout/AppErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
 import { ConfirmProvider } from './contexts/ConfirmContext';
 import { NotificationProvider } from './contexts/NotificationContext';
+import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import { applyStoredSitePreferences } from './utils/sitePreferences';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -29,10 +30,11 @@ root.render(
   <React.StrictMode>
     <AppErrorBoundary>
       <AuthProvider>
-        <NotificationProvider>
-          <ConfirmProvider>
-            <App />
-            <Toaster
+        <SubscriptionProvider>
+          <NotificationProvider>
+            <ConfirmProvider>
+              <App />
+              <Toaster
               position="top-right"
               toastOptions={{
                 style: {
@@ -43,9 +45,10 @@ root.render(
                   boxShadow: '0 18px 40px rgba(0, 0, 0, 0.3)',
                 },
               }}
-            />
-          </ConfirmProvider>
-        </NotificationProvider>
+              />
+            </ConfirmProvider>
+          </NotificationProvider>
+        </SubscriptionProvider>
       </AuthProvider>
     </AppErrorBoundary>
   </React.StrictMode>

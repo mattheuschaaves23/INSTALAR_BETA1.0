@@ -35,7 +35,7 @@ Com o InstalaPro Instaladores você pode:
 - falar com o suporte pelo aplicativo;
 - escolher fundo claro ou escuro.
 
-O cadastro de instalador inclui 7 dias de teste grátis. Não há compra nem cobrança
+O cadastro de instalador inclui um plano Grátis permanente. Não há compra nem cobrança
 dentro do aplicativo distribuído pela Google Play. O acesso e a situação da conta
 são vinculados ao cadastro do profissional.
 

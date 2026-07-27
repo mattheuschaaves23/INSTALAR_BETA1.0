@@ -15,6 +15,11 @@ const {
 const forwardGeocode = require('../utils/forwardGeocode');
 const { buildAvailableDates, normalizeInstallationDays } = require('../utils/installerAvailability');
 const { validateUploadFile } = require('../utils/uploadValidation');
+const {
+  getInstallerPlanAccess,
+  isLimitReached,
+  upgradeRequired,
+} = require('../services/planAccess');
 
 function normalizeStringList(values, maxItems = 8) {
   if (!Array.isArray(values)) {
@@ -529,6 +534,22 @@ exports.updateProfile = async (req, res) => {
 
     const normalizedDays = normalizeInstallationDays(installation_days);
     const normalizedGallery = normalizeGallery(installation_gallery);
+    const planAccess = await getInstallerPlanAccess(req.userId);
+    const galleryLimit = planAccess.limits.portfolio_photos;
+
+    if (
+      Array.isArray(installation_gallery)
+      && galleryLimit !== null
+      && normalizedGallery.length > galleryLimit
+      && normalizedGallery.length > Number(planAccess.usage.portfolio_photos || 0)
+    ) {
+      return upgradeRequired(res, {
+        code: 'FREE_PORTFOLIO_LIMIT',
+        error: `O plano Grátis permite até ${galleryLimit} fotos no portfólio. No Pro, você pode publicar até 10.`,
+        planAccess,
+        feature: 'expanded_portfolio',
+      });
+    }
     const normalizedRadius = service_radius_km === undefined
       ? null
       : Math.min(Math.max(Number(service_radius_km) || 80, 10), 250);
@@ -827,6 +848,16 @@ exports.createAvailabilitySlot = async (req, res) => {
       return res.status(409).json({ error: 'Esse intervalo já está ocupado por um agendamento.' });
     }
 
+    const planAccess = await getInstallerPlanAccess(req.userId);
+    if (isLimitReached(planAccess, 'availability_slots')) {
+      return upgradeRequired(res, {
+        code: 'FREE_AVAILABILITY_LIMIT',
+        error: `O plano Grátis permite até ${planAccess.limits.availability_slots} horários futuros. Exclua um horário ou assine o Pro para adicionar sem limite.`,
+        planAccess,
+        feature: 'unlimited_availability',
+      });
+    }
+
     const { rows } = await pool.query(
       `
         INSERT INTO installer_availability_slots (
@@ -880,6 +911,7 @@ exports.deleteAvailabilitySlot = async (req, res) => {
 
 exports.getDashboard = async (req, res) => {
   try {
+    const planAccess = await getInstallerPlanAccess(req.userId);
     const [profileResult, budgetResult, scheduleResult, reviewResult, rankingResult, topInstallers] =
       await Promise.all([
         pool.query(
@@ -1068,8 +1100,9 @@ exports.getDashboard = async (req, res) => {
         public_profile: profile.public_profile,
       },
       metrics,
-      motivation: buildMotivationalNotes(metrics),
-      ranking: topInstallers,
+      motivation: planAccess.is_pro ? buildMotivationalNotes(metrics) : [],
+      ranking: planAccess.is_pro ? topInstallers : [],
+      plan_access: planAccess,
     });
   } catch (_error) {
     return res.status(500).json({ error: 'Erro ao montar o dashboard.' });
@@ -1102,6 +1135,7 @@ exports.getReviewsSummary = async (req, res) => {
 
 exports.getReviewsDashboard = async (req, res) => {
   try {
+    const planAccess = await getInstallerPlanAccess(req.userId);
     const [profileResult, summaryResult, distributionResult, monthlyResult, reviewsResult] = await Promise.all([
       pool.query(
         `
@@ -1210,33 +1244,37 @@ exports.getReviewsDashboard = async (req, res) => {
       summary: {
         review_count: reviewCount,
         average_rating: Number(rawSummary.average_rating || 0),
-        current_month_count: currentMonthCount,
-        previous_month_count: previousMonthCount,
-        recent_3_count: Number(rawSummary.recent_3_count || 0),
-        commented_count: commentedCount,
-        comment_rate: reviewCount > 0 ? Math.round((commentedCount / reviewCount) * 100) : 0,
-        monthly_delta:
+        current_month_count: planAccess.is_pro ? currentMonthCount : null,
+        previous_month_count: planAccess.is_pro ? previousMonthCount : null,
+        recent_3_count: planAccess.is_pro ? Number(rawSummary.recent_3_count || 0) : null,
+        commented_count: planAccess.is_pro ? commentedCount : null,
+        comment_rate: planAccess.is_pro && reviewCount > 0 ? Math.round((commentedCount / reviewCount) * 100) : null,
+        monthly_delta: planAccess.is_pro
+          ? (
           previousMonthCount > 0
             ? Math.round(((currentMonthCount - previousMonthCount) / previousMonthCount) * 100)
             : currentMonthCount > 0
               ? 100
-              : 0,
+              : 0
+          )
+          : null,
         last_review_at: rawSummary.last_review_at,
       },
-      rating_distribution: [5, 4, 3, 2, 1].map((rating) => {
+      rating_distribution: planAccess.is_pro ? [5, 4, 3, 2, 1].map((rating) => {
         const count = distributionByRating.get(rating) || 0;
         return {
           rating,
           review_count: count,
           percentage: reviewCount > 0 ? Math.round((count / reviewCount) * 100) : 0,
         };
-      }),
-      monthly_series: monthlyResult.rows.map((row) => ({
+      }) : [],
+      monthly_series: planAccess.is_pro ? monthlyResult.rows.map((row) => ({
         month: row.month,
         review_count: Number(row.review_count || 0),
         average_rating: Number(row.average_rating || 0),
-      })),
-      reviews: reviewsResult.rows,
+      })) : [],
+      reviews: planAccess.is_pro ? reviewsResult.rows : reviewsResult.rows.slice(0, 10),
+      plan_access: planAccess,
     });
   } catch (_error) {
     return res.status(500).json({ error: 'Erro ao carregar painel de avaliações.' });

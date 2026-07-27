@@ -133,10 +133,10 @@ function canFit(doc, y, heightNeeded) {
   return y + heightNeeded <= doc.page.height - BOTTOM_SAFE_AREA;
 }
 
-function drawMainHeader(doc, budget, user) {
+function drawMainHeader(doc, budget, user, isPro) {
   const pageWidth = doc.page.width;
-  const logo = decodeImage(user.logo);
-  const photo = decodeImage(user.installer_photo);
+  const logo = isPro ? decodeImage(user.logo) : null;
+  const photo = isPro ? decodeImage(user.installer_photo) : null;
 
   doc.save();
   doc.rect(0, 0, pageWidth, HEADER_HEIGHT).fill(COLORS.bg);
@@ -464,7 +464,7 @@ function drawScopeAndSignature(doc, y, width, userName) {
   return scopeHeight + 58;
 }
 
-function drawFooter(doc, pageNumber, pageCount, budgetId, user) {
+function drawFooter(doc, pageNumber, pageCount, budgetId, user, isPro) {
   const footerY = doc.page.height - 44;
 
   doc.save();
@@ -472,7 +472,9 @@ function drawFooter(doc, pageNumber, pageCount, budgetId, user) {
   doc.restore();
 
   const leftText = `InstalaPro • Orçamento #${budgetId}`;
-  const centerText = toText(user?.phone) ? `Contato: ${toText(user.phone)}` : 'Documento gerado automaticamente';
+  const centerText = isPro
+    ? (toText(user?.phone) ? `Contato: ${toText(user.phone)}` : 'Documento gerado automaticamente')
+    : 'Criado gratuitamente com InstalaPro';
   const rightText = `Página ${pageNumber} de ${pageCount}`;
 
   doc.fillColor(COLORS.muted).font('Helvetica').fontSize(8.5).text(leftText, MARGIN, footerY, { width: 220 });
@@ -480,7 +482,7 @@ function drawFooter(doc, pageNumber, pageCount, budgetId, user) {
   doc.text(rightText, doc.page.width - MARGIN - 120, footerY, { width: 120, align: 'right' });
 }
 
-module.exports = function generateBudgetPDF({ budget, client, environments, user }) {
+module.exports = function generateBudgetPDF({ budget, client, environments, user, isPro = false }) {
   return new Promise((resolve, reject) => {
     const tempDir = path.join(__dirname, '..', 'temp');
     if (!fs.existsSync(tempDir)) {
@@ -492,7 +494,7 @@ module.exports = function generateBudgetPDF({ budget, client, environments, user
     const stream = fs.createWriteStream(filePath);
     doc.pipe(stream);
 
-    drawMainHeader(doc, budget, user);
+    drawMainHeader(doc, budget, user, isPro);
 
     const contentWidth = doc.page.width - MARGIN * 2;
     const gap = 14;
@@ -565,7 +567,7 @@ module.exports = function generateBudgetPDF({ budget, client, environments, user
     const pageRange = doc.bufferedPageRange();
     for (let i = 0; i < pageRange.count; i += 1) {
       doc.switchToPage(i);
-      drawFooter(doc, i + 1, pageRange.count, budget.id, user);
+      drawFooter(doc, i + 1, pageRange.count, budget.id, user, isPro);
     }
 
     doc.end();

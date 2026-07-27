@@ -129,13 +129,13 @@ test('Asaas cria checkout mensal, ativa assinatura e reverte acesso após estorn
       'UPDATE users SET document_id = $2 WHERE id = $1',
       [installerId, '24971563792']
     );
-    const trialSubscription = await pool.query(
+    const freeSubscription = await pool.query(
       'SELECT plan, status, expires_at FROM subscriptions WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
       [installerId]
     );
-    assert.equal(trialSubscription.rows[0].plan, 'trial');
-    assert.equal(trialSubscription.rows[0].status, 'active');
-    assert.ok(trialSubscription.rows[0].expires_at);
+    assert.equal(freeSubscription.rows[0].plan, 'free');
+    assert.equal(freeSubscription.rows[0].status, 'active');
+    assert.equal(freeSubscription.rows[0].expires_at, null);
 
     const payment = await requestJson(realFetch, baseUrl, '/api/subscriptions/pay', {
       method: 'POST',
@@ -164,7 +164,7 @@ test('Asaas cria checkout mensal, ativa assinatura e reverte acesso após estorn
       'SELECT plan, status, expires_at, provider, provider_subscription_id, billing_method FROM subscriptions WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
       [installerId]
     );
-    assert.equal(activeSubscription.rows[0].plan, 'monthly');
+    assert.equal(activeSubscription.rows[0].plan, 'pro');
     assert.equal(activeSubscription.rows[0].status, 'active');
     assert.ok(activeSubscription.rows[0].expires_at);
     assert.equal(activeSubscription.rows[0].provider, 'asaas');
@@ -189,12 +189,9 @@ test('Asaas cria checkout mensal, ativa assinatura e reverte acesso após estorn
       'SELECT plan, status, expires_at FROM subscriptions WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
       [installerId]
     );
-    assert.equal(reversedSubscription.rows[0].plan, 'trial');
+    assert.equal(reversedSubscription.rows[0].plan, 'free');
     assert.equal(reversedSubscription.rows[0].status, 'active');
-    assert.equal(
-      new Date(reversedSubscription.rows[0].expires_at).getTime(),
-      new Date(trialSubscription.rows[0].expires_at).getTime()
-    );
+    assert.equal(reversedSubscription.rows[0].expires_at, null);
 
     const duplicateWebhook = await requestJson(realFetch, baseUrl, '/api/subscriptions/webhooks/asaas', {
       method: 'POST',

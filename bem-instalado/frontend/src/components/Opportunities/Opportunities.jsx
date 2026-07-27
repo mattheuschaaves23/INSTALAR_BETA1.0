@@ -4,6 +4,8 @@ import toast from 'react-hot-toast';
 import api from '../../services/api';
 import PageIntro from '../Layout/PageIntro';
 import { notifyPanelBadgeCountsChanged } from '../Layout/panelBadgeCounts';
+import PlanUsage from '../Subscription/PlanUsage';
+import { useSubscription } from '../../contexts/SubscriptionContext';
 
 const FILTERS = [
   { value: 'open', label: 'Novas' },
@@ -66,6 +68,7 @@ function getSummaryItems(item) {
 }
 
 export default function Opportunities() {
+  const { refreshSubscription } = useSubscription();
   const [filter, setFilter] = useState('open');
   const [opportunities, setOpportunities] = useState([]);
   const [stats, setStats] = useState({ open: 0, interested: 0, selected: 0, matched: 0 });
@@ -128,6 +131,7 @@ export default function Opportunities() {
           interested: wasOpen ? Number(current.interested || 0) + 1 : Number(current.interested || 0),
         }));
         notifyPanelBadgeCountsChanged();
+        await refreshSubscription();
       }
 
       toast.success('Interesse enviado. O cliente vai escolher com quem quer falar.');
@@ -153,6 +157,8 @@ export default function Opportunities() {
         stats={pageStats}
       />
 
+      <PlanUsage className="mb-5" usageKey="monthly_interests" />
+
       <section className="opportunity-toolbar">
         <div className="opportunity-filter-tabs" role="group" aria-label="Filtrar oportunidades">
           {FILTERS.map((item) => (
@@ -174,7 +180,12 @@ export default function Opportunities() {
             <strong>Pedidos visíveis; envio de interesse pendente.</strong>
             <span>{eligibility.message}</span>
           </div>
-          <Link className="ghost-button" to="/profile">Revisar perfil</Link>
+          <Link
+            className="ghost-button"
+            to={eligibility.requirement_code === 'FREE_INTEREST_LIMIT' ? '/subscription' : '/profile'}
+          >
+            {eligibility.requirement_code === 'FREE_INTEREST_LIMIT' ? 'Conhecer o Pro' : 'Revisar perfil'}
+          </Link>
         </div>
       ) : null}
 
@@ -272,7 +283,12 @@ export default function Opportunities() {
                         {sendingInterestId === opportunity.id ? 'Enviando...' : 'Tenho interesse'}
                       </button>
                     ) : (
-                      <Link className="ghost-button" to="/profile">Concluir verificação</Link>
+                      <Link
+                        className="ghost-button"
+                        to={eligibility.requirement_code === 'FREE_INTEREST_LIMIT' ? '/subscription' : '/profile'}
+                      >
+                        {eligibility.requirement_code === 'FREE_INTEREST_LIMIT' ? 'Conhecer o Pro' : 'Concluir verificação'}
+                      </Link>
                     )
                   )}
                 </div>

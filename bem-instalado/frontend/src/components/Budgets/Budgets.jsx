@@ -6,6 +6,7 @@ import PageIntro from '../Layout/PageIntro';
 import PaginationControls from '../Layout/PaginationControls';
 import { notifyPanelBadgeCountsChanged } from '../Layout/panelBadgeCounts';
 import { formatCurrency, formatDateTime, formatStatusLabel } from '../../utils/formatters';
+import PlanUsage from '../Subscription/PlanUsage';
 
 const BUDGETS_PER_PAGE = 6;
 
@@ -154,6 +155,8 @@ export default function Budgets() {
         ]}
         title="Acompanhe seus orçamentos."
       />
+
+      <PlanUsage usageKey="monthly_budgets" />
 
       <div className="grid gap-4">
         <div className="list-surface lux-panel fade-up min-w-0 overflow-hidden">

@@ -2,6 +2,11 @@
 const pool = require('../config/database');
 const generateBudgetPDF = require('../utils/generatePDF');
 const generateWhatsAppLink = require('../utils/whatsapp');
+const {
+  getInstallerPlanAccess,
+  isLimitReached,
+  upgradeRequired,
+} = require('../services/planAccess');
 
 const ROLL_AREA = 4.5;
 
@@ -144,6 +149,36 @@ exports.createBudget = async (req, res) => {
 
     if (!Array.isArray(environments) || environments.length === 0) {
       return res.status(400).json({ error: 'Cliente e ambientes são obrigatórios.' });
+    }
+
+    const planAccess = req.planAccess || await getInstallerPlanAccess(req.userId, db);
+
+    if (isLimitReached(planAccess, 'monthly_budgets')) {
+      return upgradeRequired(res, {
+        code: 'FREE_BUDGET_LIMIT',
+        error: `O plano Grátis permite ${planAccess.limits.monthly_budgets} novos orçamentos por mês. Seus orçamentos atuais continuam disponíveis.`,
+        planAccess,
+        feature: 'unlimited_budgets',
+      });
+    }
+
+    const environmentLimit = planAccess.limits.environments_per_budget;
+    if (environmentLimit !== null && environments.length > environmentLimit) {
+      return upgradeRequired(res, {
+        code: 'PRO_MULTI_ENVIRONMENT_REQUIRED',
+        error: 'Orçamentos com vários ambientes estão disponíveis no plano Pro.',
+        planAccess,
+        feature: 'multi_environment_budgets',
+      });
+    }
+
+    if (installmentsEnabled && !planAccess.features.installment_budgets) {
+      return upgradeRequired(res, {
+        code: 'PRO_INSTALLMENTS_REQUIRED',
+        error: 'Parcelamento de propostas está disponível no plano Pro.',
+        planAccess,
+        feature: 'installment_budgets',
+      });
     }
 
     if (cleanPricingMode === 'roll' && !isPositiveNumber(cleanPricePerRoll)) {
@@ -626,6 +661,7 @@ exports.rejectBudget = async (req, res) => {
 
 exports.generatePDF = async (req, res) => {
   try {
+    const planAccess = req.planAccess || await getInstallerPlanAccess(req.userId);
     const budgetResult = await pool.query(`SELECT * FROM budgets WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId]);
     const budget = budgetResult.rows[0];
 
@@ -655,6 +691,7 @@ exports.generatePDF = async (req, res) => {
       client: clientResult.rows[0],
       environments: environmentsResult.rows,
       user: userResult.rows[0],
+      isPro: planAccess.is_pro,
     });
 
     return res.download(filePath, `orcamento-${budget.id}.pdf`, async () => {

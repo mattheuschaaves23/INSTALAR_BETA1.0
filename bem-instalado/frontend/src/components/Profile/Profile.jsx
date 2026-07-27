@@ -10,6 +10,8 @@ import {
 } from '../../services/auth';
 import PageIntro from '../Layout/PageIntro';
 import { installationDayOptions, formatInstallationDays } from '../../utils/installerDays';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import PlanUsage from '../Subscription/PlanUsage';
 
 const initialForm = {
   name: '',
@@ -140,6 +142,7 @@ function normalizeProfilePayload(payload) {
 export default function Profile() {
   const confirm = useConfirm();
   const { setUser } = useAuth();
+  const { isPro, planAccess, refreshSubscription } = useSubscription();
   const [form, setForm] = useState(initialForm);
   const [setup, setSetup] = useState(null);
   const [token, setToken] = useState('');
@@ -237,10 +240,11 @@ export default function Profile() {
     }
 
     const currentGallery = Array.isArray(form.installation_gallery) ? form.installation_gallery : [];
-    const remainingSlots = Math.max(0, 10 - currentGallery.length);
+    const galleryLimit = planAccess.limits?.portfolio_photos ?? 10;
+    const remainingSlots = Math.max(0, galleryLimit - currentGallery.length);
 
     if (remainingSlots <= 0) {
-      toast.error('Você já atingiu o limite de 10 fotos no portfólio.');
+      toast.error(`Você já atingiu o limite de ${galleryLimit} fotos do seu plano.`);
       return;
     }
 
@@ -276,7 +280,7 @@ export default function Profile() {
 
     setForm((current) => ({
       ...current,
-      installation_gallery: [...(current.installation_gallery || []), ...uploadedItems].slice(0, 10),
+      installation_gallery: [...(current.installation_gallery || []), ...uploadedItems].slice(0, galleryLimit),
     }));
     toast.success(`${uploadedItems.length} foto(s) adicionada(s) ao portfólio.`);
   };
@@ -371,7 +375,7 @@ export default function Profile() {
     try {
       await api.post('/users/availability', slotForm);
       toast.success('Horário vago adicionado.');
-      await loadAvailabilitySlots(availabilityMonth);
+      await Promise.all([loadAvailabilitySlots(availabilityMonth), refreshSubscription()]);
     } catch (error) {
       toast.error(error.response?.data?.error || 'Não foi possível adicionar o horário.');
     } finally {
@@ -395,7 +399,7 @@ export default function Profile() {
     try {
       await api.delete(`/users/availability/${slotId}`);
       toast.success('Horário removido.');
-      await loadAvailabilitySlots(availabilityMonth);
+      await Promise.all([loadAvailabilitySlots(availabilityMonth), refreshSubscription()]);
     } catch (error) {
       toast.error(error.response?.data?.error || 'Não foi possível remover o horário.');
     }
@@ -409,6 +413,7 @@ export default function Profile() {
       const response = await api.put('/users/profile', form);
       setForm(normalizeProfilePayload(response.data));
       setUser((current) => ({ ...current, ...response.data }));
+      await refreshSubscription();
       toast.success('Perfil do instalador atualizado.');
     } catch (error) {
       toast.error(error.response?.data?.error || 'Não foi possível atualizar o perfil.');
@@ -571,7 +576,9 @@ export default function Profile() {
             </label>
 
             <label className="block md:col-span-2">
-              <span className="field-label">Portfólio de instalações (até 10 fotos)</span>
+              <span className="field-label">
+                Portfólio de instalações (até {planAccess.limits?.portfolio_photos ?? 10} fotos)
+              </span>
               <input
                 className="field-input"
                 onChange={(event) => handleGalleryUpload(event.target.files)}
@@ -582,6 +589,7 @@ export default function Profile() {
               <p className="mt-2 text-xs text-[var(--muted)]">
                 Mostre ambientes já instalados para aumentar a confiança do cliente.
               </p>
+              <PlanUsage className="mt-3" compact usageKey="portfolio_photos" />
               <div className="profile-gallery-grid mt-3">
                 {(form.installation_gallery || []).map((photo, index) => (
                   <article
@@ -755,6 +763,7 @@ export default function Profile() {
             </div>
 
             <div className="profile-availability-shell md:col-span-2 rounded-[22px] border border-[var(--line)] bg-[rgba(255,255,255,0.02)] p-5">
+              <PlanUsage className="mb-4" compact usageKey="availability_slots" />
               <div className="flex flex-wrap items-end gap-3">
                 <label className="block">
                   <span className="field-label">Mês dos horários vagos</span>
@@ -806,7 +815,15 @@ export default function Profile() {
                 </label>
               </div>
 
-              <button className="gold-button mt-4" disabled={slotSaving} onClick={createAvailabilitySlot} type="button">
+              <button
+                className="gold-button mt-4"
+                disabled={slotSaving || (
+                  planAccess.limits?.availability_slots !== null
+                  && Number(planAccess.usage?.availability_slots || 0) >= Number(planAccess.limits?.availability_slots || 0)
+                )}
+                onClick={createAvailabilitySlot}
+                type="button"
+              >
                 {slotSaving ? 'Salvando horário...' : 'Adicionar horário vago'}
               </button>
 
@@ -889,9 +906,10 @@ export default function Profile() {
             </label>
 
             <label className="block">
-              <span className="field-label">Meta mensal</span>
+              <span className="field-label">Meta mensal {isPro ? '' : '• Pro'}</span>
               <input
                 className="field-input"
+                disabled={!isPro}
                 name="monthly_goal"
                 onChange={handleChange}
                 type="number"

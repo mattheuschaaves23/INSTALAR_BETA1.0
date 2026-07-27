@@ -98,8 +98,8 @@ CREATE TABLE IF NOT EXISTS environments (
 CREATE TABLE IF NOT EXISTS subscriptions (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  plan VARCHAR(30) NOT NULL DEFAULT 'monthly',
-  status VARCHAR(20) NOT NULL DEFAULT 'inactive',
+  plan VARCHAR(30) NOT NULL DEFAULT 'free',
+  status VARCHAR(20) NOT NULL DEFAULT 'active',
   provider VARCHAR(50),
   provider_subscription_id VARCHAR(120),
   billing_method VARCHAR(30),

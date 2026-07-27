@@ -165,8 +165,8 @@ const installerBenefits = [
   },
   {
     icon: 'chart',
-    title: 'Teste grátis por 7 dias',
-    copy: 'Conheça todas as ferramentas antes de assinar',
+    title: 'Plano Grátis permanente',
+    copy: 'Comece sem cobrança e evolua para o Pro quando precisar',
   },
 ];
 
