@@ -30,6 +30,7 @@ const PANEL_NAV_ITEMS = [
   { to: '/notifications', label: 'Notificações', icon: 'bell', badgeKey: 'notifications' },
   { to: '/settings', label: 'Configurações', icon: 'settings' },
   { to: '/support', label: 'Suporte', icon: 'help' },
+  { to: '/download-app', label: 'Baixar app', icon: 'download', section: 'APLICATIVO', webOnly: true },
 ];
 
 const ADMIN_NAV_ITEM = { to: '/admin', label: 'Painel ADM', icon: 'admin', section: 'SISTEMA' };
@@ -57,6 +58,7 @@ function PanelIcon({ type, size = 20 }) {
     profile: <><circle cx="12" cy="8" r="3.2" /><path d="M5.4 19c1.5-3 4-4.5 6.6-4.5s5.1 1.5 6.6 4.5" /></>,
     opportunities: <><path d="M9 6V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1" /><rect x="4" y="6" width="16" height="14" rx="2.4" /><path d="M4 12h16" /><path d="M9 15.5h6" /></>,
     card: <><rect x="4" y="6.5" width="16" height="11" rx="2" /><path d="M4 10h16" /></>,
+    download: <><path d="M12 3.5v11" /><path d="m7.5 10.8 4.5 4.5 4.5-4.5" /><path d="M5 20.5h14" /></>,
     bell: <><path d="M18 10.8a6 6 0 0 0-12 0c0 5-2 5.7-2 5.7h16s-2-.7-2-5.7" /><path d="M10 20a2.4 2.4 0 0 0 4 0" /></>,
     settings: <><path d="M12 8.4a3.6 3.6 0 1 1 0 7.2 3.6 3.6 0 0 1 0-7.2Z" /><path d="M19.2 13.4a7.9 7.9 0 0 0 0-2.8l2-1.55-2-3.46-2.43.98a7.25 7.25 0 0 0-2.4-1.39L14 2.6h-4l-.37 2.58a7.25 7.25 0 0 0-2.4 1.39L4.8 5.59l-2 3.46 2 1.55a7.9 7.9 0 0 0 0 2.8l-2 1.55 2 3.46 2.43-.98a7.25 7.25 0 0 0 2.4 1.39L10 21.4h4l.37-2.58a7.25 7.25 0 0 0 2.4-1.39l2.43.98 2-3.46z" /></>,
     help: <><circle cx="12" cy="12" r="8.5" /><path d="M9.8 9.4a2.4 2.4 0 1 1 3.6 2.1c-.9.5-1.4 1.1-1.4 2.2" /><path d="M12 17.2h.01" /></>,
@@ -108,7 +110,10 @@ export function SidebarContent({ allowCollapse = false, badgeCounts, collapsed =
   const navigate = useNavigate();
   const { logout, user } = useAuth();
   const canSeeAdmin = !IS_INSTALLER_APP && hasAdminAccess(user);
-  const navItems = useMemo(() => (canSeeAdmin ? [...PANEL_NAV_ITEMS, ADMIN_NAV_ITEM] : PANEL_NAV_ITEMS), [canSeeAdmin]);
+  const navItems = useMemo(() => {
+    const visibleItems = PANEL_NAV_ITEMS.filter((item) => !item.webOnly || !IS_INSTALLER_APP);
+    return canSeeAdmin ? [...visibleItems, ADMIN_NAV_ITEM] : visibleItems;
+  }, [canSeeAdmin]);
 
   const handleLogout = () => {
     logout();
@@ -178,7 +183,10 @@ export default function InstallerPanelShell({ children }) {
   const notificationBadge = badgeCounts.notifications > 0 ? formatPanelBadgeCount(badgeCounts.notifications) : null;
   const canSeeAdmin = !IS_INSTALLER_APP && hasAdminAccess(user);
   const searchableItems = useMemo(
-    () => (canSeeAdmin ? [...PANEL_NAV_ITEMS, ADMIN_NAV_ITEM] : PANEL_NAV_ITEMS),
+    () => {
+      const visibleItems = PANEL_NAV_ITEMS.filter((item) => !item.webOnly || !IS_INSTALLER_APP);
+      return canSeeAdmin ? [...visibleItems, ADMIN_NAV_ITEM] : visibleItems;
+    },
     [canSeeAdmin]
   );
   const mobileDockItems = useMemo(

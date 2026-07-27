@@ -18347,6 +18347,135 @@ body,
   }
 }
 
+.installer-app-page {
+  display: grid;
+  gap: 1.35rem;
+}
+
+.installer-app-page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.installer-app-page-header p {
+  margin: 0 0 0.35rem;
+  color: var(--site-accent);
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.16em;
+}
+
+.installer-app-page-header h1 {
+  margin: 0;
+  color: var(--ref-text);
+  font-size: clamp(1.8rem, 3vw, 2.65rem);
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.installer-app-page-header > div > span {
+  display: block;
+  margin-top: 0.55rem;
+  color: var(--ref-muted);
+  font-size: 0.92rem;
+}
+
+.installer-app-page-status {
+  min-height: 2.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid rgba(35, 216, 137, 0.2);
+  border-radius: 999px;
+  background: rgba(35, 216, 137, 0.07);
+  color: #48dfa1;
+  padding: 0 0.85rem;
+  font-size: 0.73rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.installer-app-page-status i {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #31da93;
+  box-shadow: 0 0 0 0.28rem rgba(49, 218, 147, 0.1);
+}
+
+.installer-app-download--page {
+  min-height: 15.5rem;
+  grid-template-columns: 8rem minmax(0, 1fr) auto;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.installer-app-download--page .installer-app-download-visual {
+  width: 7.4rem;
+  height: 7.4rem;
+}
+
+.installer-app-download--page .installer-app-download-phone {
+  width: 4.05rem;
+  height: 5.9rem;
+  border-radius: 1rem;
+}
+
+.installer-app-download--page .installer-app-download-copy h2 {
+  font-size: clamp(1.55rem, 2.6vw, 2.25rem);
+}
+
+.installer-app-download--page .installer-app-download-copy p {
+  font-size: 0.96rem;
+}
+
+.installer-app-page-notes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.installer-app-page-notes article {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1.1rem;
+  border: 1px solid var(--ref-line-soft);
+  border-radius: 1rem;
+  background: rgba(var(--site-panel-soft-rgb), 0.72);
+}
+
+.installer-app-page-notes article > span {
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(var(--site-accent-rgb), 0.23);
+  border-radius: 0.65rem;
+  background: rgba(var(--site-accent-rgb), 0.08);
+  color: var(--site-accent);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.installer-app-page-notes strong {
+  display: block;
+  color: var(--ref-text);
+  font-size: 0.88rem;
+}
+
+.installer-app-page-notes p {
+  margin: 0.3rem 0 0;
+  color: var(--ref-muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
 .native-update-backdrop {
   position: fixed;
   inset: 0;
@@ -19332,6 +19461,23 @@ body,
     min-height: 3.6rem;
   }
 
+  .installer-app-download--page {
+    min-height: 0;
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 1.15rem;
+  }
+
+  .installer-app-download--page .installer-app-download-visual {
+    width: 4.8rem;
+    height: 4.8rem;
+  }
+
+  .installer-app-download--page .installer-app-download-phone {
+    width: 2.75rem;
+    height: 3.95rem;
+    border-radius: 0.72rem;
+  }
+
   .ref-panel-route-content {
     width: 100vw;
     max-width: 100vw;
@@ -19723,6 +19869,20 @@ body,
 }
 
 @media (max-width: 520px) {
+  .installer-app-page-header {
+    align-items: flex-start;
+  }
+
+  .installer-app-page-status {
+    min-height: 1.9rem;
+    padding: 0 0.65rem;
+    font-size: 0.62rem;
+  }
+
+  .installer-app-page-notes {
+    grid-template-columns: 1fr;
+  }
+
   .installer-app-download-copy p {
     font-size: 0.8rem;
   }
@@ -24231,6 +24391,10 @@ html[data-site-theme='light'] .installer-app-download {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
     0 18px 44px rgba(57, 43, 18, 0.1);
+}
+
+html[data-site-theme='light'] .installer-app-download-copy h2 {
+  color: var(--ref-text);
 }
 
 html[data-site-theme='light'] .installer-app-download-phone,

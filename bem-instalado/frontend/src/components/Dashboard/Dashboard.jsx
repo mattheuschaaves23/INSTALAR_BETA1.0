@@ -29,8 +29,6 @@ const CHART_HEIGHT = 280;
 const CHART_PADDING_X = 18;
 const CHART_PADDING_Y = 24;
 const DASHBOARD_REFRESH_INTERVAL = 30000;
-const INSTALLER_APP_DOWNLOAD_URL = 'https://github.com/mattheuschaaves23/Instalar/releases/latest/download/InstalaPro-Instaladores.apk';
-const INSTALLER_APP_VERSION = '1.0.10';
 const CHART_VIEWS = ['weekly', 'monthly', 'yearly'];
 const CHART_VIEW_LABELS = {
   weekly: 'Semanal',
@@ -202,6 +200,7 @@ const PANEL_NAV_ITEMS = [
   { to: '/notifications', label: 'Notificações', icon: 'bell', badgeKey: 'notifications' },
   { to: '/settings', label: 'Configurações', icon: 'settings' },
   { to: '/support', label: 'Suporte', icon: 'help' },
+  { to: '/download-app', label: 'Baixar app', icon: 'download', section: 'APLICATIVO', webOnly: true },
 ];
 
 const ADMIN_NAV_ITEM = { to: '/admin', label: 'Painel ADM', icon: 'admin', section: 'SISTEMA' };
@@ -229,6 +228,7 @@ function PanelIcon({ type, size = 20 }) {
     opportunities: <><path d="M9 6V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1" /><rect x="4" y="6" width="16" height="14" rx="2.4" /><path d="M4 12h16" /><path d="M9 15.5h6" /></>,
     profile: <><circle cx="12" cy="8" r="3.2" /><path d="M5.4 19c1.5-3 4-4.5 6.6-4.5s5.1 1.5 6.6 4.5" /></>,
     card: <><rect x="4" y="6.5" width="16" height="11" rx="2" /><path d="M4 10h16" /></>,
+    download: <><path d="M12 3.5v11" /><path d="m7.5 10.8 4.5 4.5 4.5-4.5" /><path d="M5 20.5h14" /></>,
     bell: <><path d="M18 10.8a6 6 0 0 0-12 0c0 5-2 5.7-2 5.7h16s-2-.7-2-5.7" /><path d="M10 20a2.4 2.4 0 0 0 4 0" /></>,
     settings: <><path d="M12 8.4a3.6 3.6 0 1 1 0 7.2 3.6 3.6 0 0 1 0-7.2Z" /><path d="M19.2 13.4a7.9 7.9 0 0 0 0-2.8l2-1.55-2-3.46-2.43.98a7.25 7.25 0 0 0-2.4-1.39L14 2.6h-4l-.37 2.58a7.25 7.25 0 0 0-2.4 1.39L4.8 5.59l-2 3.46 2 1.55a7.9 7.9 0 0 0 0 2.8l-2 1.55 2 3.46 2.43-.98a7.25 7.25 0 0 0 2.4 1.39L10 21.4h4l.37-2.58a7.25 7.25 0 0 0 2.4-1.39l2.43.98 2-3.46z" /></>,
     help: <><circle cx="12" cy="12" r="8.5" /><path d="M9.8 9.4a2.4 2.4 0 1 1 3.6 2.1c-.9.5-1.4 1.1-1.4 2.2" /><path d="M12 17.2h.01" /></>,
@@ -245,53 +245,6 @@ function PanelIcon({ type, size = 20 }) {
   };
 
   return <svg {...sharedProps}>{icons[type] || icons.grid}</svg>;
-}
-
-function InstallerAppDownloadCard() {
-  if (IS_INSTALLER_APP) {
-    return null;
-  }
-
-  return (
-    <aside aria-labelledby="installer-app-download-title" className="installer-app-download">
-      <div aria-hidden="true" className="installer-app-download-visual">
-        <span className="installer-app-download-orbit" />
-        <span className="installer-app-download-phone">
-          <i />
-          <svg fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" viewBox="0 0 24 24">
-            <path d="M9 6V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1" />
-            <rect height="14" rx="2.5" width="16" x="4" y="6" />
-            <path d="M4 12h16M9 15.5h6" />
-          </svg>
-        </span>
-      </div>
-
-      <div className="installer-app-download-copy">
-        <span className="installer-app-download-kicker"><i /> Aplicativo do instalador</span>
-        <h2 id="installer-app-download-title">Seu painel também no celular</h2>
-        <p>Acesse oportunidades, agenda, clientes e orçamentos de onde estiver.</p>
-        <div className="installer-app-download-meta">
-          <span>Android 7+</span>
-          <span>Versão {INSTALLER_APP_VERSION}</span>
-        </div>
-      </div>
-
-      <a
-        className="installer-app-download-button"
-        href={INSTALLER_APP_DOWNLOAD_URL}
-        rel="noreferrer"
-        target="_blank"
-      >
-        <svg aria-hidden="true" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.9" viewBox="0 0 24 24">
-          <path d="M12 3v12" />
-          <path d="m7 11 5 5 5-5" />
-          <path d="M5 21h14" />
-        </svg>
-        <span><small>Baixar agora</small><strong>Aplicativo Android</strong></span>
-        <b aria-hidden="true">→</b>
-      </a>
-    </aside>
-  );
 }
 
 function compactCurrency(value) {
@@ -652,7 +605,10 @@ export default function Dashboard() {
   const badgeCounts = usePanelBadgeCounts();
   const notificationBadge = badgeCounts.notifications > 0 ? formatPanelBadgeCount(badgeCounts.notifications) : null;
   const canSeeAdmin = !IS_INSTALLER_APP && hasAdminAccess(user);
-  const panelNavItems = useMemo(() => (canSeeAdmin ? [...PANEL_NAV_ITEMS, ADMIN_NAV_ITEM] : PANEL_NAV_ITEMS), [canSeeAdmin]);
+  const panelNavItems = useMemo(() => {
+    const visibleItems = PANEL_NAV_ITEMS.filter((item) => !item.webOnly || !IS_INSTALLER_APP);
+    return canSeeAdmin ? [...visibleItems, ADMIN_NAV_ITEM] : visibleItems;
+  }, [canSeeAdmin]);
   const mobileDockItems = useMemo(
     () => (canSeeAdmin ? [...MOBILE_DOCK_ITEMS.slice(0, 4), ADMIN_MOBILE_DOCK_ITEM] : MOBILE_DOCK_ITEMS),
     [canSeeAdmin]
@@ -1116,8 +1072,6 @@ export default function Dashboard() {
             </div>
           </section>
 
-          <InstallerAppDownloadCard />
-
           <PlanUsage usageKey="monthly_budgets" />
 
           <section className="ref-panel-mobile-section-head">
@@ -1375,8 +1329,6 @@ export default function Dashboard() {
             </Link>
           </div>
         </div>
-
-        <InstallerAppDownloadCard />
 
         <PlanUsage usageKey="monthly_budgets" />
 

@@ -53,6 +53,7 @@ const ReviewsDashboard = lazy(() => import('./components/Reviews/ReviewsDashboar
 const Settings = lazy(() => import('./components/Settings/Settings'));
 const SupportChat = lazy(() => import('./components/Support/SupportChat'));
 const Subscription = lazy(() => import('./components/Subscription/Subscription'));
+const AppDownload = lazy(() => import('./components/AppDownload/AppDownload'));
 
 function RouteLoading() {
   return (
@@ -123,6 +124,7 @@ export default function App() {
               <Route element={<Profile />} path="/profile" />
               <Route element={<Settings />} path="/settings" />
               <Route element={<Subscription />} path="/subscription" />
+              <Route element={<AppDownload />} path="/download-app" />
               <Route element={<SupportChat />} path="/support" />
               <Route element={<AdminRoute />}>
                 <Route element={<AdminDashboard />} path="/admin" />
