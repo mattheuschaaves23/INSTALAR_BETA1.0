@@ -81,6 +81,7 @@ function Hero() {
       </div>
       <div className="lp6-hero-gradient" aria-hidden="true" />
       <div className="lp6-hero-grain" aria-hidden="true" />
+      <div className="lp6-hero-light" aria-hidden="true" />
 
       <div className="lp6-hero-content">
         <p className="lp6-eyebrow"><span /> Instalação de papel de parede</p>
@@ -219,14 +220,16 @@ function StoreCarousel() {
 function Stores() {
   return (
     <section aria-labelledby="lp6-stores-title" className="lp6-stores" id="lojas">
-      <div className="lp6-section-heading">
+      <div className="lp6-section-heading" data-reveal="rise">
         <p><span>Curadoria</span> para o seu projeto</p>
         <h2 id="lp6-stores-title">Lojas recomendadas.</h2>
         <a href={STORE_CONTACT_URL} rel="noreferrer" target="_blank">
           Anunciar minha loja <span aria-hidden="true">↗</span>
         </a>
       </div>
-      <StoreCarousel />
+      <div data-reveal="scale">
+        <StoreCarousel />
+      </div>
     </section>
   );
 }
@@ -252,7 +255,7 @@ const processSteps = [
 function Process() {
   return (
     <section aria-labelledby="lp6-process-title" className="lp6-process" id="como-funciona">
-      <div className="lp6-process-intro">
+      <div className="lp6-process-intro" data-reveal="left">
         <p>Simples do início ao fim</p>
         <h2 id="lp6-process-title">
           Do pedido
@@ -262,7 +265,11 @@ function Process() {
 
       <ol className="lp6-process-list">
         {processSteps.map((step) => (
-          <li key={step.number}>
+          <li
+            data-reveal="rise"
+            key={step.number}
+            style={{ '--lp6-reveal-delay': `${Number(step.number) * 110}ms` }}
+          >
             <span>{step.number}</span>
             <div>
               <h3>{step.title}</h3>
@@ -272,14 +279,14 @@ function Process() {
         ))}
       </ol>
 
-      <div className="lp6-final-cta">
+      <div className="lp6-final-cta" data-reveal="left">
         <p>Seu projeto pode começar agora.</p>
         <Link to={REQUEST_PATH}>
           Publicar meu pedido <span aria-hidden="true">→</span>
         </Link>
       </div>
 
-      <footer className="lp6-footer">
+      <footer className="lp6-footer" data-reveal="rise">
         <img alt="InstalaPro" src="/brand/instalapro-logo-transparent.png" />
         <p>Conecta quem precisa com quem sabe instalar.</p>
         <nav aria-label="Links institucionais">
@@ -294,6 +301,61 @@ function Process() {
 }
 
 export default function ClientLanding() {
+  useEffect(() => {
+    const page = document.querySelector('.lp6-page');
+    if (!page) return undefined;
+
+    const revealElements = Array.from(page.querySelectorAll('[data-reveal]'));
+    let observer;
+
+    if ('IntersectionObserver' in window) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          });
+        },
+        { rootMargin: '0px 0px -8% 0px', threshold: 0.12 }
+      );
+      revealElements.forEach((element) => observer.observe(element));
+    } else {
+      revealElements.forEach((element) => element.classList.add('is-visible'));
+    }
+
+    const hero = page.querySelector('.lp6-hero');
+    const finePointer = window.matchMedia('(min-width: 821px) and (pointer: fine)');
+
+    const handlePointerMove = (event) => {
+      if (!hero || !finePointer.matches) return;
+      const bounds = hero.getBoundingClientRect();
+      const x = Math.min(1, Math.max(0, (event.clientX - bounds.left) / bounds.width));
+      const y = Math.min(1, Math.max(0, (event.clientY - bounds.top) / bounds.height));
+      hero.style.setProperty('--lp6-shift-x', `${(0.5 - x) * 12}px`);
+      hero.style.setProperty('--lp6-shift-y', `${(0.5 - y) * 8}px`);
+      hero.style.setProperty('--lp6-light-x', `${x * 100}%`);
+      hero.style.setProperty('--lp6-light-y', `${y * 100}%`);
+    };
+
+    const resetPointer = () => {
+      if (!hero) return;
+      hero.style.setProperty('--lp6-shift-x', '0px');
+      hero.style.setProperty('--lp6-shift-y', '0px');
+      hero.style.setProperty('--lp6-light-x', '68%');
+      hero.style.setProperty('--lp6-light-y', '40%');
+    };
+
+    hero?.addEventListener('pointermove', handlePointerMove, { passive: true });
+    hero?.addEventListener('pointerleave', resetPointer);
+
+    return () => {
+      observer?.disconnect();
+      hero?.removeEventListener('pointermove', handlePointerMove);
+      hero?.removeEventListener('pointerleave', resetPointer);
+    };
+  }, []);
+
   return (
     <div className="lp6-page">
       <a className="lp6-skip-link" href="#conteudo">Pular para o conteúdo</a>
