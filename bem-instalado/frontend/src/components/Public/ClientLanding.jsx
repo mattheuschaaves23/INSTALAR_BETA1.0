@@ -86,33 +86,24 @@ function Hero() {
       <div className="lp6-hero-content">
         <p className="lp6-eyebrow"><span /> Instalação de papel de parede</p>
         <h1 id="lp6-hero-title">
-          Papel de parede,
-          <em>bem instalado.</em>
+          <span>Encontre <em>instaladores</em></span>
+          <span>de papel de parede</span>
+          <span>na <em>sua região</em></span>
         </h1>
         <p className="lp6-hero-summary">
-          Publique grátis. Instaladores da sua região demonstram interesse.
-          <strong> Você escolhe quem chamar.</strong>
+          A InstalaPro conecta clientes, lojas e instaladores. Solicite atendimento
+          gratuitamente e encontre profissionais da sua região com mais praticidade
+          e segurança.
         </p>
         <div className="lp6-hero-actions">
           <Link className="lp6-primary-cta" to={REQUEST_PATH}>
-            Criar pedido grátis <span aria-hidden="true">→</span>
+            Encontrar instaladores <span aria-hidden="true">→</span>
           </Link>
           <a className="lp6-secondary-cta" href="#como-funciona">
             Ver como funciona
           </a>
         </div>
-
-        <ul className="lp6-assurances" aria-label="Vantagens do serviço">
-          <li><span>01</span> Sem custo para publicar</li>
-          <li><span>02</span> Profissionais próximos</li>
-          <li><span>03</span> A decisão é sua</li>
-        </ul>
       </div>
-
-      <a aria-label="Ir para lojas recomendadas" className="lp6-scroll-cue" href="#lojas">
-        <span />
-        Lojas recomendadas
-      </a>
     </section>
   );
 }

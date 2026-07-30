@@ -214,9 +214,9 @@
   --lp6-light-y: 40%;
   position: relative;
   isolation: isolate;
-  height: 76svh;
-  min-height: 39rem;
-  max-height: 54rem;
+  height: 72svh;
+  min-height: 37rem;
+  max-height: 49rem;
   overflow: hidden;
   background: #070706;
 }
@@ -246,8 +246,8 @@
   inset: 0;
   z-index: -3;
   background:
-    linear-gradient(90deg, rgba(3, 3, 3, 0.94) 0%, rgba(3, 3, 3, 0.82) 25%, rgba(3, 3, 3, 0.42) 49%, rgba(3, 3, 3, 0.06) 76%),
-    linear-gradient(180deg, rgba(3, 3, 3, 0.46) 0%, transparent 28%, transparent 62%, #050505 100%);
+    linear-gradient(90deg, #030303 0%, rgba(3, 3, 3, 0.96) 24%, rgba(3, 3, 3, 0.7) 47%, rgba(3, 3, 3, 0.08) 79%),
+    linear-gradient(180deg, rgba(3, 3, 3, 0.5) 0%, transparent 31%, transparent 67%, #050505 100%);
 }
 
 .lp6-hero-grain {
@@ -307,22 +307,22 @@
 }
 
 .lp6-hero-content {
-  width: min(100%, 96rem);
+  width: min(100%, 94rem);
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   margin: 0 auto;
-  padding: clamp(7rem, 10vw, 9.5rem) clamp(1.5rem, 6vw, 6.5rem) clamp(7rem, 9vw, 8.5rem);
+  padding: clamp(7rem, 9vw, 8.8rem) clamp(1.5rem, 6.3vw, 6.8rem) clamp(4rem, 6vw, 6rem);
 }
 
 .lp6-eyebrow {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  margin: 0 0 1.35rem;
+  margin: 0 0 1.15rem;
   color: var(--lp6-gold-light);
-  font-size: 0.67rem;
+  font-size: 0.7rem;
   font-weight: 850;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -338,18 +338,16 @@
 }
 
 .lp6-hero h1 {
-  max-width: 13ch;
+  max-width: 13em;
   margin: 0;
   color: #fff;
-  font-size: clamp(3.8rem, 6.7vw, 7.6rem);
-  font-weight: 760;
-  letter-spacing: -0.072em;
-  line-height: 0.88;
-  text-wrap: balance;
+  font-size: clamp(3.65rem, 6.25vw, 6.75rem);
+  font-weight: 820;
+  letter-spacing: -0.065em;
+  line-height: 0.91;
 }
 
-.lp6-hero h1,
-.lp6-hero h1 em {
+.lp6-hero h1 > span {
   display: block;
 }
 
@@ -359,19 +357,23 @@
 }
 
 .lp6-hero h1 em {
-  margin-top: 0.13em;
-  color: var(--lp6-gold-light);
-  font-family: 'Fraunces', Georgia, serif;
-  font-weight: 480;
-  letter-spacing: -0.06em;
+  color: transparent;
+  background: linear-gradient(105deg, var(--lp6-gold), var(--lp6-gold-light) 52%, var(--lp6-gold));
+  background-clip: text;
+  -webkit-background-clip: text;
+  font-family: inherit;
+  font-style: normal;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-shadow: 0 0 2rem rgba(var(--site-accent-rgb), 0.1);
 }
 
 .lp6-hero-summary {
-  max-width: 42rem;
-  margin: 1.65rem 0 0;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: clamp(0.9rem, 1.15vw, 1.08rem);
-  line-height: 1.7;
+  max-width: 39rem;
+  margin: 1.45rem 0 0;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: clamp(0.9rem, 1.1vw, 1.04rem);
+  line-height: 1.58;
   opacity: 0;
   animation: lp6Rise 720ms 340ms ease forwards;
 }
@@ -385,15 +387,15 @@
   display: flex;
   align-items: center;
   gap: 1.4rem;
-  margin-top: 1.8rem;
+  margin-top: 1.65rem;
   opacity: 0;
   animation: lp6Rise 720ms 440ms ease forwards;
 }
 
 .lp6-primary-cta {
   position: relative;
-  min-width: 16.5rem;
-  min-height: 4rem;
+  min-width: 19.5rem;
+  min-height: 4.1rem;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
@@ -404,7 +406,7 @@
   background: linear-gradient(120deg, var(--lp6-gold-light), var(--lp6-gold));
   box-shadow: 0 1.3rem 3rem rgba(var(--site-accent-rgb), 0.2);
   color: #0b0803 !important;
-  font-size: 0.76rem;
+  font-size: 0.8rem;
   font-weight: 900;
   transition:
     box-shadow 220ms ease,
@@ -451,7 +453,7 @@
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.28);
   color: rgba(255, 255, 255, 0.78) !important;
-  font-size: 0.74rem;
+  font-size: 0.77rem;
   font-weight: 760;
   transition:
     border-color 180ms ease,
@@ -1207,7 +1209,7 @@ html[data-site-theme='light'] .lp6-footer > span {
   }
 
   .lp6-hero h1 {
-    max-width: 11ch;
+    max-width: 13em;
   }
 }
 
