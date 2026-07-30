@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import ThemeToggle from '../Layout/ThemeToggle';
 import api from '../../services/api';
@@ -161,6 +161,8 @@ function StoreCard({ duplicate, store }) {
 
 function StoreCarousel() {
   const [stores, setStores] = useState([]);
+  const groupRef = useRef(null);
+  const trackRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -190,8 +192,43 @@ function StoreCarousel() {
     );
   }, [stores]);
 
+  useEffect(() => {
+    const track = trackRef.current;
+    const group = groupRef.current;
+    if (!track || !group) return undefined;
+
+    let animationFrame;
+    let previousTime = performance.now();
+    let offset = 0;
+
+    const moveCarousel = (currentTime) => {
+      const elapsed = Math.min(50, currentTime - previousTime);
+      const gap = Number.parseFloat(window.getComputedStyle(track).columnGap) || 0;
+      const loopDistance = group.getBoundingClientRect().width + gap;
+
+      previousTime = currentTime;
+      if (loopDistance > 0) {
+        offset = (offset + elapsed * 0.026) % loopDistance;
+        track.style.transform = `translate3d(${-offset}px, 0, 0)`;
+      }
+
+      animationFrame = window.requestAnimationFrame(moveCarousel);
+    };
+
+    animationFrame = window.requestAnimationFrame(moveCarousel);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      track.style.removeProperty('transform');
+    };
+  }, [items]);
+
   const renderGroup = (duplicate = false) => (
-    <div aria-hidden={duplicate} className="lp6-store-group">
+    <div
+      aria-hidden={duplicate}
+      className="lp6-store-group"
+      ref={duplicate ? undefined : groupRef}
+    >
       {items.map((store) => (
         <StoreCard
           duplicate={duplicate}
@@ -207,9 +244,8 @@ function StoreCarousel() {
       aria-label="Carrossel automático de lojas recomendadas"
       className="lp6-carousel"
       role="region"
-      style={{ '--lp6-carousel-duration': `${Math.max(56, items.length * 14)}s` }}
     >
-      <div className="lp6-carousel-track">
+      <div className="lp6-carousel-track" ref={trackRef}>
         {renderGroup(false)}
         {renderGroup(true)}
       </div>
@@ -301,6 +337,21 @@ function Process() {
 }
 
 export default function ClientLanding() {
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const previousMotion = root.dataset.siteMotion;
+
+    root.dataset.siteMotion = 'smooth';
+
+    return () => {
+      if (previousMotion) {
+        root.dataset.siteMotion = previousMotion;
+      } else {
+        delete root.dataset.siteMotion;
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const page = document.querySelector('.lp6-page');
     if (!page) return undefined;

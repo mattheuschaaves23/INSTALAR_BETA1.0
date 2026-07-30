@@ -633,12 +633,8 @@
   width: max-content;
   display: flex;
   gap: 1.15rem;
-  animation: lp6Carousel var(--lp6-carousel-duration) linear infinite;
+  transform: translate3d(0, 0, 0);
   will-change: transform;
-}
-
-.lp6-carousel:focus-within .lp6-carousel-track {
-  animation-play-state: paused;
 }
 
 .lp6-store-group {
@@ -1121,10 +1117,6 @@
   50% { opacity: 1; transform: translate(-50%, 0.45rem); }
 }
 
-@keyframes lp6Carousel {
-  to { transform: translateX(calc(-50% - 0.575rem)); }
-}
-
 @keyframes lp6CardFloat {
   from { transform: translateY(0); }
   to { transform: translateY(-0.55rem); }
@@ -1516,19 +1508,4 @@ html[data-site-theme='light'] .lp6-footer > span {
 :root[data-site-motion='reduced'] .lp6-page [data-reveal] {
   opacity: 1;
   transform: none;
-}
-
-:root[data-site-motion='reduced'] .lp6-carousel-track {
-    animation: none;
-    width: 100%;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-}
-
-:root[data-site-motion='reduced'] .lp6-store-card {
-    scroll-snap-align: start;
-}
-
-:root[data-site-motion='reduced'] .lp6-store-group[aria-hidden='true'] {
-    display: none;
 }
