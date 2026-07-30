@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../../services/api';
 
 const FALLBACK_DOWNLOAD_URL = 'https://github.com/mattheuschaaves23/Instalar/releases/latest/download/InstalaPro-Instaladores.apk';
-const FALLBACK_VERSION = '1.0.12';
+const FALLBACK_VERSION = '1.0.13';
 
 function formatFileSize(value) {
   const bytes = Number(value || 0);
