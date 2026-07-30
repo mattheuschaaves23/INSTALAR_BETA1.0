@@ -341,10 +341,11 @@
   max-width: 13em;
   margin: 0;
   color: #fff;
+  font-family: 'Fraunces', Georgia, serif;
   font-size: clamp(3.65rem, 6.25vw, 6.75rem);
-  font-weight: 820;
-  letter-spacing: -0.065em;
-  line-height: 0.91;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 0.93;
 }
 
 .lp6-hero h1 > span {
