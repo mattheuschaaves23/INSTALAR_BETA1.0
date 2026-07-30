@@ -11,13 +11,20 @@ function read(relativePath) {
 const app = read('frontend/src/App.jsx');
 const home = read('frontend/src/components/Public/Home.jsx');
 const locationGlobe = read('frontend/src/components/Public/AnimatedLocationGlobe.jsx');
-const landing = read('frontend/src/components/Public/ClientLandingLegacy.jsx');
+const landing = read('frontend/src/components/Public/ClientLanding.jsx');
+const adminDashboard = read('frontend/src/components/Admin/AdminDashboard.jsx');
 const apiClient = read('frontend/src/services/api.jsx');
+const adminRoutes = read('backend/routes/adminRoutes.js');
 const publicRoutes = read('backend/routes/publicRoutes.js');
 const publicController = read('backend/controllers/publicController.js');
 const serviceRequestController = read('backend/controllers/serviceRequestController.js');
 const opportunityRoutes = read('backend/routes/opportunityRoutes.js');
 const reverseGeocoder = read('backend/utils/reverseGeocode.js');
+
+assert.match(landing, /api\.get\('\/public\/recommended-stores'/, 'A landing deve carregar as lojas recomendadas pela API.');
+assert.match(adminDashboard, /api\.post\('\/admin\/recommended-stores'/, 'O painel ADM deve permitir adicionar lojas ao carrossel.');
+assert.match(adminDashboard, /api\.patch\(`\/admin\/recommended-stores\/\$\{editingStoreId\}`/, 'O painel ADM deve permitir editar lojas do carrossel.');
+assert.match(adminRoutes, /router\.delete\('\/recommended-stores\/:id'/, 'O painel ADM deve permitir remover lojas do carrossel.');
 
 assert.match(app, /path="\/papelperto"/, 'A rota pública /papelperto precisa continuar disponível.');
 assert.match(landing, /const REQUEST_PATH = '\/cliente';/, 'A landing deve enviar o cliente à área integrada de busca.');
