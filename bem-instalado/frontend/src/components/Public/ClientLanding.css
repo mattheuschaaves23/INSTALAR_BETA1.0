@@ -637,7 +637,6 @@
   will-change: transform;
 }
 
-.lp6-carousel:hover .lp6-carousel-track,
 .lp6-carousel:focus-within .lp6-carousel-track {
   animation-play-state: paused;
 }
@@ -1514,26 +1513,22 @@ html[data-site-theme='light'] .lp6-footer > span {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .lp6-page *,
-  .lp6-page *::before,
-  .lp6-page *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 1ms !important;
-    animation-iteration-count: 1 !important;
-  }
+:root[data-site-motion='reduced'] .lp6-page [data-reveal] {
+  opacity: 1;
+  transform: none;
+}
 
-  .lp6-carousel-track {
+:root[data-site-motion='reduced'] .lp6-carousel-track {
+    animation: none;
     width: 100%;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-  }
+}
 
-  .lp6-store-card {
+:root[data-site-motion='reduced'] .lp6-store-card {
     scroll-snap-align: start;
-  }
+}
 
-  .lp6-store-group[aria-hidden='true'] {
+:root[data-site-motion='reduced'] .lp6-store-group[aria-hidden='true'] {
     display: none;
-  }
 }
