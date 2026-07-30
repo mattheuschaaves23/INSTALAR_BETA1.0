@@ -12,108 +12,58 @@ const STORE_CONTACT_URL =
 const fallbackStores = [
   {
     id: 'showcase-modern',
-    name: 'Sua loja em destaque',
-    description: 'Apresente sua coleção para clientes que já estão prontos para transformar um ambiente.',
+    name: 'Sua loja aqui',
+    description: 'Papel de parede para projetos que pedem personalidade.',
     image_url: '/landing/carousel-room-modern.jpg',
     cta_label: 'Anunciar minha loja',
     link_url: STORE_CONTACT_URL,
   },
   {
     id: 'showcase-tropical',
-    name: 'Curadoria para cada estilo',
-    description: 'Papéis de parede que conectam inspiração, produto e instalação profissional.',
+    name: 'Novos estilos',
+    description: 'Coleções para transformar qualquer ambiente.',
     image_url: '/landing/carousel-room-tropical.jpg',
     cta_label: 'Quero participar',
     link_url: STORE_CONTACT_URL,
   },
   {
-    id: 'showcase-luxury',
-    name: 'Marcas que transformam',
-    description: 'Uma vitrine contínua para lojas de papel de parede selecionadas pela InstalaPro.',
+    id: 'showcase-bold',
+    name: 'Paredes com presença',
+    description: 'Curadoria, tendência e atendimento especializado.',
     image_url: '/landing/carousel-room-black-gold.jpg',
     cta_label: 'Falar com a InstalaPro',
     link_url: STORE_CONTACT_URL,
   },
 ];
 
-const steps = [
-  {
-    number: '01',
-    title: 'Conte o que precisa',
-    description: 'Crie seu pedido em poucos minutos e informe onde será a instalação.',
-  },
-  {
-    number: '02',
-    title: 'Receba interessados',
-    description: 'Instaladores da sua região encontram o pedido e apresentam interesse.',
-  },
-  {
-    number: '03',
-    title: 'Escolha quem chamar',
-    description: 'Compare os profissionais interessados e decida com quem conversar.',
-  },
-];
+const carouselColors = ['#ff5219', '#123c8c', '#f2c800', '#ea2c73', '#167c67'];
 
 function Header() {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const updateHeader = () => setScrolled(window.scrollY > 24);
-    updateHeader();
-    window.addEventListener('scroll', updateHeader, { passive: true });
-    return () => window.removeEventListener('scroll', updateHeader);
+    const update = () => setScrolled(window.scrollY > 18);
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    return () => window.removeEventListener('scroll', update);
   }, []);
 
-  useEffect(() => {
-    document.body.classList.toggle('lp3-menu-lock', menuOpen);
-    return () => document.body.classList.remove('lp3-menu-lock');
-  }, [menuOpen]);
-
-  const closeMenu = () => setMenuOpen(false);
-
   return (
-    <header className={`lp3-header${scrolled ? ' is-scrolled' : ''}${menuOpen ? ' has-menu' : ''}`}>
-      <Link aria-label="InstalaPro — página inicial" className="lp3-brand" onClick={closeMenu} to="/">
+    <header className={`lp4-header${scrolled ? ' is-scrolled' : ''}`}>
+      <Link aria-label="InstalaPro — início" className="lp4-brand" to="/">
         <img alt="InstalaPro" src="/brand/instalapro-logo-transparent.png" />
       </Link>
 
-      <nav aria-label="Navegação principal" className="lp3-desktop-nav">
+      <nav aria-label="Navegação principal" className="lp4-nav">
+        <a href="#lojas">Lojas</a>
         <a href="#como-funciona">Como funciona</a>
-        <a href="#lojas">Lojas recomendadas</a>
       </nav>
 
-      <div className="lp3-header-actions">
-        <Link className="lp3-login-link" to={INSTALLER_LOGIN_PATH}>
-          Sou instalador
-        </Link>
-        <Link className="lp3-enter-button" to={CLIENT_LOGIN_PATH}>
+      <div className="lp4-access">
+        <Link className="lp4-installer-link" to={INSTALLER_LOGIN_PATH}>Sou instalador</Link>
+        <Link className="lp4-login" to={CLIENT_LOGIN_PATH}>
           Entrar <span aria-hidden="true">↗</span>
         </Link>
-      </div>
-
-      <button
-        aria-controls="lp3-mobile-menu"
-        aria-expanded={menuOpen}
-        aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
-        className="lp3-menu-button"
-        onClick={() => setMenuOpen((current) => !current)}
-        type="button"
-      >
-        <span />
-        <span />
-      </button>
-
-      <div className="lp3-mobile-menu" id="lp3-mobile-menu">
-        <nav aria-label="Navegação para celular">
-          <a href="#como-funciona" onClick={closeMenu}>Como funciona <span>01</span></a>
-          <a href="#lojas" onClick={closeMenu}>Lojas recomendadas <span>02</span></a>
-          <Link onClick={closeMenu} to={REQUEST_PATH}>Criar meu pedido <span>↗</span></Link>
-        </nav>
-        <div className="lp3-mobile-access">
-          <Link onClick={closeMenu} to={CLIENT_LOGIN_PATH}>Entrar como cliente</Link>
-          <Link onClick={closeMenu} to={INSTALLER_LOGIN_PATH}>Entrar como instalador</Link>
-        </div>
       </div>
     </header>
   );
@@ -142,27 +92,34 @@ function StoreCarousel() {
     };
   }, []);
 
-  const carouselStores = useMemo(() => {
+  const items = useMemo(() => {
     const source = stores.length ? stores : fallbackStores;
-    const minimumItems = 5;
     return Array.from(
-      { length: Math.max(minimumItems, source.length) },
-      (_, index) => ({ ...source[index % source.length], instance: index })
+      { length: Math.max(5, source.length) },
+      (_, index) => ({
+        ...source[index % source.length],
+        instance: index,
+        color: carouselColors[index % carouselColors.length],
+      })
     );
   }, [stores]);
 
-  const renderGroup = (group) => (
-    <div aria-hidden={group === 'duplicate'} className="lp3-store-group">
-      {carouselStores.map((store) => (
-        <article className="lp3-store-card" key={`${group}-${store.id}-${store.instance}`}>
+  const renderItems = (duplicate = false) => (
+    <div aria-hidden={duplicate} className="lp4-store-group">
+      {items.map((store) => (
+        <article
+          className="lp4-store-card"
+          key={`${duplicate ? 'copy' : 'main'}-${store.id}-${store.instance}`}
+          style={{ '--lp4-card-color': store.color }}
+        >
           <a
-            aria-label={`${store.cta_label || 'Visitar loja'}: ${store.name}`}
+            aria-label={`${store.cta_label || 'Conhecer loja'}: ${store.name}`}
             href={store.link_url || STORE_CONTACT_URL}
             rel="noreferrer"
-            tabIndex={group === 'duplicate' ? -1 : 0}
+            tabIndex={duplicate ? -1 : 0}
             target="_blank"
           >
-            <div className="lp3-store-image">
+            <div className="lp4-store-photo">
               {store.image_url ? (
                 <img
                   alt=""
@@ -174,16 +131,12 @@ function StoreCarousel() {
                   src={store.image_url}
                 />
               ) : null}
-              <span className="lp3-store-index" aria-hidden="true">
-                {String(store.instance + 1).padStart(2, '0')}
-              </span>
+              <span aria-hidden="true">{String(store.instance + 1).padStart(2, '0')}</span>
             </div>
-            <div className="lp3-store-copy">
-              <div>
-                <p>{store.name}</p>
-                <span>{store.description || 'Papel de parede, curadoria e atendimento especializado.'}</span>
-              </div>
-              <i aria-hidden="true">↗</i>
+            <div className="lp4-store-info">
+              <p>{store.name}</p>
+              <small>{store.description || 'Papel de parede e atendimento especializado.'}</small>
+              <strong>{store.cta_label || 'Conhecer'} <i aria-hidden="true">↗</i></strong>
             </div>
           </a>
         </article>
@@ -193,14 +146,14 @@ function StoreCarousel() {
 
   return (
     <div
-      aria-label="Lojas de papel de parede recomendadas"
-      className="lp3-store-marquee"
+      aria-label="Carrossel de lojas de papel de parede recomendadas"
+      className="lp4-marquee"
       role="region"
-      style={{ '--lp3-marquee-duration': `${Math.max(46, carouselStores.length * 11)}s` }}
+      style={{ '--lp4-carousel-speed': `${Math.max(52, items.length * 13)}s` }}
     >
-      <div className="lp3-store-track">
-        {renderGroup('original')}
-        {renderGroup('duplicate')}
+      <div className="lp4-store-track">
+        {renderItems(false)}
+        {renderItems(true)}
       </div>
     </div>
   );
@@ -208,102 +161,51 @@ function StoreCarousel() {
 
 function HeroBlock() {
   return (
-    <section className="lp3-hero">
-      <div className="lp3-hero-media" aria-hidden="true">
-        <img
-          alt=""
-          fetchPriority="high"
-          src="/landing/hero-instalapro-editorial-v2.jpg"
-        />
-        <span className="lp3-hero-vignette" />
-        <span className="lp3-hero-paper-line" />
-      </div>
-
-      <div className="lp3-hero-orbit" aria-hidden="true">
-        <span />
-        <i />
-      </div>
-
-      <div className="lp3-hero-content">
-        <p className="lp3-eyebrow">
-          <span />
-          Instalação de papel de parede
-        </p>
+    <section className="lp4-hero">
+      <div className="lp4-hero-copy">
+        <div className="lp4-copy-orbit" aria-hidden="true"><span /></div>
+        <p className="lp4-kicker"><span /> InstalaPro</p>
         <h1>
-          Sua parede.<br />
-          <em>Do jeito certo.</em>
+          Papel na parede.<br />
+          <em>Sem dor de cabeça.</em>
         </h1>
-        <p className="lp3-hero-description">
-          Publique o serviço, receba interessados da sua região e escolha o profissional ideal.
+        <p className="lp4-summary">
+          Crie o pedido grátis. Instaladores perto de você se interessam. <strong>Você escolhe quem chamar.</strong>
         </p>
-        <div className="lp3-hero-actions">
-          <Link className="lp3-main-cta" to={REQUEST_PATH}>
-            Criar meu pedido
-            <span aria-hidden="true">↗</span>
+        <div className="lp4-hero-actions">
+          <Link className="lp4-primary" to={REQUEST_PATH}>
+            Pedir instalação <span aria-hidden="true">→</span>
           </Link>
-          <a className="lp3-text-link" href="#como-funciona">
-            Ver como funciona
-            <span aria-hidden="true">↓</span>
-          </a>
+          <Link className="lp4-secondary" to={INSTALLER_LOGIN_PATH}>
+            Sou instalador
+          </Link>
         </div>
       </div>
 
-      <div className="lp3-hero-proof" aria-label="Vantagens da InstalaPro">
-        <span><strong>Grátis</strong> para criar o pedido</span>
-        <span><strong>Local</strong> instaladores da região</span>
-        <span><strong>Você decide</strong> quem chamar</span>
+      <div className="lp4-hero-visual">
+        <img
+          alt="Sala moderna sendo transformada por um papel de parede colorido"
+          fetchPriority="high"
+          src="/landing/hero-instalapro-impacto-v3.jpg"
+        />
+        <span className="lp4-image-wash" aria-hidden="true" />
+        <div className="lp4-local-badge">
+          <i aria-hidden="true" />
+          <span><strong>Profissionais</strong> da sua região</span>
+        </div>
+        <div className="lp4-choice-stamp" aria-hidden="true">
+          Você<br /><strong>escolhe.</strong>
+        </div>
       </div>
 
-      <div className="lp3-scroll-cue" aria-hidden="true">
-        <span />
-        Explore
-      </div>
-    </section>
-  );
-}
-
-function HowItWorksBlock() {
-  return (
-    <section className="lp3-process" id="como-funciona">
-      <div className="lp3-process-heading">
-        <p className="lp3-section-number">01 — Como funciona</p>
-        <h2>
-          Do pedido à parede pronta,<br />
-          <em>sem complicação.</em>
-        </h2>
-        <p>Três passos simples. Você mantém o controle do começo ao fim.</p>
-      </div>
-
-      <div className="lp3-process-grid">
-        <ol className="lp3-steps">
-          {steps.map((step, index) => (
-            <li key={step.number} style={{ '--lp3-step-delay': `${index * 120}ms` }}>
-              <span>{step.number}</span>
-              <div>
-                <h3>{step.title}</h3>
-                <p>{step.description}</p>
-              </div>
-              <i aria-hidden="true">→</i>
-            </li>
-          ))}
-        </ol>
-
-        <div className="lp3-transformation">
-          <div className="lp3-before-layer">
-            <img alt="Sala antes da aplicação do papel de parede" loading="lazy" src="/landing/foto-before-alinhada.png" />
-            <span>Antes</span>
-          </div>
-          <div className="lp3-after-layer">
-            <img alt="A mesma sala transformada com papel de parede" loading="lazy" src="/landing/foto-after-alinhada.png" />
-            <span>Depois</span>
-          </div>
-          <div className="lp3-reveal-line" aria-hidden="true">
-            <i>↔</i>
-          </div>
-          <p className="lp3-transformation-note">
-            <strong>Uma parede muda tudo.</strong>
-            Encontre quem sabe transformar a sua.
-          </p>
+      <div className="lp4-hero-ticker" aria-hidden="true">
+        <div>
+          <span>Publique o pedido</span><i>✦</i>
+          <span>Receba interessados</span><i>✦</i>
+          <span>Escolha quem chamar</span><i>✦</i>
+          <span>Publique o pedido</span><i>✦</i>
+          <span>Receba interessados</span><i>✦</i>
+          <span>Escolha quem chamar</span><i>✦</i>
         </div>
       </div>
     </section>
@@ -312,24 +214,68 @@ function HowItWorksBlock() {
 
 function StoresBlock() {
   return (
-    <section className="lp3-stores" id="lojas">
-      <div className="lp3-stores-glow" aria-hidden="true" />
-      <div className="lp3-stores-heading">
+    <section className="lp4-stores" id="lojas">
+      <div className="lp4-store-heading">
         <div>
-          <p className="lp3-section-number">02 — Lojas recomendadas</p>
-          <h2>Inspire. Escolha. <em>Transforme.</em></h2>
+          <p>Seleção InstalaPro</p>
+          <h2>Lojas que<br /><em>a gente recomenda.</em></h2>
         </div>
-        <div className="lp3-stores-intro">
-          <p>Uma curadoria de lojas de papel de parede para o seu próximo ambiente.</p>
+        <div className="lp4-store-heading-action">
+          <span>Papel de parede para começar o seu projeto.</span>
           <a href={STORE_CONTACT_URL} rel="noreferrer" target="_blank">
-            Quero anunciar minha loja <span aria-hidden="true">↗</span>
+            Anunciar minha loja <i aria-hidden="true">↗</i>
           </a>
         </div>
       </div>
 
       <StoreCarousel />
+    </section>
+  );
+}
 
-      <footer className="lp3-footer">
+function ProcessBlock() {
+  return (
+    <section className="lp4-process" id="como-funciona">
+      <div className="lp4-process-top">
+        <p>É simples assim</p>
+        <h2>
+          Você pede.<br />
+          Eles respondem.<br />
+          <em>Você escolhe.</em>
+        </h2>
+        <Link to={REQUEST_PATH}>Criar meu pedido <span aria-hidden="true">→</span></Link>
+      </div>
+
+      <div className="lp4-process-body">
+        <ol className="lp4-steps">
+          <li>
+            <span>1</span>
+            <p><strong>Publique.</strong> Diga onde e o que precisa instalar.</p>
+          </li>
+          <li>
+            <span>2</span>
+            <p><strong>Receba.</strong> Profissionais da região demonstram interesse.</p>
+          </li>
+          <li>
+            <span>3</span>
+            <p><strong>Escolha.</strong> Compare e chame o profissional ideal.</p>
+          </li>
+        </ol>
+
+        <div className="lp4-before-after">
+          <div className="lp4-before">
+            <img alt="Sala antes do papel de parede" loading="lazy" src="/landing/foto-before-alinhada.png" />
+            <span>Antes</span>
+          </div>
+          <div className="lp4-after">
+            <img alt="Sala depois da aplicação do papel de parede" loading="lazy" src="/landing/foto-after-alinhada.png" />
+            <span>Depois</span>
+          </div>
+          <div className="lp4-reveal-handle" aria-hidden="true"><i>↔</i></div>
+        </div>
+      </div>
+
+      <footer className="lp4-footer">
         <img alt="InstalaPro" src="/brand/instalapro-logo-transparent.png" />
         <p>Conecta quem quer transformar com quem sabe instalar.</p>
         <div>
@@ -337,7 +283,7 @@ function StoresBlock() {
           <Link to="/termos">Termos</Link>
           <a href="mailto:beminstaladohd@gmail.com">Contato</a>
         </div>
-        <span>© {new Date().getFullYear()} InstalaPro</span>
+        <span>© {new Date().getFullYear()}</span>
       </footer>
     </section>
   );
@@ -345,13 +291,13 @@ function StoresBlock() {
 
 export default function ClientLanding() {
   return (
-    <div className="lp3-page">
-      <a className="lp3-skip-link" href="#conteudo">Pular para o conteúdo</a>
+    <div className="lp4-page">
+      <a className="lp4-skip-link" href="#principal">Pular para o conteúdo</a>
       <Header />
-      <main id="conteudo">
+      <main id="principal">
         <HeroBlock />
-        <HowItWorksBlock />
         <StoresBlock />
+        <ProcessBlock />
       </main>
     </div>
   );
