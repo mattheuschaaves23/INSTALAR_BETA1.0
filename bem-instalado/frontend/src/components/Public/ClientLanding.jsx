@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
+import ThemeToggle from '../Layout/ThemeToggle';
 import api from '../../services/api';
 import './ClientLanding.css';
 
@@ -13,7 +14,7 @@ const fallbackStores = [
   {
     id: 'showcase-one',
     name: 'Sua loja aqui',
-    description: 'Sua coleção perto de quem já procura instalação.',
+    description: 'Apresente sua coleção para clientes que já estão planejando a instalação.',
     image_url: '',
     cta_label: 'Anunciar minha loja',
     link_url: STORE_CONTACT_URL,
@@ -21,7 +22,7 @@ const fallbackStores = [
   {
     id: 'showcase-two',
     name: 'Vitrine InstalaPro',
-    description: 'Destaque sua marca no momento certo do projeto.',
+    description: 'Sua marca em destaque no momento em que o projeto começa.',
     image_url: '',
     cta_label: 'Quero participar',
     link_url: STORE_CONTACT_URL,
@@ -29,7 +30,7 @@ const fallbackStores = [
   {
     id: 'showcase-three',
     name: 'Lojas recomendadas',
-    description: 'Curadoria de papel de parede e atendimento especializado.',
+    description: 'Papel de parede, curadoria e atendimento especializado.',
     image_url: '',
     cta_label: 'Falar com a InstalaPro',
     link_url: STORE_CONTACT_URL,
@@ -40,30 +41,120 @@ function Header() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const update = () => setScrolled(window.scrollY > 18);
-    update();
-    window.addEventListener('scroll', update, { passive: true });
-    return () => window.removeEventListener('scroll', update);
+    const handleScroll = () => setScrolled(window.scrollY > 24);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <header className={`lp5-header${scrolled ? ' is-scrolled' : ''}`}>
-      <Link aria-label="InstalaPro — início" className="lp5-brand" to="/">
+    <header className={`lp6-header${scrolled ? ' is-scrolled' : ''}`}>
+      <Link aria-label="InstalaPro — página inicial" className="lp6-brand" to="/">
         <img alt="InstalaPro" src="/brand/instalapro-logo-transparent.png" />
       </Link>
 
-      <nav aria-label="Navegação principal" className="lp5-nav">
-        <a href="#lojas">Lojas recomendadas</a>
+      <nav aria-label="Navegação principal" className="lp6-nav">
+        <a href="#lojas">Lojas</a>
         <a href="#como-funciona">Como funciona</a>
+        <Link to={INSTALLER_LOGIN_PATH}>Sou instalador</Link>
       </nav>
 
-      <div className="lp5-access">
-        <Link className="lp5-installer-link" to={INSTALLER_LOGIN_PATH}>Sou instalador</Link>
-        <Link className="lp5-login" to={CLIENT_LOGIN_PATH}>
+      <div className="lp6-header-actions">
+        <ThemeToggle />
+        <Link className="lp6-login" to={CLIENT_LOGIN_PATH}>
           Entrar <span aria-hidden="true">↗</span>
         </Link>
       </div>
     </header>
+  );
+}
+
+function Hero() {
+  return (
+    <section aria-labelledby="lp6-hero-title" className="lp6-hero">
+      <div className="lp6-hero-media">
+        <img
+          alt="Instalador finalizando uma parede elegante com papel de parede escuro"
+          fetchPriority="high"
+          src="/landing/hero-home-panoramico-v2.jpg"
+        />
+      </div>
+      <div className="lp6-hero-gradient" aria-hidden="true" />
+      <div className="lp6-hero-grain" aria-hidden="true" />
+
+      <div className="lp6-hero-content">
+        <p className="lp6-eyebrow"><span /> Instalação de papel de parede</p>
+        <h1 id="lp6-hero-title">
+          Papel de parede,
+          <em>bem instalado.</em>
+        </h1>
+        <p className="lp6-hero-summary">
+          Publique grátis. Instaladores da sua região demonstram interesse.
+          <strong> Você escolhe quem chamar.</strong>
+        </p>
+        <div className="lp6-hero-actions">
+          <Link className="lp6-primary-cta" to={REQUEST_PATH}>
+            Criar pedido grátis <span aria-hidden="true">→</span>
+          </Link>
+          <a className="lp6-secondary-cta" href="#como-funciona">
+            Ver como funciona
+          </a>
+        </div>
+
+        <ul className="lp6-assurances" aria-label="Vantagens do serviço">
+          <li><span>01</span> Sem custo para publicar</li>
+          <li><span>02</span> Profissionais próximos</li>
+          <li><span>03</span> A decisão é sua</li>
+        </ul>
+      </div>
+
+      <a aria-label="Ir para lojas recomendadas" className="lp6-scroll-cue" href="#lojas">
+        <span />
+        Lojas recomendadas
+      </a>
+    </section>
+  );
+}
+
+function StoreCard({ duplicate, store }) {
+  const href = store.link_url || STORE_CONTACT_URL;
+  const label = store.cta_label || 'Conhecer loja';
+
+  return (
+    <article className="lp6-store-card">
+      <a
+        aria-label={`${label}: ${store.name}`}
+        href={href}
+        rel="noreferrer"
+        tabIndex={duplicate ? -1 : 0}
+        target="_blank"
+      >
+        <div className={`lp6-store-visual${store.image_url ? '' : ' is-empty'}`}>
+          {store.image_url ? (
+            <img
+              alt=""
+              loading="lazy"
+              onError={(event) => {
+                event.currentTarget.parentElement.classList.add('is-empty');
+                event.currentTarget.remove();
+              }}
+              src={store.image_url}
+            />
+          ) : null}
+          <div className="lp6-store-monogram" aria-hidden="true">
+            <span>{store.name?.slice(0, 1) || 'I'}</span>
+          </div>
+          <small>Seleção InstalaPro</small>
+        </div>
+        <div className="lp6-store-copy">
+          <div>
+            <h3>{store.name}</h3>
+            <p>{store.description || 'Papel de parede e atendimento especializado.'}</p>
+          </div>
+          <span className="lp6-store-arrow" aria-hidden="true">↗</span>
+        </div>
+      </a>
+    </article>
   );
 }
 
@@ -98,125 +189,39 @@ function StoreCarousel() {
     );
   }, [stores]);
 
-  const renderItems = (duplicate = false) => (
-    <div aria-hidden={duplicate} className="lp5-store-group">
+  const renderGroup = (duplicate = false) => (
+    <div aria-hidden={duplicate} className="lp6-store-group">
       {items.map((store) => (
-        <article className="lp5-store-card" key={`${duplicate ? 'copy' : 'main'}-${store.id}-${store.instance}`}>
-          <a
-            aria-label={`${store.cta_label || 'Conhecer loja'}: ${store.name}`}
-            href={store.link_url || STORE_CONTACT_URL}
-            rel="noreferrer"
-            tabIndex={duplicate ? -1 : 0}
-            target="_blank"
-          >
-            <div className={`lp5-store-photo${store.image_url ? '' : ' is-empty'}`}>
-              {store.image_url ? (
-                <img
-                  alt=""
-                  loading="lazy"
-                  onError={(event) => {
-                    event.currentTarget.parentElement.classList.add('is-empty');
-                    event.currentTarget.remove();
-                  }}
-                  src={store.image_url}
-                />
-              ) : null}
-              <span aria-hidden="true">{String(store.instance + 1).padStart(2, '0')}</span>
-              <i aria-hidden="true">IP</i>
-            </div>
-            <div className="lp5-store-info">
-              <div>
-                <p>{store.name}</p>
-                <small>{store.description || 'Papel de parede e atendimento especializado.'}</small>
-              </div>
-              <strong aria-hidden="true">↗</strong>
-            </div>
-          </a>
-        </article>
+        <StoreCard
+          duplicate={duplicate}
+          key={`${duplicate ? 'copy' : 'main'}-${store.id}-${store.instance}`}
+          store={store}
+        />
       ))}
     </div>
   );
 
   return (
     <div
-      aria-label="Carrossel de lojas de papel de parede recomendadas"
-      className="lp5-marquee"
+      aria-label="Carrossel automático de lojas recomendadas"
+      className="lp6-carousel"
       role="region"
-      style={{ '--lp5-carousel-speed': `${Math.max(54, items.length * 14)}s` }}
+      style={{ '--lp6-carousel-duration': `${Math.max(56, items.length * 14)}s` }}
     >
-      <div className="lp5-store-track">
-        {renderItems(false)}
-        {renderItems(true)}
+      <div className="lp6-carousel-track">
+        {renderGroup(false)}
+        {renderGroup(true)}
       </div>
     </div>
   );
 }
 
-function WallpaperMotion() {
+function Stores() {
   return (
-    <figure className="lp5-wall-motion">
-      <img
-        alt="Profissional aplicando papel de parede preto com detalhes dourados"
-        fetchPriority="high"
-        src="/landing/hero-instalacao-preto-dourado-v1.jpg"
-      />
-      <div className="lp5-photo-shade" aria-hidden="true" />
-      <div className="lp5-photo-sweep" aria-hidden="true" />
-      <figcaption>
-        <strong>Aplicação profissional.</strong>
-        <span>Precisa, limpa e bem-acabada.</span>
-      </figcaption>
-      <div className="lp5-motion-number" aria-hidden="true">01</div>
-    </figure>
-  );
-}
-
-function HeroBlock() {
-  return (
-    <section className="lp5-hero">
-      <div className="lp5-hero-rings" aria-hidden="true"><span /><i /></div>
-
-      <div className="lp5-hero-copy">
-        <p className="lp5-kicker"><span /> Instalação de papel de parede</p>
-        <h1>
-          Papel na parede.<br />
-          <em>Sem dor de cabeça.</em>
-        </h1>
-        <p className="lp5-summary">
-          Publique grátis. Profissionais da região se interessam. <strong>Você escolhe.</strong>
-        </p>
-        <div className="lp5-hero-actions">
-          <Link className="lp5-primary" to={REQUEST_PATH}>
-            Criar meu pedido <span aria-hidden="true">→</span>
-          </Link>
-          <a className="lp5-text-link" href="#como-funciona">Como funciona <span>↓</span></a>
-        </div>
-      </div>
-
-      <WallpaperMotion />
-
-      <div className="lp5-hero-ticker" aria-hidden="true">
-        <div>
-          <span>Publique</span><i>✦</i>
-          <span>Receba interessados</span><i>✦</i>
-          <span>Escolha</span><i>✦</i>
-          <span>Publique</span><i>✦</i>
-          <span>Receba interessados</span><i>✦</i>
-          <span>Escolha</span><i>✦</i>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function StoresBlock() {
-  return (
-    <section className="lp5-stores" id="lojas">
-      <div className="lp5-store-heading">
-        <div>
-          <p>Escolhas InstalaPro</p>
-          <h2>Lojas <em>recomendadas.</em></h2>
-        </div>
+    <section aria-labelledby="lp6-stores-title" className="lp6-stores" id="lojas">
+      <div className="lp6-section-heading">
+        <p><span>Curadoria</span> para o seu projeto</p>
+        <h2 id="lp6-stores-title">Lojas recomendadas.</h2>
         <a href={STORE_CONTACT_URL} rel="noreferrer" target="_blank">
           Anunciar minha loja <span aria-hidden="true">↗</span>
         </a>
@@ -226,42 +231,63 @@ function StoresBlock() {
   );
 }
 
-function ProcessBlock() {
+const processSteps = [
+  {
+    number: '01',
+    title: 'Conte o que precisa.',
+    text: 'Crie seu pedido com localização, medidas e detalhes do ambiente.',
+  },
+  {
+    number: '02',
+    title: 'Receba interessados.',
+    text: 'Instaladores próximos encontram o projeto e demonstram interesse.',
+  },
+  {
+    number: '03',
+    title: 'Escolha quem chamar.',
+    text: 'Compare os profissionais disponíveis e decida com quem conversar.',
+  },
+];
+
+function Process() {
   return (
-    <section className="lp5-process" id="como-funciona">
-      <div className="lp5-process-heading">
-        <p>Direto ao ponto</p>
-        <h2>Você pede.<br /><em>Você escolhe.</em></h2>
-        <Link to={REQUEST_PATH}>Começar agora <span aria-hidden="true">→</span></Link>
+    <section aria-labelledby="lp6-process-title" className="lp6-process" id="como-funciona">
+      <div className="lp6-process-intro">
+        <p>Simples do início ao fim</p>
+        <h2 id="lp6-process-title">
+          Do pedido
+          <em>à parede.</em>
+        </h2>
       </div>
 
-      <div className="lp5-flow-shell">
-        <ol className="lp5-flow">
-          <li>
-            <span>01</span>
-            <div><strong>Publique</strong><small>o que precisa instalar.</small></div>
+      <ol className="lp6-process-list">
+        {processSteps.map((step) => (
+          <li key={step.number}>
+            <span>{step.number}</span>
+            <div>
+              <h3>{step.title}</h3>
+              <p>{step.text}</p>
+            </div>
           </li>
-          <li>
-            <span>02</span>
-            <div><strong>Receba</strong><small>interessados da região.</small></div>
-          </li>
-          <li>
-            <span>03</span>
-            <div><strong>Escolha</strong><small>quem você quer chamar.</small></div>
-          </li>
-        </ol>
-        <div className="lp5-flow-line" aria-hidden="true"><i /></div>
+        ))}
+      </ol>
+
+      <div className="lp6-final-cta">
+        <p>Seu projeto pode começar agora.</p>
+        <Link to={REQUEST_PATH}>
+          Publicar meu pedido <span aria-hidden="true">→</span>
+        </Link>
       </div>
 
-      <footer className="lp5-footer">
+      <footer className="lp6-footer">
         <img alt="InstalaPro" src="/brand/instalapro-logo-transparent.png" />
         <p>Conecta quem precisa com quem sabe instalar.</p>
-        <div>
+        <nav aria-label="Links institucionais">
           <Link to="/privacidade">Privacidade</Link>
           <Link to="/termos">Termos</Link>
           <a href="mailto:beminstaladohd@gmail.com">Contato</a>
-        </div>
-        <span>© {new Date().getFullYear()}</span>
+        </nav>
+        <span>© {new Date().getFullYear()} InstalaPro</span>
       </footer>
     </section>
   );
@@ -269,13 +295,13 @@ function ProcessBlock() {
 
 export default function ClientLanding() {
   return (
-    <div className="lp5-page">
-      <a className="lp5-skip-link" href="#principal">Pular para o conteúdo</a>
+    <div className="lp6-page">
+      <a className="lp6-skip-link" href="#conteudo">Pular para o conteúdo</a>
       <Header />
-      <main id="principal">
-        <HeroBlock />
-        <StoresBlock />
-        <ProcessBlock />
+      <main id="conteudo">
+        <Hero />
+        <Stores />
+        <Process />
       </main>
     </div>
   );
