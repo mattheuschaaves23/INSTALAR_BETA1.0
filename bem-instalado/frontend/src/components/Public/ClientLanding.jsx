@@ -154,19 +154,20 @@ function StoreCarousel() {
 
 function WallpaperMotion() {
   return (
-    <div aria-label="Animação de aplicação de papel de parede" className="lp5-wall-motion" role="img">
-      <div className="lp5-wall-plain" />
-      <div className="lp5-wall-paper">
-        <span /><span /><span /><span />
-      </div>
-      <div className="lp5-wall-seam" />
-      <div className="lp5-roller">
-        <i />
-        <span />
-      </div>
-      <p><strong>Aplicação</strong><br />precisa. limpa. profissional.</p>
+    <figure className="lp5-wall-motion">
+      <img
+        alt="Profissional aplicando papel de parede preto com detalhes dourados"
+        fetchPriority="high"
+        src="/landing/hero-instalacao-preto-dourado-v1.jpg"
+      />
+      <div className="lp5-photo-shade" aria-hidden="true" />
+      <div className="lp5-photo-sweep" aria-hidden="true" />
+      <figcaption>
+        <strong>Aplicação profissional.</strong>
+        <span>Precisa, limpa e bem-acabada.</span>
+      </figcaption>
       <div className="lp5-motion-number" aria-hidden="true">01</div>
-    </div>
+    </figure>
   );
 }
 
