@@ -4,11 +4,11 @@ export const SITE_PREFERENCES_EVENT = 'site-preferences:changed';
 
 const STORAGE_KEY = 'instalar-site-preferences';
 const THEME_PREFERENCE_VERSION = 2;
-const ACCENT_PREFERENCE_VERSION = 2;
-const LEGACY_DEFAULT_GOLD = '#e2b42d';
+const ACCENT_PREFERENCE_VERSION = 3;
+const LEGACY_DEFAULT_GOLDS = ['#e2b42d', '#a86600'];
 
 export const DEFAULT_SITE_PREFERENCES = {
-  accentColor: '#a86600',
+  accentColor: '#c48400',
   accentVersion: ACCENT_PREFERENCE_VERSION,
   theme: 'light',
   themeVersion: THEME_PREFERENCE_VERSION,
@@ -17,7 +17,7 @@ export const DEFAULT_SITE_PREFERENCES = {
 };
 
 export const ACCENT_PRESETS = [
-  { name: 'Dourado', value: '#a86600' },
+  { name: 'Dourado', value: '#c48400' },
   { name: 'Azul', value: '#3b82f6' },
   { name: 'Verde', value: '#22c55e' },
   { name: 'Rosa', value: '#ec4899' },
@@ -77,13 +77,14 @@ function getContrastText(hex) {
 function buildAccentTokens(accentColor, theme) {
   const accent = normalizeHexColor(accentColor);
   const { r, g, b } = hexToRgb(accent);
-  const strong = mixColor(accent, '#ffffff', 0.24);
-  const deep = mixColor(accent, '#000000', 0.38);
   const lightTheme = theme === 'light';
-  const background = lightTheme ? '#ece9e2' : '#000000';
-  const panel = lightTheme ? '#fffdfa' : '#050505';
-  const panelSoft = lightTheme ? '#f4f1ea' : '#0a0a0a';
-  const panelElevated = lightTheme ? '#e6e0d6' : '#101010';
+  const isDefaultGold = accent === '#c48400';
+  const strong = lightTheme && isDefaultGold ? '#e6b23d' : mixColor(accent, '#ffffff', 0.24);
+  const deep = mixColor(accent, '#000000', 0.38);
+  const background = lightTheme ? '#e3e1dc' : '#000000';
+  const panel = lightTheme ? '#ffffff' : '#050505';
+  const panelSoft = lightTheme ? '#f0eee9' : '#0a0a0a';
+  const panelElevated = lightTheme ? '#d9d6cf' : '#101010';
   const strongRgb = hexToRgb(strong);
   const deepRgb = hexToRgb(deep);
   const backgroundRgb = hexToRgb(background);
@@ -95,7 +96,7 @@ function buildAccentTokens(accentColor, theme) {
     accent,
     strong,
     deep,
-    contrast: getContrastText(accent),
+    contrast: lightTheme && isDefaultGold ? '#181613' : getContrastText(accent),
     rgb: `${r}, ${g}, ${b}`,
     strongRgb: `${strongRgb.r}, ${strongRgb.g}, ${strongRgb.b}`,
     deepRgb: `${deepRgb.r}, ${deepRgb.g}, ${deepRgb.b}`,
@@ -115,7 +116,7 @@ export function normalizeSitePreferences(value) {
   const hasCurrentThemeChoice = Number(source.themeVersion) >= THEME_PREFERENCE_VERSION;
   const hasCurrentAccentChoice = Number(source.accentVersion) >= ACCENT_PREFERENCE_VERSION;
   const normalizedAccent = normalizeHexColor(source.accentColor);
-  const accentColor = !hasCurrentAccentChoice && normalizedAccent === LEGACY_DEFAULT_GOLD
+  const accentColor = !hasCurrentAccentChoice && LEGACY_DEFAULT_GOLDS.includes(normalizedAccent)
     ? DEFAULT_SITE_PREFERENCES.accentColor
     : normalizedAccent;
 
@@ -162,14 +163,14 @@ export function applySitePreferences(nextPreferences = readSitePreferences()) {
   root.style.setProperty('--site-accent-rgb', tokens.rgb);
   root.style.setProperty('--site-accent-strong-rgb', tokens.strongRgb);
   root.style.setProperty('--site-accent-deep-rgb', tokens.deepRgb);
-  root.style.setProperty('--site-accent-soft', `rgba(${tokens.rgb}, ${lightTheme ? '0.12' : '0.14'})`);
-  root.style.setProperty('--site-accent-line', `rgba(${tokens.rgb}, ${lightTheme ? '0.42' : '0.18'})`);
-  root.style.setProperty('--site-accent-line-strong', `rgba(${tokens.rgb}, ${lightTheme ? '0.66' : '0.34'})`);
+  root.style.setProperty('--site-accent-soft', `rgba(${tokens.rgb}, ${lightTheme ? '0.16' : '0.14'})`);
+  root.style.setProperty('--site-accent-line', `rgba(${tokens.rgb}, ${lightTheme ? '0.5' : '0.18'})`);
+  root.style.setProperty('--site-accent-line-strong', `rgba(${tokens.rgb}, ${lightTheme ? '0.72' : '0.34'})`);
   root.style.setProperty('--bg', tokens.background);
   root.style.setProperty('--bg-soft', tokens.panelSoft);
   root.style.setProperty('--surface', `rgba(${tokens.panelRgb}, 0.9)`);
   root.style.setProperty('--surface-strong', `rgba(${tokens.panelSoftRgb}, 0.98)`);
-  root.style.setProperty('--surface-soft', lightTheme ? '#f4f1ea' : 'rgba(255, 255, 255, 0.03)');
+  root.style.setProperty('--surface-soft', lightTheme ? '#f0eee9' : 'rgba(255, 255, 255, 0.03)');
   root.style.setProperty('--site-bg', tokens.background);
   root.style.setProperty('--site-bg-rgb', tokens.backgroundRgb);
   root.style.setProperty('--site-panel', tokens.panel);
@@ -180,14 +181,14 @@ export function applySitePreferences(nextPreferences = readSitePreferences()) {
   root.style.setProperty('--site-panel-elevated-rgb', tokens.panelElevatedRgb);
   root.style.setProperty('--gold', tokens.accent);
   root.style.setProperty('--gold-strong', tokens.strong);
-  root.style.setProperty('--gold-soft', `rgba(${tokens.rgb}, ${lightTheme ? '0.12' : '0.14'})`);
-  root.style.setProperty('--line', lightTheme ? '#c9c2b5' : `rgba(${tokens.rgb}, 0.18)`);
-  root.style.setProperty('--text', lightTheme ? '#211b14' : '#f6efdf');
-  root.style.setProperty('--muted', lightTheme ? '#5e574c' : 'rgba(246, 239, 223, 0.64)');
+  root.style.setProperty('--gold-soft', `rgba(${tokens.rgb}, ${lightTheme ? '0.16' : '0.14'})`);
+  root.style.setProperty('--line', lightTheme ? '#b9b5ad' : `rgba(${tokens.rgb}, 0.18)`);
+  root.style.setProperty('--text', lightTheme ? '#181613' : '#f6efdf');
+  root.style.setProperty('--muted', lightTheme ? '#59554e' : 'rgba(246, 239, 223, 0.64)');
   root.style.setProperty('--shadow', lightTheme ? '0 14px 32px rgba(57, 45, 25, 0.11)' : '0 30px 80px rgba(0, 0, 0, 0.45)');
   root.style.setProperty('--ref-gold', tokens.accent);
   root.style.setProperty('--ref-gold-strong', tokens.strong);
-  root.style.setProperty('--ref-line', lightTheme ? '#c9c2b5' : `rgba(${tokens.rgb}, 0.17)`);
+  root.style.setProperty('--ref-line', lightTheme ? '#b9b5ad' : `rgba(${tokens.rgb}, 0.17)`);
   root.style.setProperty('--route-line-gold', `rgba(${tokens.rgb}, ${lightTheme ? '0.52' : '0.22'})`);
   root.dataset.siteTheme = preferences.theme;
   root.dataset.siteDensity = preferences.density;

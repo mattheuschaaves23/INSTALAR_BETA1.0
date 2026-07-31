@@ -1145,18 +1145,18 @@
 /* Light mode */
 
 html[data-site-theme='light'] .lp6-page {
-  --lp6-black: #ece9e2;
-  --lp6-black-soft: #f4f1ea;
-  --lp6-black-raised: #fffdfa;
-  --lp6-text: #211b14;
-  --lp6-muted: #5e574c;
-  --lp6-line: #c9c2b5;
+  --lp6-black: #e3e1dc;
+  --lp6-black-soft: #f0eee9;
+  --lp6-black-raised: #ffffff;
+  --lp6-text: #181613;
+  --lp6-muted: #59554e;
+  --lp6-line: #b9b5ad;
   background: var(--lp6-black);
 }
 
 html[data-site-theme='light'] .lp6-header.is-scrolled {
-  border-bottom-color: #c9c2b5;
-  background: rgba(255, 253, 250, 0.96);
+  border-bottom-color: #b9b5ad;
+  background: rgba(255, 255, 255, 0.96);
 }
 
 html[data-site-theme='light'] .lp6-header.is-scrolled .lp6-nav a {
@@ -1179,7 +1179,7 @@ html[data-site-theme='light'] .lp6-header.is-scrolled .lp6-login {
 }
 
 html[data-site-theme='light'] .lp6-store-copy {
-  border-bottom-color: #c9c2b5;
+  border-bottom-color: #b9b5ad;
 }
 
 html[data-site-theme='light'] .lp6-store-visual > small {

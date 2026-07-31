@@ -8,7 +8,7 @@ describe('preferências visuais', () => {
   it('migra preferências antigas para o fundo branco principal', () => {
     expect(normalizeSitePreferences({ accentColor: '#e2b42d' })).toMatchObject({
       theme: 'light',
-      accentColor: '#a86600',
+      accentColor: '#c48400',
       density: 'comfortable',
       motion: 'smooth',
     });
@@ -22,7 +22,7 @@ describe('preferências visuais', () => {
       })
     ).toMatchObject({
       theme: 'dark',
-      accentColor: '#a86600',
+      accentColor: '#c48400',
     });
   });
 
