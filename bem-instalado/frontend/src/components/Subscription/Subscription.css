@@ -887,3 +887,65 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Tema claro: mantém a assinatura premium, mas com leitura imediata. */
+html[data-site-theme='light'] .subscription-v3-hero {
+  border-color: #c9c2b5;
+  background:
+    radial-gradient(circle at 82% 18%, rgba(var(--site-accent-rgb), 0.16), transparent 29%),
+    radial-gradient(circle at 18% 110%, rgba(var(--site-accent-rgb), 0.1), transparent 36%),
+    linear-gradient(135deg, #fffdfa 0%, #f4f1ea 100%);
+  box-shadow: 0 1.4rem 3.6rem rgba(57, 45, 25, 0.12);
+}
+
+html[data-site-theme='light'] .subscription-v3-hero h1 {
+  color: var(--text);
+}
+
+html[data-site-theme='light'] .subscription-v3-hero h1 span {
+  background-image: linear-gradient(100deg, #7c4d00 0%, #b87709 46%, #8c5600 100%);
+}
+
+html[data-site-theme='light'] .subscription-v3-hero-copy > p,
+html[data-site-theme='light'] .subscription-v3-current > span,
+html[data-site-theme='light'] .subscription-v3-current p {
+  color: var(--muted);
+}
+
+html[data-site-theme='light'] .subscription-v3-current {
+  border-color: #bcb4a6;
+  background: rgba(255, 253, 250, 0.94);
+  box-shadow: 0 1rem 2.4rem rgba(57, 45, 25, 0.12);
+}
+
+html[data-site-theme='light'] .subscription-v3-current > strong,
+html[data-site-theme='light'] .subscription-v3-plan-pro .subscription-v3-price strong,
+html[data-site-theme='light'] .subscription-v3-section-copy > span,
+html[data-site-theme='light'] .subscription-v3-pending-toggle strong,
+html[data-site-theme='light'] .subscription-v3-profile-link {
+  color: var(--site-accent-deep);
+}
+
+html[data-site-theme='light'] :is(
+  .subscription-v3-plan,
+  .subscription-v3-usage,
+  .subscription-v3-pending,
+  .subscription-v3-store-note
+) {
+  border-color: #c9c2b5;
+  background: linear-gradient(180deg, #ffffff, #f6f3ed);
+  box-shadow: 0 10px 24px rgba(57, 45, 25, 0.08);
+}
+
+html[data-site-theme='light'] .subscription-v3-plan-pro {
+  border-color: var(--site-accent);
+  background:
+    radial-gradient(circle at 90% 6%, rgba(var(--site-accent-rgb), 0.17), transparent 28%),
+    linear-gradient(150deg, #fffdfa 0%, #f4f1ea 100%);
+}
+
+html[data-site-theme='light'] .subscription-v3-secondary {
+  border-color: #bcb4a6;
+  background: #fffdfa;
+  color: var(--text);
+}

@@ -5,38 +5,38 @@
 @tailwind utilities;
 
 :root {
-  --bg: #f6f4ef;
+  --bg: #ece9e2;
   --bg-soft: var(--site-panel);
   --surface: rgba(var(--site-panel-rgb), 0.9);
   --surface-strong: rgba(var(--site-panel-soft-rgb), 0.98);
-  --surface-soft: rgba(57, 46, 30, 0.045);
-  --site-accent: #cda349;
-  --site-accent-strong: #f0d28a;
-  --site-accent-deep: #8d6922;
-  --site-accent-contrast: #100b03;
-  --site-accent-rgb: 205, 163, 73;
-  --site-accent-strong-rgb: 240, 210, 138;
-  --site-accent-deep-rgb: 141, 105, 34;
-  --site-accent-soft: rgba(var(--site-accent-rgb), 0.14);
-  --site-accent-line: rgba(var(--site-accent-rgb), 0.18);
-  --site-accent-line-strong: rgba(var(--site-accent-rgb), 0.34);
-  --site-bg: #f6f4ef;
-  --site-bg-rgb: 246, 244, 239;
-  --site-panel: #fffdf8;
-  --site-panel-soft: #f0ece4;
-  --site-panel-elevated: #e5dfd5;
-  --site-panel-rgb: 255, 253, 248;
-  --site-panel-soft-rgb: 240, 236, 228;
-  --site-panel-elevated-rgb: 229, 223, 213;
+  --surface-soft: #f4f1ea;
+  --site-accent: #a86600;
+  --site-accent-strong: #bd8a3d;
+  --site-accent-deep: #683f00;
+  --site-accent-contrast: #fffdf8;
+  --site-accent-rgb: 168, 102, 0;
+  --site-accent-strong-rgb: 189, 138, 61;
+  --site-accent-deep-rgb: 104, 63, 0;
+  --site-accent-soft: rgba(var(--site-accent-rgb), 0.12);
+  --site-accent-line: rgba(var(--site-accent-rgb), 0.42);
+  --site-accent-line-strong: rgba(var(--site-accent-rgb), 0.66);
+  --site-bg: #ece9e2;
+  --site-bg-rgb: 236, 233, 226;
+  --site-panel: #fffdfa;
+  --site-panel-soft: #f4f1ea;
+  --site-panel-elevated: #e6e0d6;
+  --site-panel-rgb: 255, 253, 250;
+  --site-panel-soft-rgb: 244, 241, 234;
+  --site-panel-elevated-rgb: 230, 224, 214;
   --gold: var(--site-accent);
   --gold-strong: var(--site-accent-strong);
   --gold-soft: var(--site-accent-soft);
-  --line: var(--site-accent-line);
-  --text: #211b13;
-  --muted: rgba(61, 52, 41, 0.72);
+  --line: #c9c2b5;
+  --text: #211b14;
+  --muted: #5e574c;
   --danger: #df6b6b;
   --success: #4fb88d;
-  --shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  --shadow: 0 14px 32px rgba(57, 45, 25, 0.11);
 }
 
 * {
@@ -25109,25 +25109,35 @@ html[data-site-theme='light'] .wall-loader-scene {
   }
 }
 
-/* -------- Tema claro principal -------- */
+/* -------- Tema claro principal: superfícies, bordas e contraste -------- */
 html[data-site-theme='light'] {
-  --bg: #f6f4ef;
-  --bg-soft: #f0ece4;
-  --surface: rgba(255, 253, 248, 0.94);
-  --surface-strong: rgba(255, 253, 248, 0.99);
-  --surface-soft: rgba(57, 46, 30, 0.045);
-  --site-bg: #f6f4ef;
-  --site-bg-rgb: 246, 244, 239;
-  --site-panel: #fffdf8;
-  --site-panel-soft: #f0ece4;
-  --site-panel-elevated: #e5dfd5;
-  --site-panel-rgb: 255, 253, 248;
-  --site-panel-soft-rgb: 240, 236, 228;
-  --site-panel-elevated-rgb: 229, 223, 213;
-  --text: #211b13;
-  --muted: rgba(61, 52, 41, 0.72);
-  --line: rgba(91, 72, 37, 0.18);
-  --shadow: 0 18px 48px rgba(68, 52, 27, 0.12);
+  --bg: #ece9e2;
+  --bg-soft: #f4f1ea;
+  --surface: rgba(255, 253, 250, 0.97);
+  --surface-strong: #ffffff;
+  --surface-soft: #f4f1ea;
+  --site-accent: #a86600;
+  --site-accent-strong: #bd8a3d;
+  --site-accent-deep: #683f00;
+  --site-accent-contrast: #fffdf8;
+  --site-accent-rgb: 168, 102, 0;
+  --site-accent-strong-rgb: 189, 138, 61;
+  --site-accent-deep-rgb: 104, 63, 0;
+  --site-accent-soft: rgba(168, 102, 0, 0.12);
+  --site-accent-line: rgba(168, 102, 0, 0.42);
+  --site-accent-line-strong: rgba(168, 102, 0, 0.66);
+  --site-bg: #ece9e2;
+  --site-bg-rgb: 236, 233, 226;
+  --site-panel: #fffdfa;
+  --site-panel-soft: #f4f1ea;
+  --site-panel-elevated: #e6e0d6;
+  --site-panel-rgb: 255, 253, 250;
+  --site-panel-soft-rgb: 244, 241, 234;
+  --site-panel-elevated-rgb: 230, 224, 214;
+  --text: #211b14;
+  --muted: #5e574c;
+  --line: #c9c2b5;
+  --shadow: 0 14px 32px rgba(57, 45, 25, 0.11);
 }
 
 html[data-site-theme='light'] body,
@@ -25135,35 +25145,97 @@ html[data-site-theme='light'] #root,
 html[data-site-theme='light'] .app-layout,
 html[data-site-theme='light'] .app-layout-shell,
 html[data-site-theme='light'] .auth-scene {
-  background: #f6f4ef !important;
+  background: #ece9e2 !important;
   color: var(--text);
 }
 
 html[data-site-theme='light'] :is(input, select, textarea) {
-  border-color: rgba(91, 72, 37, 0.2);
-  background-color: #fffdf8;
+  border-color: #bcb4a6;
+  background-color: #fffdfa;
   color: var(--text);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 1px 0 #ffffff, 0 1px 2px rgba(57, 45, 25, 0.05);
 }
 
 html[data-site-theme='light'] :is(input, select, textarea)::placeholder {
-  color: rgba(61, 52, 41, 0.48);
+  color: #766e62;
+}
+
+html[data-site-theme='light'] :is(input, select, textarea):focus {
+  border-color: var(--site-accent) !important;
+  box-shadow: 0 0 0 3px rgba(var(--site-accent-rgb), 0.16) !important;
 }
 
 html[data-site-theme='light'] :is(.lux-panel, .metric-card, .empty-state, .settings-panel, .site-confirm-dialog) {
-  border-color: rgba(91, 72, 37, 0.16);
-  box-shadow: 0 14px 36px rgba(68, 52, 27, 0.09);
+  border-color: #c9c2b5;
+  box-shadow: 0 12px 28px rgba(57, 45, 25, 0.1);
 }
 
 html[data-site-theme='light'] :is(.ghost-button, .glow-badge, .settings-segment button, .settings-shortcuts a) {
-  border-color: rgba(91, 72, 37, 0.15);
-  background-color: rgba(255, 253, 248, 0.92);
+  border-color: #bbb3a6;
+  background-color: #fffdfa;
   color: var(--text);
 }
 
 html[data-site-theme='light'] :is(.ghost-button, .glow-badge, .settings-segment button, .settings-shortcuts a):hover {
-  border-color: rgba(var(--site-accent-rgb), 0.52);
-  background-color: rgba(var(--site-accent-rgb), 0.1);
+  border-color: var(--site-accent);
+  background-color: rgba(var(--site-accent-rgb), 0.12);
+}
+
+html[data-site-theme='light'] :is(
+  .ref-panel-shell,
+  .dashboard-reference-layout
+) {
+  --ref-text: #211b14;
+  --ref-muted: #5e574c;
+  --ref-line: #c9c2b5;
+  --ref-line-soft: #d4cec2;
+  --route-line: #c9c2b5;
+  --route-line-gold: rgba(var(--site-accent-rgb), 0.52);
+  --route-muted: #5e574c;
+}
+
+html[data-site-theme='light'] :is(
+  .ref-panel-card,
+  .ref-panel-metric-card,
+  .ref-panel-hero,
+  .dashboard-neo-frame,
+  .dashboard-neo-card,
+  .dashboard-neo-panel,
+  .dashboard-neo-range,
+  .dashboard-neo-filter,
+  .dashboard-neo-ghost,
+  .dashboard-neo-nav,
+  .dashboard-neo-select,
+  .admin-modern-shell .admin-activity-column,
+  .admin-modern-empty,
+  .settings-color-picker,
+  .settings-live-preview,
+  .opportunity-filter-tabs,
+  .ref-panel-search,
+  .ref-panel-date,
+  .ref-panel-bell,
+  .ref-panel-account
+) {
+  border-color: #c9c2b5 !important;
+  background: linear-gradient(180deg, #ffffff, #f6f3ed) !important;
+  color: var(--text);
+  box-shadow: 0 10px 24px rgba(57, 45, 25, 0.08);
+}
+
+html[data-site-theme='light'] :is(
+  .panel-topbar,
+  .ref-panel-topbar,
+  .ref-panel-mobile-header,
+  .ref-panel-bottom-nav,
+  .dashboard-reference-layout .client-intake-topbar,
+  .dashboard-reference-layout .client-intake-mobile-dock
+) {
+  border-color: #c9c2b5 !important;
+  background-color: rgba(255, 253, 250, 0.96) !important;
+}
+
+html[data-site-theme='light'] :is(hr, .support-compose, .client-app-request-progress) {
+  border-color: #c9c2b5;
 }
 
 html[data-site-theme='dark'] body,

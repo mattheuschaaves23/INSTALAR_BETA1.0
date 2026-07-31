@@ -4631,3 +4631,83 @@ html[data-site-theme='light'] .client-app-search-card select {
   background: rgba(255, 255, 255, 0.94);
   color: var(--text);
 }
+
+/* Tema claro: o fluxo do cliente também usa superfícies claramente separadas. */
+html[data-site-theme='light'] .client-app-page {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(var(--site-accent-rgb), 0.1), transparent 26%),
+    #ece9e2 !important;
+}
+
+html[data-site-theme='light'] :is(
+  .client-app-topbar,
+  .client-app-request-card,
+  .client-app-request-receipt,
+  .client-app-finder-intro,
+  .client-app-search-card,
+  .client-app-toolbar,
+  .client-app-empty,
+  .client-app-suggestion-box,
+  .client-app-account-requests,
+  .client-app-tracking-lookup,
+  .client-app-tracking-panel,
+  .client-app-interest-panel,
+  .client-app-request-panel,
+  .client-app-detail-section,
+  .client-app-review-block,
+  .client-app-request-score,
+  .client-app-photo-drop,
+  .client-app-account-request-list > article,
+  .client-app-notification-menu,
+  .client-app-installer-card,
+  .client-app-trust-strip
+) {
+  border: 1px solid #c9c2b5 !important;
+  border-radius: 1rem !important;
+  background-color: #fffdfa !important;
+  box-shadow: 0 10px 24px rgba(57, 45, 25, 0.08) !important;
+}
+
+html[data-site-theme='light'] :is(
+  .client-app-chip-link,
+  .client-app-request-progress button,
+  .client-app-service-grid button,
+  .client-app-chip-grid button,
+  .client-app-option-list button,
+  .client-app-material-list button,
+  .client-app-measure-options button,
+  .client-app-room-stream button,
+  .client-app-ghost-button
+) {
+  border: 1px solid #bbb3a6 !important;
+  border-radius: 0.8rem !important;
+  background: #f4f1ea !important;
+  color: var(--text) !important;
+}
+
+html[data-site-theme='light'] :is(
+  .client-app-request-progress button.is-active,
+  .client-app-request-progress button.is-done,
+  .client-app-service-grid button.is-selected,
+  .client-app-chip-grid button.is-selected,
+  .client-app-option-list button.is-selected,
+  .client-app-material-list button.is-selected,
+  .client-app-measure-options button.is-selected,
+  .client-app-room-stream button.is-selected
+) {
+  border-color: var(--site-accent) !important;
+  background: rgba(var(--site-accent-rgb), 0.14) !important;
+  color: var(--site-accent-deep) !important;
+}
+
+html[data-site-theme='light'] :is(
+  .client-app-request-field input,
+  .client-app-request-field textarea,
+  .client-app-request-field--line input,
+  .client-app-request-field--line textarea,
+  .client-app-search-card input,
+  .client-app-search-card select
+) {
+  border: 1px solid #bcb4a6 !important;
+  background: #ffffff !important;
+}
