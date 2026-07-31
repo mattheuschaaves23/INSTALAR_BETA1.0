@@ -33,7 +33,7 @@ export default function Layout() {
 
   if (isStandaloneDashboard) {
     return (
-      <div className="app-layout dashboard-reference-layout panel-flat-language">
+      <div className="app-layout dashboard-reference-layout panel-flat-language panel-v3">
         <Outlet />
       </div>
     );
@@ -41,7 +41,7 @@ export default function Layout() {
 
   if (isInstallerPanelRoute) {
     return (
-      <div className="app-layout dashboard-reference-layout panel-flat-language">
+      <div className="app-layout dashboard-reference-layout panel-flat-language panel-v3">
         <InstallerPanelShell>
           <Outlet />
         </InstallerPanelShell>

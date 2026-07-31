@@ -55,7 +55,7 @@ body {
   overflow-x: hidden;
   font-family: 'Manrope', 'Segoe UI', sans-serif;
   color: var(--text);
-  background: rgb(0, 0, 0);
+  background: var(--site-bg);
 }
 
 #root {
@@ -25504,5 +25504,1012 @@ html[data-site-theme='light'] .client-intake-list-intro strong {
 
   .budget-modern-client-choice-button {
     width: 100%;
+  }
+}
+
+/* Painel v3: uma única linguagem visual para todas as áreas internas. */
+.panel-v3 {
+  --panel-canvas: #f3f2ef;
+  --panel-surface: #ffffff;
+  --panel-surface-soft: #f8f7f4;
+  --panel-surface-muted: #eeece7;
+  --panel-border: #d9d6cf;
+  --panel-border-strong: #c6c1b7;
+  --panel-ink: #24211d;
+  --panel-muted: #716b61;
+  --panel-subtle: #9a9489;
+  --panel-gold: #b87800;
+  --panel-gold-strong: #d79613;
+  --panel-gold-soft: #fff1cf;
+  --panel-success: #178a5b;
+  --panel-danger: #bc3d3d;
+  --panel-shadow: 0 14px 34px rgba(51, 43, 31, 0.07);
+  --panel-shadow-hover: 0 18px 42px rgba(51, 43, 31, 0.11);
+  min-height: 100vh;
+  background: var(--panel-canvas) !important;
+  color: var(--panel-ink);
+  font-family: 'Public Sans', 'Segoe UI', sans-serif;
+}
+
+.panel-v3 :is(button, input, textarea, select) {
+  font-family: inherit;
+}
+
+.panel-v3 :is(h1, h2, h3, h4) {
+  color: var(--panel-ink);
+  letter-spacing: -0.025em;
+}
+
+.panel-v3 .ref-panel-shell {
+  --ref-bg: var(--panel-canvas);
+  --ref-sidebar: var(--panel-surface);
+  --ref-card: var(--panel-surface);
+  --ref-card-soft: var(--panel-surface-soft);
+  --ref-line: var(--panel-border);
+  --ref-line-soft: var(--panel-border);
+  --ref-gold: var(--panel-gold);
+  --ref-gold-strong: var(--panel-gold-strong);
+  --ref-text: var(--panel-ink);
+  --ref-muted: var(--panel-muted);
+  background: var(--panel-canvas) !important;
+  color: var(--panel-ink);
+  font-family: inherit;
+}
+
+.panel-v3.panel-flat-language :is(
+  .page-shell,
+  .agenda-modern-shell,
+  .budget-modern-shell,
+  .client-intake-shell,
+  .opportunities-page,
+  .reviews-dashboard-shell,
+  .settings-page,
+  .installer-app-page,
+  .subscription-v3,
+  .admin-modern-shell
+) {
+  background: transparent !important;
+  color: var(--panel-ink);
+}
+
+.panel-v3 .ref-panel-sidebar,
+.panel-v3 .ref-panel-mobile-drawer {
+  border-color: var(--panel-border);
+  background: var(--panel-surface) !important;
+  box-shadow: 1px 0 0 rgba(42, 35, 25, 0.02);
+}
+
+.panel-v3 .ref-panel-brand,
+.panel-v3 .ref-panel-user {
+  border-color: var(--panel-border);
+}
+
+.panel-v3 .ref-panel-brand button {
+  border: 1px solid transparent;
+  color: var(--panel-muted);
+}
+
+.panel-v3 .ref-panel-brand button:hover,
+.panel-v3 .ref-panel-brand button:focus-visible {
+  border-color: var(--panel-border);
+  background: var(--panel-surface-soft);
+  color: var(--panel-ink);
+  outline: none;
+}
+
+.panel-v3 .ref-panel-user strong,
+.panel-v3 .ref-panel-account strong {
+  color: var(--panel-ink);
+}
+
+.panel-v3 .ref-panel-user small {
+  color: var(--panel-gold);
+}
+
+.panel-v3 .ref-panel-user .ref-panel-avatar::after {
+  border-color: var(--panel-surface);
+}
+
+.panel-v3 .ref-panel-logo,
+.panel-v3 .ref-panel-avatar,
+.panel-v3 .ref-panel-mobile-header nav a.ref-panel-avatar {
+  background: linear-gradient(135deg, #f2c55c, var(--panel-gold-strong));
+  color: #2c1b00 !important;
+  box-shadow: 0 8px 18px rgba(184, 120, 0, 0.18);
+}
+
+.panel-v3 .ref-panel-logo.brand-mark {
+  border-color: rgba(184, 120, 0, 0.28);
+  background: #24211d;
+}
+
+.panel-v3 .ref-panel-nav {
+  gap: 0.26rem;
+}
+
+.panel-v3 .ref-panel-nav-block p {
+  color: var(--panel-subtle);
+}
+
+.panel-v3 .ref-panel-nav-link,
+.panel-v3 .ref-panel-logout {
+  border: 1px solid transparent;
+  color: var(--panel-muted);
+}
+
+.panel-v3 .ref-panel-nav-link:hover,
+.panel-v3 .ref-panel-logout:hover {
+  border-color: var(--panel-border);
+  background: var(--panel-surface-soft);
+  color: var(--panel-ink);
+  transform: none;
+}
+
+.panel-v3 .ref-panel-nav-link.is-active {
+  border-color: #edce80;
+  background: var(--panel-gold-soft);
+  color: #6d4600;
+}
+
+.panel-v3 .ref-panel-nav-link.is-active::before {
+  left: 0.35rem;
+  background: var(--panel-gold);
+}
+
+.panel-v3 .ref-panel-nav-link em,
+.panel-v3 .ref-panel-bell em {
+  background: var(--panel-gold);
+  color: #281900 !important;
+}
+
+.panel-v3 .ref-panel-logout {
+  border-top-color: var(--panel-border);
+  color: #8b4a43;
+}
+
+.panel-v3 .ref-panel-main {
+  background: var(--panel-canvas);
+}
+
+.panel-v3 .ref-panel-topbar {
+  min-height: 4.55rem;
+  border-bottom-color: var(--panel-border);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 0 rgba(42, 35, 25, 0.03);
+}
+
+.panel-v3 .ref-panel-search,
+.panel-v3 .ref-panel-date,
+.panel-v3 .ref-panel-bell,
+.panel-v3 .ref-panel-account {
+  border-color: var(--panel-border);
+  background: var(--panel-surface);
+  color: var(--panel-muted);
+  box-shadow: none;
+}
+
+.panel-v3 .ref-panel-search:focus-within {
+  border-color: var(--panel-gold);
+  box-shadow: 0 0 0 3px rgba(184, 120, 0, 0.12);
+}
+
+.panel-v3 .ref-panel-search input {
+  color: var(--panel-ink);
+}
+
+.panel-v3 .ref-panel-search input::placeholder {
+  color: var(--panel-subtle);
+}
+
+.panel-v3 .ref-panel-content,
+.panel-v3 .ref-panel-route-content {
+  gap: 1.35rem;
+  padding: 1.5rem clamp(1rem, 2vw, 2rem) 2.25rem;
+}
+
+.panel-v3 .ref-panel-hero,
+.panel-v3 .ref-panel-card,
+.panel-v3 .ref-panel-metric-card,
+.panel-v3 .page-intro-main,
+.panel-v3 .page-intro-stat,
+.panel-v3 .list-surface,
+.panel-v3 .agenda-modern-hero,
+.panel-v3 .agenda-modern-calendar-card,
+.panel-v3 .agenda-modern-day-panel,
+.panel-v3 .agenda-modern-summary-card,
+.panel-v3 .budget-modern-topbar,
+.panel-v3 .budget-modern-stepper,
+.panel-v3 .budget-modern-calculator-card,
+.panel-v3 .budget-modern-summary-panel,
+.panel-v3 .budget-modern-section,
+.panel-v3 .budget-modern-environment,
+.panel-v3 .budget-modern-payment-box,
+.panel-v3 .budget-modern-client-box,
+.panel-v3 .client-intake-form-shell,
+.panel-v3 .client-intake-side-card,
+.panel-v3 .client-intake-mobile-list,
+.panel-v3 .opportunity-row,
+.panel-v3 .opportunity-empty,
+.panel-v3 .reviews-dashboard-hero,
+.panel-v3 .reviews-dashboard-score-card,
+.panel-v3 .reviews-dashboard-metric,
+.panel-v3 .reviews-dashboard-panel,
+.panel-v3 .reviews-dashboard-list-panel,
+.panel-v3 .reviews-dashboard-empty,
+.panel-v3 .settings-panel,
+.panel-v3 .support-list-panel,
+.panel-v3 .support-chat-panel,
+.panel-v3 .support-ideas-panel,
+.panel-v3 .installer-app-download,
+.panel-v3 .subscription-v3-current,
+.panel-v3 .subscription-v3-hero,
+.panel-v3 .subscription-v3-plan,
+.panel-v3 .subscription-v3-pending,
+.panel-v3 .admin-modern-hero,
+.panel-v3 .admin-modern-shell .lux-panel,
+.panel-v3 .admin-modern-empty,
+.panel-v3 .lux-panel,
+.panel-v3 .empty-state {
+  border: 1px solid var(--panel-border) !important;
+  border-radius: 18px !important;
+  background: var(--panel-surface) !important;
+  box-shadow: var(--panel-shadow) !important;
+}
+
+.panel-v3.panel-flat-language .page-intro-main,
+.panel-v3.panel-flat-language .page-intro-stat,
+.panel-v3.panel-flat-language .page-shell .lux-panel,
+.panel-v3.panel-flat-language .page-shell .lux-panel-soft,
+.panel-v3.panel-flat-language .page-shell .list-surface,
+.panel-v3.panel-flat-language .list-row,
+.panel-v3.panel-flat-language .agenda-modern-hero,
+.panel-v3.panel-flat-language .agenda-modern-calendar-card,
+.panel-v3.panel-flat-language .agenda-modern-day-panel,
+.panel-v3.panel-flat-language .agenda-modern-summary-card,
+.panel-v3.panel-flat-language .client-intake-form-shell,
+.panel-v3.panel-flat-language .client-intake-side-card,
+.panel-v3.panel-flat-language .client-intake-mobile-list,
+.panel-v3.panel-flat-language .opportunity-row,
+.panel-v3.panel-flat-language .reviews-dashboard-hero,
+.panel-v3.panel-flat-language .reviews-dashboard-score-card,
+.panel-v3.panel-flat-language .reviews-dashboard-metric,
+.panel-v3.panel-flat-language .reviews-dashboard-panel,
+.panel-v3.panel-flat-language .settings-panel,
+.panel-v3.panel-flat-language .support-list-panel,
+.panel-v3.panel-flat-language .support-chat-panel,
+.panel-v3.panel-flat-language .support-ideas-panel,
+.panel-v3.panel-flat-language .budget-modern-topbar,
+.panel-v3.panel-flat-language .budget-modern-stepper,
+.panel-v3.panel-flat-language .budget-modern-calculator-card,
+.panel-v3.panel-flat-language .budget-modern-summary-panel {
+  border: 1px solid var(--panel-border) !important;
+  border-radius: 18px !important;
+  background: var(--panel-surface) !important;
+  box-shadow: var(--panel-shadow) !important;
+}
+
+.panel-v3.panel-flat-language .page-intro-main,
+.panel-v3.panel-flat-language .page-shell .lux-panel,
+.panel-v3.panel-flat-language .client-intake-form-shell,
+.panel-v3.panel-flat-language .client-intake-side-card,
+.panel-v3.panel-flat-language .client-intake-mobile-list,
+.panel-v3.panel-flat-language .settings-panel,
+.panel-v3.panel-flat-language .support-list-panel,
+.panel-v3.panel-flat-language .support-chat-panel,
+.panel-v3.panel-flat-language .support-ideas-panel {
+  padding: clamp(1rem, 1.8vw, 1.45rem) !important;
+}
+
+.panel-v3 .ref-panel-hero {
+  min-height: 10.5rem;
+  padding: clamp(1.25rem, 2vw, 1.8rem);
+  border-color: #e7cc8e !important;
+  background:
+    radial-gradient(32rem 16rem at 100% 0%, rgba(215, 150, 19, 0.16), transparent 58%),
+    var(--panel-surface) !important;
+}
+
+.panel-v3 .ref-panel-hero p,
+.panel-v3 .dashboard-neo-kicker,
+.panel-v3 .agenda-modern-eyebrow,
+.panel-v3 .agenda-modern-section-label,
+.panel-v3 .client-intake-kicker,
+.panel-v3 .subscription-v3-kicker,
+.panel-v3 .installer-app-download-kicker {
+  color: var(--panel-gold) !important;
+}
+
+.panel-v3 .ref-panel-hero h1,
+.panel-v3 .ref-panel-hero h2 {
+  color: var(--panel-ink) !important;
+}
+
+.panel-v3 .ref-panel-hero h1 span,
+.panel-v3 .ref-panel-hero h2 span {
+  color: var(--panel-gold) !important;
+}
+
+.panel-v3 .ref-panel-hero small,
+.panel-v3 .page-copy,
+.panel-v3 .agenda-modern-hero-copy > p,
+.panel-v3 .client-intake-form-head span,
+.panel-v3 .reviews-dashboard-hero-copy > span,
+.panel-v3 .subscription-v3-section-copy,
+.panel-v3 .installer-app-download-copy p {
+  color: var(--panel-muted) !important;
+}
+
+.panel-v3 .ref-panel-hero small strong {
+  color: var(--panel-ink) !important;
+}
+
+.panel-v3 .ref-panel-metrics,
+.panel-v3 .page-intro-stats,
+.panel-v3 .agenda-modern-hero-metrics,
+.panel-v3 .client-intake-stat-grid,
+.panel-v3 .reviews-dashboard-metrics {
+  gap: 0.85rem;
+  border: 0;
+}
+
+.panel-v3 .ref-panel-metric-card,
+.panel-v3 .page-intro-stat,
+.panel-v3 .agenda-modern-hero-metrics article,
+.panel-v3 .client-intake-stat-grid article,
+.panel-v3 .reviews-dashboard-metric {
+  min-height: 8rem;
+  padding: 1rem !important;
+  border: 1px solid var(--panel-border) !important;
+  border-radius: 16px !important;
+  background: var(--panel-surface-soft) !important;
+  box-shadow: none !important;
+}
+
+.panel-v3 .ref-panel-metric-card:hover,
+.panel-v3 .page-intro-stat:hover,
+.panel-v3 .opportunity-row:hover,
+.panel-v3 .client-intake-client-card:hover,
+.panel-v3 .agenda-modern-appointment:hover,
+.panel-v3 .reviews-list-item:hover {
+  border-color: #d4ad4e !important;
+  box-shadow: var(--panel-shadow-hover) !important;
+  transform: translateY(-2px);
+}
+
+.panel-v3 .ref-panel-metric-icon,
+.panel-v3 .dashboard-neo-icon,
+.panel-v3 .agenda-modern-section-icon,
+.panel-v3 .client-intake-section-icon {
+  border-radius: 12px;
+  background: var(--panel-gold-soft);
+  color: #875900 !important;
+}
+
+.panel-v3 .ref-panel-metric-card > strong,
+.panel-v3 .metric-value,
+.panel-v3 .agenda-modern-hero-metrics strong,
+.panel-v3 .client-intake-stat-grid strong,
+.panel-v3 .reviews-dashboard-metric strong {
+  color: var(--panel-ink) !important;
+}
+
+.panel-v3 .ref-panel-metric-card p,
+.panel-v3 .ref-panel-metric-card div,
+.panel-v3 .page-intro-stat p,
+.panel-v3 .agenda-modern-hero-metrics span,
+.panel-v3 .client-intake-stat-grid span,
+.panel-v3 .reviews-dashboard-metric span {
+  color: var(--panel-muted) !important;
+}
+
+.panel-v3 :is(
+  .gold-button,
+  .ref-panel-primary,
+  .dashboard-neo-primary,
+  .agenda-modern-primary-button,
+  .budget-modern-primary-cta,
+  .budget-modern-save-button,
+  .client-intake-primary,
+  .client-intake-save,
+  .subscription-v3-primary,
+  .installer-app-download-button
+) {
+  min-height: 2.8rem;
+  border: 1px solid transparent !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #e7b63f, #bd7b00) !important;
+  color: #251800 !important;
+  font-size: 0.86rem;
+  font-weight: 800;
+  box-shadow: 0 9px 18px rgba(184, 120, 0, 0.18) !important;
+  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+
+.panel-v3 :is(
+  .ghost-button,
+  .ref-panel-secondary,
+  .dashboard-neo-ghost,
+  .dashboard-neo-range,
+  .agenda-modern-chip-button,
+  .agenda-modern-icon-button,
+  .agenda-modern-menu-button,
+  .agenda-modern-summary-link,
+  .agenda-modern-action,
+  .budget-modern-secondary-cta,
+  .budget-modern-inline-button,
+  .budget-modern-back-button,
+  .budget-modern-remove-button,
+  .client-intake-secondary,
+  .subscription-v3-secondary,
+  .installer-app-download-actions a
+) {
+  min-height: 2.8rem;
+  border: 1px solid var(--panel-border) !important;
+  border-radius: 12px !important;
+  background: var(--panel-surface) !important;
+  color: var(--panel-ink) !important;
+  font-size: 0.86rem;
+  font-weight: 700;
+  box-shadow: none !important;
+  transition: transform 160ms ease, border-color 160ms ease, background-color 160ms ease;
+}
+
+.panel-v3 .danger-button,
+.panel-v3 .agenda-modern-action.is-danger {
+  min-height: 2.8rem;
+  border: 1px solid #e9bcbc !important;
+  border-radius: 12px !important;
+  background: #fff8f7 !important;
+  color: var(--panel-danger) !important;
+  font-weight: 750;
+  box-shadow: none !important;
+}
+
+.panel-v3 :is(
+  .gold-button,
+  .ref-panel-primary,
+  .dashboard-neo-primary,
+  .agenda-modern-primary-button,
+  .budget-modern-primary-cta,
+  .budget-modern-save-button,
+  .client-intake-primary,
+  .client-intake-save,
+  .subscription-v3-primary,
+  .installer-app-download-button,
+  .ghost-button,
+  .ref-panel-secondary,
+  .dashboard-neo-ghost,
+  .agenda-modern-chip-button,
+  .agenda-modern-icon-button,
+  .agenda-modern-menu-button,
+  .agenda-modern-summary-link,
+  .agenda-modern-action,
+  .budget-modern-secondary-cta,
+  .budget-modern-inline-button,
+  .client-intake-secondary,
+  .subscription-v3-secondary,
+  .danger-button
+):hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.panel-v3 :is(
+  .gold-button,
+  .ref-panel-primary,
+  .dashboard-neo-primary,
+  .agenda-modern-primary-button,
+  .budget-modern-primary-cta,
+  .client-intake-primary,
+  .subscription-v3-primary,
+  .installer-app-download-button
+):hover:not(:disabled) {
+  box-shadow: 0 13px 24px rgba(184, 120, 0, 0.26) !important;
+  filter: saturate(1.06);
+}
+
+.panel-v3 :is(
+  .ghost-button,
+  .ref-panel-secondary,
+  .dashboard-neo-ghost,
+  .agenda-modern-chip-button,
+  .agenda-modern-icon-button,
+  .agenda-modern-menu-button,
+  .agenda-modern-summary-link,
+  .agenda-modern-action,
+  .budget-modern-secondary-cta,
+  .budget-modern-inline-button,
+  .client-intake-secondary,
+  .subscription-v3-secondary
+):hover:not(:disabled) {
+  border-color: #d5ae52 !important;
+  background: var(--panel-gold-soft) !important;
+}
+
+.panel-v3 :is(button, a, input, textarea, select):focus-visible {
+  outline: 3px solid rgba(184, 120, 0, 0.22) !important;
+  outline-offset: 2px;
+}
+
+.panel-v3 button:disabled,
+.panel-v3 a[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.5;
+  filter: grayscale(0.2);
+  box-shadow: none !important;
+}
+
+.panel-v3 :is(
+  .field-input,
+  .field-select,
+  .field-textarea,
+  .budget-modern-field input,
+  .budget-modern-field select,
+  .budget-modern-currency-input,
+  .budget-modern-currency-input input,
+  .client-intake-field input,
+  .client-intake-field select,
+  .client-intake-field textarea,
+  .settings-control-block input,
+  .settings-control-block select,
+  .settings-control-block textarea,
+  .support-compose input,
+  .support-compose textarea
+) {
+  border-color: var(--panel-border) !important;
+  border-radius: 12px !important;
+  background: var(--panel-surface-soft) !important;
+  color: var(--panel-ink) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+.panel-v3 :is(
+  .field-input,
+  .field-select,
+  .field-textarea,
+  .budget-modern-field input,
+  .budget-modern-field select,
+  .budget-modern-currency-input input,
+  .client-intake-field input,
+  .client-intake-field select,
+  .client-intake-field textarea,
+  .settings-control-block input,
+  .settings-control-block select,
+  .settings-control-block textarea,
+  .support-compose input,
+  .support-compose textarea
+):focus {
+  border-color: var(--panel-gold) !important;
+  box-shadow: 0 0 0 3px rgba(184, 120, 0, 0.12) !important;
+}
+
+.panel-v3 :is(.field-label, .budget-modern-field span, .client-intake-field > span) {
+  color: var(--panel-muted) !important;
+  font-weight: 700;
+}
+
+.panel-v3 :is(.status-pill, .agenda-modern-status, .ref-panel-status-pill, .opportunity-actions > span) {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--panel-gold-soft);
+  color: #805400 !important;
+  font-weight: 750;
+}
+
+.panel-v3 :is(.status-pill, .agenda-modern-status, .ref-panel-status-pill)[data-tone='approved'],
+.panel-v3 :is(.status-pill, .agenda-modern-status, .ref-panel-status-pill)[data-tone='completed'],
+.panel-v3 .ref-panel-status-pill[data-status='approved'],
+.panel-v3 .opportunity-actions > span.is-accepted {
+  background: #e8f6ee;
+  color: var(--panel-success) !important;
+}
+
+.panel-v3 .ref-panel-tabs,
+.panel-v3 .dashboard-neo-view-switch,
+.panel-v3 .opportunity-filter-tabs,
+.panel-v3 .reviews-filter-tabs,
+.panel-v3 .settings-segment,
+.panel-v3 .budget-modern-mode-switch {
+  border: 1px solid var(--panel-border) !important;
+  border-radius: 12px !important;
+  background: var(--panel-surface-muted) !important;
+}
+
+.panel-v3 :is(
+  .ref-panel-tabs button,
+  .dashboard-neo-view-tab,
+  .opportunity-filter-tabs button,
+  .reviews-filter-tabs button,
+  .settings-segment button,
+  .budget-modern-mode-switch button
+) {
+  color: var(--panel-muted) !important;
+}
+
+.panel-v3 :is(
+  .ref-panel-tabs button.is-active,
+  .dashboard-neo-view-tab.is-active,
+  .opportunity-filter-tabs button.is-active,
+  .reviews-filter-tabs button.is-active,
+  .settings-segment button.is-active,
+  .budget-modern-mode-switch button.is-active
+) {
+  background: var(--panel-surface) !important;
+  color: #6d4600 !important;
+  box-shadow: 0 2px 8px rgba(51, 43, 31, 0.08) !important;
+}
+
+.panel-v3 :is(.ref-panel-card, .dashboard-neo-card, .dashboard-neo-panel) {
+  border: 1px solid var(--panel-border) !important;
+  border-radius: 18px !important;
+  background: var(--panel-surface) !important;
+  box-shadow: var(--panel-shadow) !important;
+}
+
+.panel-v3 .ref-panel-card {
+  padding: 1.25rem;
+}
+
+.panel-v3 .ref-panel-agenda-stats span,
+.panel-v3 .ref-panel-appointment,
+.panel-v3 .ref-panel-ranking-row,
+.panel-v3 .ref-panel-quote-row,
+.panel-v3 .ref-panel-finance-row,
+.panel-v3 .dashboard-neo-table tbody tr,
+.panel-v3 .client-intake-client-card,
+.panel-v3 .agenda-modern-appointment,
+.panel-v3 .profile-slot-row,
+.panel-v3 .profile-toggle-row,
+.panel-v3 .support-conversation-item,
+.panel-v3 .support-idea-card,
+.panel-v3 .subscription-info-row {
+  border-color: var(--panel-border) !important;
+  border-radius: 12px !important;
+  background: var(--panel-surface-soft) !important;
+}
+
+.panel-v3 .ref-panel-donut span {
+  background: var(--panel-surface) !important;
+  color: var(--panel-ink) !important;
+}
+
+.panel-v3 .ref-panel-chart-gridline,
+.panel-v3 .dashboard-neo-chart-gridline {
+  stroke: #e1ded7;
+}
+
+.panel-v3 .ref-panel-chart-area,
+.panel-v3 .dashboard-neo-chart-area {
+  fill: rgba(184, 120, 0, 0.12);
+}
+
+.panel-v3 .ref-panel-chart-line,
+.panel-v3 .dashboard-neo-chart-line {
+  stroke: var(--panel-gold);
+}
+
+.panel-v3 .agenda-modern-day {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--panel-ink) !important;
+}
+
+.panel-v3 .agenda-modern-day:hover {
+  border-color: #e6c66f;
+  background: var(--panel-gold-soft) !important;
+}
+
+.panel-v3 .agenda-modern-day[data-selected='true'] {
+  border-color: var(--panel-gold) !important;
+  background: var(--panel-gold) !important;
+  color: #281900 !important;
+}
+
+.panel-v3 .agenda-modern-day[data-selected='true'] :is(span, strong, small) {
+  color: inherit !important;
+}
+
+.panel-v3 .budget-modern-summary-panel {
+  align-self: start;
+  border-color: #e6c66f !important;
+  background:
+    linear-gradient(180deg, rgba(255, 244, 214, 0.72), rgba(255, 255, 255, 0.98)) !important;
+}
+
+.panel-v3 .budget-modern-section,
+.panel-v3 .budget-modern-environment,
+.panel-v3 .budget-modern-payment-box,
+.panel-v3 .budget-modern-client-box,
+.panel-v3 .budget-modern-calculated-grid article,
+.panel-v3 .budget-modern-step {
+  border-color: var(--panel-border) !important;
+  background: var(--panel-surface-soft) !important;
+  box-shadow: none !important;
+}
+
+.panel-v3 .budget-modern-step.is-active,
+.panel-v3 .budget-modern-step.is-done {
+  border-color: #dfbd5f !important;
+  background: var(--panel-gold-soft) !important;
+}
+
+.panel-v3 .budget-modern-client-choice-button {
+  border-color: var(--panel-border) !important;
+  background: var(--panel-surface-soft) !important;
+  color: var(--panel-ink) !important;
+}
+
+.panel-v3 .budget-modern-client-choice-button.is-active {
+  border-color: #dfbd5f !important;
+  background: var(--panel-gold-soft) !important;
+  color: #6d4600 !important;
+}
+
+.panel-v3 .opportunity-toolbar,
+.panel-v3 .opportunity-filter-tabs {
+  border-color: var(--panel-border) !important;
+}
+
+.panel-v3 .opportunity-icon {
+  background: var(--panel-gold-soft) !important;
+  color: #805400 !important;
+}
+
+.panel-v3 .opportunity-meta,
+.panel-v3 .opportunity-details,
+.panel-v3 .opportunity-copy > p,
+.panel-v3 .opportunity-heading > span {
+  color: var(--panel-muted) !important;
+}
+
+.panel-v3 .opportunity-tags span,
+.panel-v3 .agenda-modern-service-chip,
+.panel-v3 .reviews-rating-stars,
+.panel-v3 .subscription-v3-current-badge {
+  border-color: #ead28e !important;
+  background: var(--panel-gold-soft) !important;
+  color: #805400 !important;
+}
+
+.panel-v3 .settings-shortcuts a,
+.panel-v3 .settings-color-row button,
+.panel-v3 .settings-live-preview,
+.panel-v3 .settings-color-picker,
+.panel-v3 .subscription-v3-usage-item,
+.panel-v3 .subscription-v3-payment-methods,
+.panel-v3 .subscription-v3-pending-body,
+.panel-v3 .installer-app-page-notes,
+.panel-v3 .installer-app-page-status {
+  border-color: var(--panel-border) !important;
+  border-radius: 12px !important;
+  background: var(--panel-surface-soft) !important;
+  color: var(--panel-ink) !important;
+}
+
+.panel-v3 .support-compose {
+  border-color: var(--panel-border) !important;
+  background: var(--panel-surface-soft) !important;
+}
+
+.panel-v3 .reviews-list-item,
+.panel-v3 .reviews-rating-row,
+.panel-v3 .reviews-month-chart,
+.panel-v3 .reviews-rating-breakdown {
+  border-color: var(--panel-border) !important;
+  background: var(--panel-surface-soft) !important;
+}
+
+.panel-v3 .notification-surface,
+.panel-v3 .notification-item {
+  border-color: var(--panel-border) !important;
+  background: var(--panel-surface) !important;
+}
+
+.panel-v3 .admin-modern-tab,
+.panel-v3 .admin-section-tab,
+.panel-v3 .admin-modern-hero-metrics article,
+.panel-v3 .admin-modern-shell .admin-activity-column,
+.panel-v3 .admin-modern-shell .summary-strip-item {
+  border-color: var(--panel-border) !important;
+  border-radius: 14px !important;
+  background: var(--panel-surface-soft) !important;
+  color: var(--panel-ink) !important;
+  box-shadow: none !important;
+}
+
+.panel-v3 .admin-modern-tab.is-active,
+.panel-v3 .admin-section-tab.is-active {
+  border-color: #dfbd5f !important;
+  background: var(--panel-gold-soft) !important;
+}
+
+html[data-site-theme='dark'] .panel-v3 {
+  --panel-canvas: #101113;
+  --panel-surface: #18191d;
+  --panel-surface-soft: #202126;
+  --panel-surface-muted: #2a2b31;
+  --panel-border: #35363d;
+  --panel-border-strong: #494a53;
+  --panel-ink: #f3f0e9;
+  --panel-muted: #b6b0a5;
+  --panel-subtle: #8d887f;
+  --panel-gold: #e1aa34;
+  --panel-gold-strong: #f2c35b;
+  --panel-gold-soft: #382a0d;
+  --panel-success: #55c890;
+  --panel-danger: #f18d8d;
+  --panel-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
+  --panel-shadow-hover: 0 20px 44px rgba(0, 0, 0, 0.3);
+}
+
+html[data-site-theme='dark'] .panel-v3 .ref-panel-topbar {
+  background: rgba(24, 25, 29, 0.92);
+}
+
+html[data-site-theme='dark'] .panel-v3 .ref-panel-logo.brand-mark {
+  background: #0d0e10;
+}
+
+html[data-site-theme='dark'] .panel-v3 .ref-panel-nav-link.is-active,
+html[data-site-theme='dark'] .panel-v3 .budget-modern-client-choice-button.is-active,
+html[data-site-theme='dark'] .panel-v3 .budget-modern-step.is-active,
+html[data-site-theme='dark'] .panel-v3 .budget-modern-step.is-done,
+html[data-site-theme='dark'] .panel-v3 .admin-modern-tab.is-active,
+html[data-site-theme='dark'] .panel-v3 .admin-section-tab.is-active {
+  color: var(--panel-gold-strong) !important;
+}
+
+html[data-site-theme='dark'] .panel-v3 .ref-panel-hero,
+html[data-site-theme='dark'] .panel-v3 .budget-modern-summary-panel {
+  background:
+    radial-gradient(32rem 16rem at 100% 0%, rgba(225, 170, 52, 0.15), transparent 58%),
+    var(--panel-surface) !important;
+}
+
+html[data-site-theme='dark'] .panel-v3 .danger-button,
+html[data-site-theme='dark'] .panel-v3 .agenda-modern-action.is-danger {
+  border-color: rgba(241, 141, 141, 0.4) !important;
+  background: rgba(159, 54, 54, 0.15) !important;
+}
+
+html[data-site-theme='dark'] .panel-v3 .ref-panel-chart-gridline,
+html[data-site-theme='dark'] .panel-v3 .dashboard-neo-chart-gridline {
+  stroke: #35363d;
+}
+
+html[data-site-theme='dark'] .panel-v3 .ref-panel-donut span {
+  background: var(--panel-surface) !important;
+}
+
+@media (max-width: 1023px) {
+  .panel-v3 .ref-panel-mobile-header,
+  .panel-v3 .ref-panel-bottom-nav {
+    border-color: var(--panel-border) !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 -8px 24px rgba(51, 43, 31, 0.06);
+  }
+
+  .panel-v3 .ref-panel-mobile-header button,
+  .panel-v3 .ref-panel-mobile-header nav a:not(.ref-panel-avatar) {
+    border-color: var(--panel-border) !important;
+    background: var(--panel-surface-soft) !important;
+    color: var(--panel-ink) !important;
+  }
+
+  .panel-v3 .ref-panel-mobile-drawer {
+    box-shadow: 14px 0 38px rgba(51, 43, 31, 0.16);
+  }
+
+  .panel-v3 .ref-panel-content,
+  .panel-v3 .ref-panel-route-content {
+    gap: 1rem;
+    padding: 1rem 1rem calc(6.75rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .panel-v3.panel-flat-language .page-intro-grid,
+  .panel-v3 .ref-panel-metrics,
+  .panel-v3 .page-intro-stats,
+  .panel-v3 .agenda-modern-hero-metrics,
+  .panel-v3 .client-intake-stat-grid,
+  .panel-v3 .reviews-dashboard-metrics {
+    gap: 0.65rem;
+  }
+
+  .panel-v3 .ref-panel-hero,
+  .panel-v3 .page-intro-main,
+  .panel-v3 .agenda-modern-hero,
+  .panel-v3 .agenda-modern-calendar-card,
+  .panel-v3 .agenda-modern-day-panel,
+  .panel-v3 .budget-modern-topbar,
+  .panel-v3 .budget-modern-stepper,
+  .panel-v3 .budget-modern-calculator-card,
+  .panel-v3 .budget-modern-summary-panel,
+  .panel-v3 .budget-modern-section,
+  .panel-v3 .client-intake-mobile-list,
+  .panel-v3 .client-intake-side-card,
+  .panel-v3 .opportunity-row,
+  .panel-v3 .reviews-dashboard-hero,
+  .panel-v3 .reviews-dashboard-panel,
+  .panel-v3 .settings-panel,
+  .panel-v3 .support-list-panel,
+  .panel-v3 .support-chat-panel,
+  .panel-v3 .support-ideas-panel {
+    border-radius: 16px !important;
+  }
+
+  .panel-v3 .ref-panel-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+    padding: 0;
+  }
+
+  .panel-v3 .ref-panel-metric-card {
+    min-width: 0;
+    min-height: 7.5rem;
+  }
+
+  .panel-v3 .ref-panel-metric-dots {
+    display: none;
+  }
+
+  .panel-v3 .ref-panel-bottom-nav {
+    padding: 0.45rem 0.55rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .panel-v3 .ref-panel-bottom-tab {
+    color: var(--panel-muted) !important;
+  }
+
+  .panel-v3 .ref-panel-bottom-tab.is-active {
+    background: var(--panel-gold-soft) !important;
+    color: #805400 !important;
+  }
+
+  html[data-site-theme='dark'] .panel-v3 .ref-panel-mobile-header,
+  html[data-site-theme='dark'] .panel-v3 .ref-panel-bottom-nav {
+    background: rgba(24, 25, 29, 0.96) !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .panel-v3 .page-intro-stats,
+  .panel-v3 .agenda-modern-hero-metrics,
+  .panel-v3 .client-intake-stat-grid,
+  .panel-v3 .reviews-dashboard-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .panel-v3 .page-intro-stat,
+  .panel-v3 .agenda-modern-hero-metrics article,
+  .panel-v3 .client-intake-stat-grid article,
+  .panel-v3 .reviews-dashboard-metric {
+    min-height: 6.8rem;
+    padding: 0.85rem !important;
+  }
+
+  .panel-v3 .page-intro-actions,
+  .panel-v3 .action-cluster,
+  .panel-v3 .budget-modern-actions-bar,
+  .panel-v3 .budget-modern-summary-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .panel-v3 .page-intro-actions :is(a, button),
+  .panel-v3 .action-cluster :is(a, button),
+  .panel-v3 .budget-modern-actions-bar :is(a, button),
+  .panel-v3 .budget-modern-summary-actions :is(a, button) {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-v3 *,
+  .panel-v3 *::before,
+  .panel-v3 *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
   }
 }
