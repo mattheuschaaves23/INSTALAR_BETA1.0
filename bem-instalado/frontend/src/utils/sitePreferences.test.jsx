@@ -5,27 +5,27 @@ import {
 } from './sitePreferences';
 
 describe('preferências visuais', () => {
-  it('mantém o fundo preto como padrão para preferências antigas', () => {
+  it('migra preferências antigas para o fundo branco principal', () => {
     expect(normalizeSitePreferences({ accentColor: '#e2b42d' })).toMatchObject({
-      theme: 'dark',
+      theme: 'light',
       density: 'comfortable',
       motion: 'smooth',
     });
   });
 
-  it('aceita e preserva o fundo branco', () => {
+  it('preserva o fundo preto quando ele foi escolhido na versão atual', () => {
     expect(
       normalizeSitePreferences({
         ...DEFAULT_SITE_PREFERENCES,
-        theme: 'light',
+        theme: 'dark',
       })
     ).toMatchObject({
-      theme: 'light',
+      theme: 'dark',
       accentColor: '#e2b42d',
     });
   });
 
   it('descarta valores de tema inválidos', () => {
-    expect(normalizeSitePreferences({ theme: 'automatic' }).theme).toBe('dark');
+    expect(normalizeSitePreferences({ theme: 'automatic' }).theme).toBe('light');
   });
 });

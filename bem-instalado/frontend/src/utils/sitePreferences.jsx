@@ -3,10 +3,12 @@ import { safeLocalStorage } from './safeStorage';
 export const SITE_PREFERENCES_EVENT = 'site-preferences:changed';
 
 const STORAGE_KEY = 'instalar-site-preferences';
+const THEME_PREFERENCE_VERSION = 2;
 
 export const DEFAULT_SITE_PREFERENCES = {
   accentColor: '#e2b42d',
-  theme: 'dark',
+  theme: 'light',
+  themeVersion: THEME_PREFERENCE_VERSION,
   density: 'comfortable',
   motion: 'smooth',
 };
@@ -75,10 +77,10 @@ function buildAccentTokens(accentColor, theme) {
   const strong = mixColor(accent, '#ffffff', 0.24);
   const deep = mixColor(accent, '#000000', 0.38);
   const lightTheme = theme === 'light';
-  const background = lightTheme ? '#ffffff' : '#000000';
-  const panel = lightTheme ? '#ffffff' : '#050505';
-  const panelSoft = lightTheme ? '#f7f4ed' : '#0a0a0a';
-  const panelElevated = lightTheme ? '#eee8dd' : '#101010';
+  const background = lightTheme ? '#f6f4ef' : '#000000';
+  const panel = lightTheme ? '#fffdf8' : '#050505';
+  const panelSoft = lightTheme ? '#f0ece4' : '#0a0a0a';
+  const panelElevated = lightTheme ? '#e5dfd5' : '#101010';
   const strongRgb = hexToRgb(strong);
   const deepRgb = hexToRgb(deep);
   const backgroundRgb = hexToRgb(background);
@@ -107,10 +109,15 @@ function buildAccentTokens(accentColor, theme) {
 
 export function normalizeSitePreferences(value) {
   const source = value && typeof value === 'object' ? value : {};
+  const hasCurrentThemeChoice = Number(source.themeVersion) >= THEME_PREFERENCE_VERSION;
 
   return {
     accentColor: normalizeHexColor(source.accentColor),
-    theme: source.theme === 'light' ? 'light' : 'dark',
+    // Preferências salvas antes do novo tema claro não registravam uma escolha
+    // consciente de tema. Elas migram para o novo padrão, sem impedir que a
+    // pessoa escolha e mantenha o preto a partir de agora.
+    theme: source.theme === 'dark' && hasCurrentThemeChoice ? 'dark' : 'light',
+    themeVersion: THEME_PREFERENCE_VERSION,
     density: source.density === 'compact' ? 'compact' : 'comfortable',
     motion: source.motion === 'reduced' ? 'reduced' : 'smooth',
   };
@@ -153,7 +160,7 @@ export function applySitePreferences(nextPreferences = readSitePreferences()) {
   root.style.setProperty('--bg-soft', tokens.panelSoft);
   root.style.setProperty('--surface', `rgba(${tokens.panelRgb}, 0.9)`);
   root.style.setProperty('--surface-strong', `rgba(${tokens.panelSoftRgb}, 0.98)`);
-  root.style.setProperty('--surface-soft', lightTheme ? 'rgba(19, 15, 9, 0.035)' : 'rgba(255, 255, 255, 0.03)');
+  root.style.setProperty('--surface-soft', lightTheme ? 'rgba(57, 46, 30, 0.045)' : 'rgba(255, 255, 255, 0.03)');
   root.style.setProperty('--site-bg', tokens.background);
   root.style.setProperty('--site-bg-rgb', tokens.backgroundRgb);
   root.style.setProperty('--site-panel', tokens.panel);
@@ -166,9 +173,9 @@ export function applySitePreferences(nextPreferences = readSitePreferences()) {
   root.style.setProperty('--gold-strong', tokens.strong);
   root.style.setProperty('--gold-soft', `rgba(${tokens.rgb}, 0.14)`);
   root.style.setProperty('--line', `rgba(${tokens.rgb}, 0.18)`);
-  root.style.setProperty('--text', lightTheme ? '#17130d' : '#f6efdf');
-  root.style.setProperty('--muted', lightTheme ? 'rgba(23, 19, 13, 0.64)' : 'rgba(246, 239, 223, 0.64)');
-  root.style.setProperty('--shadow', lightTheme ? '0 24px 70px rgba(55, 42, 18, 0.12)' : '0 30px 80px rgba(0, 0, 0, 0.45)');
+  root.style.setProperty('--text', lightTheme ? '#211b13' : '#f6efdf');
+  root.style.setProperty('--muted', lightTheme ? 'rgba(61, 52, 41, 0.72)' : 'rgba(246, 239, 223, 0.64)');
+  root.style.setProperty('--shadow', lightTheme ? '0 18px 48px rgba(68, 52, 27, 0.12)' : '0 30px 80px rgba(0, 0, 0, 0.45)');
   root.style.setProperty('--ref-gold', tokens.accent);
   root.style.setProperty('--ref-gold-strong', tokens.strong);
   root.style.setProperty('--ref-line', `rgba(${tokens.rgb}, 0.17)`);
