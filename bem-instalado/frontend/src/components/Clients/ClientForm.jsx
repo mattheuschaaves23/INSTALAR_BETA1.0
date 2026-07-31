@@ -56,15 +56,17 @@ export default function ClientForm({ client = null, onClose, onSaved }) {
     setSaving(true);
 
     try {
+      let response;
+
       if (client?.id) {
-        await api.put(`/clients/${client.id}`, form);
+        response = await api.put(`/clients/${client.id}`, form);
         toast.success('Cliente atualizado.');
       } else {
-        await api.post('/clients', form);
+        response = await api.post('/clients', form);
         toast.success('Cliente cadastrado.');
       }
 
-      onSaved?.();
+      onSaved?.(response.data);
       onClose?.();
     } catch (error) {
       toast.error(error.response?.data?.error || 'Não foi possível salvar o cliente.');

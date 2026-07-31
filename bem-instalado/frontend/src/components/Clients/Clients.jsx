@@ -4,53 +4,10 @@ import toast from 'react-hot-toast';
 import api from '../../services/api';
 import PaginationControls from '../Layout/PaginationControls';
 import PlanUsage from '../Subscription/PlanUsage';
+import ClientForm from './ClientForm';
 import { useSubscription } from '../../contexts/SubscriptionContext';
 
 const CLIENTS_PER_PAGE = 6;
-
-const BRAZIL_STATES = [
-  'AC',
-  'AL',
-  'AP',
-  'AM',
-  'BA',
-  'CE',
-  'DF',
-  'ES',
-  'GO',
-  'MA',
-  'MT',
-  'MS',
-  'MG',
-  'PA',
-  'PB',
-  'PR',
-  'PE',
-  'PI',
-  'RJ',
-  'RN',
-  'RS',
-  'RO',
-  'RR',
-  'SC',
-  'SP',
-  'SE',
-  'TO',
-];
-
-const initialForm = {
-  name: '',
-  phone: '',
-  email: '',
-  street: '',
-  house_number: '',
-  neighborhood: '',
-  city: '',
-  state: '',
-  zip_code: '',
-  address_reference: '',
-  address: '',
-};
 
 function ClientUiIcon({ type }) {
   const props = {
@@ -70,59 +27,11 @@ function ClientUiIcon({ type }) {
           <path d="m14.5 5.5-6 6 6 6" />
         </svg>
       );
-    case 'save':
+    case 'edit':
       return (
         <svg {...props}>
-          <path d="M5 5.5h10l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19V5.5Z" />
-          <path d="M8 5.5V9h6V5.5M8 20.5v-6h8v6" />
-        </svg>
-      );
-    case 'person':
-      return (
-        <svg {...props}>
-          <path d="M12 12a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" />
-          <path d="M5 19.5a7 7 0 0 1 14 0" />
-        </svg>
-      );
-    case 'phone':
-      return (
-        <svg {...props}>
-          <path d="M6.5 4.5h2l1.2 4-1.7 1.7a15.7 15.7 0 0 0 5.8 5.8l1.7-1.7 4 1.2v2A1.5 1.5 0 0 1 18 19a13.5 13.5 0 0 1-13-13A1.5 1.5 0 0 1 6.5 4.5Z" />
-        </svg>
-      );
-    case 'mail':
-      return (
-        <svg {...props}>
-          <path d="M4.5 6.5h15v11h-15z" />
-          <path d="m5.5 7.5 6.5 5 6.5-5" />
-        </svg>
-      );
-    case 'location':
-      return (
-        <svg {...props}>
-          <path d="M12 21s6-4.35 6-10a6 6 0 1 0-12 0c0 5.65 6 10 6 10Z" />
-          <circle cx="12" cy="11" r="2.4" />
-        </svg>
-      );
-    case 'pin':
-      return (
-        <svg {...props}>
-          <path d="M12 20.5s5.5-4 5.5-9a5.5 5.5 0 1 0-11 0c0 5 5.5 9 5.5 9Z" />
-          <circle cx="12" cy="11.5" r="1.9" />
-        </svg>
-      );
-    case 'note':
-      return (
-        <svg {...props}>
-          <path d="M7 4.5h8l4 4V19A1.5 1.5 0 0 1 17.5 20.5h-11A1.5 1.5 0 0 1 5 19V6A1.5 1.5 0 0 1 6.5 4.5Z" />
-          <path d="M13 4.5V9h6M8 12h7M8 15.5h7" />
-        </svg>
-      );
-    case 'search':
-      return (
-        <svg {...props}>
-          <circle cx="11" cy="11" r="6.5" />
-          <path d="m16 16 3.5 3.5" />
+          <path d="m4.5 19.5 4.2-1 9.8-9.8-3.2-3.2-9.8 9.8-1 4.2Z" />
+          <path d="m13.8 7 3.2 3.2" />
         </svg>
       );
     case 'trash':
@@ -131,13 +40,6 @@ function ClientUiIcon({ type }) {
           <path d="M4.5 7.5h15" />
           <path d="M9.5 3.5h5l1 2.2h-7l1-2.2Z" />
           <path d="M7 7.5v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-10" />
-        </svg>
-      );
-    case 'edit':
-      return (
-        <svg {...props}>
-          <path d="m4.5 19.5 4.2-1 9.8-9.8-3.2-3.2-9.8 9.8-1 4.2Z" />
-          <path d="m13.8 7 3.2 3.2" />
         </svg>
       );
     case 'home':
@@ -180,18 +82,6 @@ function ClientUiIcon({ type }) {
         </svg>
       );
   }
-}
-
-function normalizeZipCode(value) {
-  const digits = String(value || '')
-    .replace(/\D/g, '')
-    .slice(0, 8);
-
-  if (digits.length <= 5) {
-    return digits;
-  }
-
-  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
 }
 
 function buildAddressSummary(client) {
@@ -254,11 +144,8 @@ export default function Clients() {
   const navigate = useNavigate();
   const { refreshSubscription } = useSubscription();
   const [clients, setClients] = useState([]);
-  const [form, setForm] = useState(initialForm);
-  const [editingClientId, setEditingClientId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [saving, setSaving] = useState(false);
-  const [searchingZip, setSearchingZip] = useState(false);
+  const [editingClient, setEditingClient] = useState(null);
 
   const loadClients = async () => {
     try {
@@ -282,108 +169,28 @@ export default function Clients() {
     [clients]
   );
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-
-    if (name === 'zip_code') {
-      setForm((current) => ({ ...current, zip_code: normalizeZipCode(value) }));
-      return;
-    }
-
-    if (name === 'state') {
-      setForm((current) => ({ ...current, state: value.toUpperCase().slice(0, 2) }));
-      return;
-    }
-
-    setForm((current) => ({ ...current, [name]: value }));
-  };
-
-  const handleClear = () => {
-    setForm(initialForm);
-    setEditingClientId(null);
-  };
-
-  const handleEdit = (client) => {
-    setEditingClientId(client.id);
-    setForm(Object.fromEntries(
-      Object.keys(initialForm).map((key) => [key, client[key] || ''])
-    ));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleZipLookup = async () => {
-    const zipDigits = String(form.zip_code || '').replace(/\D/g, '');
-
-    if (zipDigits.length !== 8) {
-      toast.error('Informe um CEP válido com 8 números.');
-      return;
-    }
-
-    setSearchingZip(true);
-
-    try {
-      const response = await fetch(`https://viacep.com.br/ws/${zipDigits}/json/`);
-      const data = await response.json();
-
-      if (data.erro) {
-        toast.error('CEP não encontrado.');
-        return;
-      }
-
-      setForm((current) => ({
-        ...current,
-        zip_code: normalizeZipCode(zipDigits),
-        street: data.logradouro || current.street,
-        neighborhood: data.bairro || current.neighborhood,
-        city: data.localidade || current.city,
-        state: data.uf || current.state,
-      }));
-
-      toast.success('Endereço preenchido com o CEP.');
-    } catch (error) {
-      toast.error('Não foi possível buscar o CEP agora.');
-    } finally {
-      setSearchingZip(false);
-    }
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!form.name.trim() || !form.phone.trim()) {
-      toast.error('Preencha pelo menos nome e telefone.');
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      if (editingClientId) {
-        await api.put(`/clients/${editingClientId}`, form);
-      } else {
-        await api.post('/clients', form);
-      }
-      setForm(initialForm);
-      setEditingClientId(null);
-      setCurrentPage(1);
-      toast.success(editingClientId ? 'Cliente atualizado com sucesso.' : 'Cliente cadastrado com sucesso.');
-      await Promise.all([loadClients(), refreshSubscription()]);
-    } catch (error) {
-      toast.error(error.response?.data?.error || 'Não foi possível salvar o cliente.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const handleDelete = async (id) => {
     try {
       await api.delete(`/clients/${id}`);
       toast.success('Cliente removido.');
-      if (editingClientId === id) handleClear();
+      setEditingClient((current) => (Number(current?.id) === Number(id) ? null : current));
       await Promise.all([loadClients(), refreshSubscription()]);
     } catch (error) {
       toast.error(error.response?.data?.error || 'Não foi possível remover o cliente.');
     }
+  };
+
+  const handleClientSaved = async (savedClient) => {
+    if (savedClient?.id) {
+      setClients((current) => current.map((client) => (
+        Number(client.id) === Number(savedClient.id) ? savedClient : client
+      )));
+    } else {
+      await loadClients();
+    }
+
+    setEditingClient(null);
+    refreshSubscription().catch(() => null);
   };
 
   const totalPages = Math.max(1, Math.ceil(clients.length / CLIENTS_PER_PAGE));
@@ -399,190 +206,19 @@ export default function Clients() {
         </button>
 
         <div className="client-intake-topbar-copy">
-          <h1>{editingClientId ? 'Editar cliente' : 'Novo cliente'}</h1>
-          <p>{editingClientId ? 'Atualize os dados do cliente' : 'Cadastre um novo cliente'}</p>
+          <h1>Clientes</h1>
+          <p>Consulte e mantenha atualizada a sua carteira</p>
         </div>
 
-        <button className="client-intake-save" form="client-intake-form" type="submit">
-          <ClientUiIcon type="save" />
-          <span>{editingClientId ? 'Salvar alterações' : 'Salvar cliente'}</span>
-        </button>
+        <Link className="client-intake-save" to="/budgets/new">
+          <ClientUiIcon type="plus" />
+          <span>Criar orçamento</span>
+        </Link>
       </header>
 
       <div className="client-intake-layout">
         <div className="client-intake-main">
           <PlanUsage className="fade-up" usageKey="clients" />
-          <form className="client-intake-form-shell fade-up" id="client-intake-form" onSubmit={handleSubmit}>
-            <div className="client-intake-form-head">
-              <div>
-                <p className="client-intake-kicker">Cadastro rápido</p>
-                <h2>Dados prontos para orçamento, agenda e atendimento</h2>
-                <span>Preencha o essencial para manter sua carteira organizada e responder mais rápido.</span>
-              </div>
-
-              <div className="client-intake-head-badge">
-                <strong>{stats.total}</strong>
-                <small>clientes ativos</small>
-              </div>
-            </div>
-
-            <section className="client-intake-section">
-              <div className="client-intake-section-title">
-                <div className="client-intake-section-icon">
-                  <ClientUiIcon type="person" />
-                </div>
-                <div>
-                  <h3>Dados pessoais</h3>
-                  <p>Nome, telefone e e-mail para contato imediato.</p>
-                </div>
-              </div>
-
-              <div className="client-intake-grid client-intake-grid--personal">
-                <label className="client-intake-field client-intake-field--full">
-                  <span>Nome completo *</span>
-                  <input name="name" onChange={handleChange} placeholder="Ex.: João da Silva" value={form.name} />
-                </label>
-
-                <label className="client-intake-field">
-                  <span>Telefone *</span>
-                  <div className="client-intake-inputwrap">
-                    <ClientUiIcon type="phone" />
-                    <input name="phone" onChange={handleChange} placeholder="(11) 99999-9999" value={form.phone} />
-                  </div>
-                </label>
-
-                <label className="client-intake-field">
-                  <span>E-mail</span>
-                  <div className="client-intake-inputwrap">
-                    <ClientUiIcon type="mail" />
-                    <input
-                      name="email"
-                      onChange={handleChange}
-                      placeholder="exemplo@email.com"
-                      type="email"
-                      value={form.email}
-                    />
-                  </div>
-                </label>
-              </div>
-            </section>
-
-            <section className="client-intake-section">
-              <div className="client-intake-section-title">
-                <div className="client-intake-section-icon">
-                  <ClientUiIcon type="location" />
-                </div>
-                <div>
-                  <h3>Endereço</h3>
-                  <p>Use o CEP para preencher rápido e revisar o local da instalação.</p>
-                </div>
-              </div>
-
-              <div className="client-intake-grid client-intake-grid--zip">
-                <label className="client-intake-field">
-                  <span>CEP</span>
-                  <div className="client-intake-inputwrap">
-                    <ClientUiIcon type="pin" />
-                    <input name="zip_code" onChange={handleChange} placeholder="00000-000" value={form.zip_code} />
-                  </div>
-                </label>
-
-                <button
-                  className="client-intake-zip-button"
-                  disabled={searchingZip}
-                  onClick={handleZipLookup}
-                  type="button"
-                >
-                  <ClientUiIcon type="search" />
-                  <span>{searchingZip ? 'Buscando...' : 'Buscar CEP'}</span>
-                </button>
-              </div>
-
-              <div className="client-intake-grid client-intake-grid--address">
-                <label className="client-intake-field client-intake-field--wide">
-                  <span>Logradouro</span>
-                  <input name="street" onChange={handleChange} placeholder="Rua, avenida, etc." value={form.street} />
-                </label>
-
-                <label className="client-intake-field client-intake-field--short">
-                  <span>Número</span>
-                  <input name="house_number" onChange={handleChange} placeholder="123" value={form.house_number} />
-                </label>
-
-                <label className="client-intake-field">
-                  <span>Bairro</span>
-                  <input
-                    name="neighborhood"
-                    onChange={handleChange}
-                    placeholder="Ex.: Centro"
-                    value={form.neighborhood}
-                  />
-                </label>
-
-                <label className="client-intake-field">
-                  <span>Cidade</span>
-                  <input name="city" onChange={handleChange} placeholder="Ex.: São Paulo" value={form.city} />
-                </label>
-
-                <label className="client-intake-field">
-                  <span>Estado</span>
-                  <select name="state" onChange={handleChange} value={form.state}>
-                    <option value="">Selecione</option>
-                    {BRAZIL_STATES.map((state) => (
-                      <option key={state} value={state}>
-                        {state}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-            </section>
-
-            <section className="client-intake-section">
-              <div className="client-intake-section-title">
-                <div className="client-intake-section-icon">
-                  <ClientUiIcon type="note" />
-                </div>
-                <div>
-                  <h3>Informações adicionais</h3>
-                  <p>Detalhes úteis para localização, acesso e atendimento no dia.</p>
-                </div>
-              </div>
-
-              <div className="client-intake-grid">
-                <label className="client-intake-field client-intake-field--full">
-                  <span>Observações</span>
-                  <textarea
-                    name="address_reference"
-                    onChange={handleChange}
-                    placeholder="Ex.: portão preto, bloco B, tocar interfone 3."
-                    rows="4"
-                    value={form.address_reference}
-                  />
-                </label>
-
-                <label className="client-intake-field client-intake-field--full">
-                  <span>Endereço livre (opcional)</span>
-                  <textarea
-                    name="address"
-                    onChange={handleChange}
-                    placeholder="Complemento livre para o cadastro"
-                    rows="3"
-                    value={form.address}
-                  />
-                </label>
-              </div>
-
-              <div className="client-intake-actions">
-                <button className="client-intake-primary" disabled={saving} type="submit">
-                  {saving ? 'Salvando...' : editingClientId ? 'Salvar alterações' : 'Salvar cliente'}
-                </button>
-                <button className="client-intake-secondary" onClick={handleClear} type="button">
-                  Limpar campos
-                </button>
-              </div>
-            </section>
-          </form>
 
           <section className="client-intake-mobile-list fade-up" style={{ animationDelay: '0.08s' }}>
             <div className="client-intake-panel-head">
@@ -593,9 +229,13 @@ export default function Clients() {
               <span>{stats.total}</span>
             </div>
 
+            <p className="client-intake-list-intro">
+              Para incluir um novo cliente, inicie um orçamento e escolha <strong>Criar cliente</strong>.
+            </p>
+
             <div className="client-intake-panel-list">
               {paginatedClients.map((client) => (
-                <ClientCard client={client} key={client.id} onDelete={handleDelete} onEdit={handleEdit} />
+                <ClientCard client={client} key={client.id} onDelete={handleDelete} onEdit={setEditingClient} />
               ))}
             </div>
 
@@ -609,7 +249,10 @@ export default function Clients() {
                   <ClientUiIcon type="users" />
                 </div>
                 <strong>Nenhum cliente cadastrado</strong>
-                <span>Assim que você salvar os primeiros contatos, eles vão aparecer organizados aqui.</span>
+                <span>Crie o primeiro cliente diretamente na criação de orçamento.</span>
+                <Link className="client-intake-primary mt-5" to="/budgets/new">
+                  Criar orçamento
+                </Link>
               </div>
             ) : null}
           </section>
@@ -640,37 +283,24 @@ export default function Clients() {
             </div>
           </section>
 
-          <section className="client-intake-side-card client-intake-side-card--list">
-            <div className="client-intake-panel-head">
-              <div>
-                <p className="client-intake-kicker">Clientes recentes</p>
-                <h3>Últimos cadastros</h3>
-              </div>
-              <span>{stats.total}</span>
-            </div>
-
-            <div className="client-intake-panel-list">
-              {paginatedClients.map((client) => (
-                  <ClientCard client={client} key={client.id} onDelete={handleDelete} onEdit={handleEdit} />
-              ))}
-            </div>
-
-            {clients.length > 0 ? (
-              <PaginationControls currentPage={normalizedPage} onPageChange={setCurrentPage} totalPages={totalPages} />
-            ) : null}
-
-            {clients.length === 0 ? (
-              <div className="client-intake-empty">
-                <div className="client-intake-empty-icon">
-                  <ClientUiIcon type="users" />
-                </div>
-                <strong>Nenhum cliente cadastrado</strong>
-                <span>Os próximos contatos salvos vão aparecer aqui para consulta rápida.</span>
-              </div>
-            ) : null}
+          <section className="client-intake-side-card client-intake-side-card--action">
+            <p className="client-intake-kicker">Novo atendimento</p>
+            <h3>Cadastre enquanto cria a proposta</h3>
+            <p>Assim o cliente já fica vinculado ao orçamento, sem cadastro duplicado.</p>
+            <Link className="client-intake-primary" to="/budgets/new">
+              Criar orçamento
+            </Link>
           </section>
         </aside>
       </div>
+
+      {editingClient ? (
+        <ClientForm
+          client={editingClient}
+          onClose={() => setEditingClient(null)}
+          onSaved={handleClientSaved}
+        />
+      ) : null}
 
       <nav className="client-intake-mobile-dock" aria-label="Atalhos do painel">
         <Link to="/dashboard">

@@ -5,6 +5,7 @@ import api from '../../services/api';
 import { formatCurrency } from '../../utils/formatters';
 import { useSubscription } from '../../contexts/SubscriptionContext';
 import PlanUsage, { ProFeatureNotice } from '../Subscription/PlanUsage';
+import ClientForm from '../Clients/ClientForm';
 
 const rollArea = 4.5;
 const INSTALLMENT_OPTIONS = Array.from({ length: 11 }, (_, index) => index + 2);
@@ -121,6 +122,7 @@ export default function BudgetForm() {
   const { isPro, refreshSubscription } = useSubscription();
   const [clients, setClients] = useState([]);
   const [clientId, setClientId] = useState('');
+  const [showClientForm, setShowClientForm] = useState(false);
   const [pricingMode, setPricingMode] = useState('roll');
   const [pricePerRoll, setPricePerRoll] = useState(0);
   const [pricePerSquareMeter, setPricePerSquareMeter] = useState(10);
@@ -271,6 +273,19 @@ export default function BudgetForm() {
     setInstallmentEnabled(false);
     setInstallmentsCount(3);
     setEnvironments([createEnvironment(profileDefaults.removalPrice)]);
+  };
+
+  const handleClientCreated = (client) => {
+    if (!client?.id) {
+      return;
+    }
+
+    setClients((current) => [
+      client,
+      ...current.filter((item) => Number(item.id) !== Number(client.id)),
+    ]);
+    setClientId(String(client.id));
+    refreshSubscription().catch(() => null);
   };
 
   const handleSubmit = async (event) => {
@@ -704,11 +719,31 @@ export default function BudgetForm() {
                   </div>
                 </div>
 
+                <div className="budget-modern-client-choice" role="group" aria-label="Seleção de cliente">
+                  <button
+                    aria-pressed="true"
+                    className="budget-modern-client-choice-button is-active"
+                    onClick={() => document.getElementById('budget-client-select')?.focus()}
+                    type="button"
+                  >
+                    Usar cliente existente
+                  </button>
+                  <button
+                    className="budget-modern-client-choice-button"
+                    onClick={() => setShowClientForm(true)}
+                    type="button"
+                  >
+                    Criar cliente
+                  </button>
+                </div>
+
                 <div className="budget-modern-field-grid">
                   <label className="budget-modern-field budget-modern-field--full">
                     <span>Cliente</span>
-                    <select onChange={(event) => setClientId(event.target.value)} required value={clientId}>
-                      <option value="">Selecione um cliente</option>
+                    <select id="budget-client-select" onChange={(event) => setClientId(event.target.value)} required value={clientId}>
+                      <option value="">
+                        {clients.length ? 'Selecione um cliente' : 'Ainda não há clientes cadastrados'}
+                      </option>
                       {clients.map((client) => (
                         <option key={client.id} value={client.id}>
                           {client.name}
@@ -792,6 +827,12 @@ export default function BudgetForm() {
           </aside>
         </div>
       </form>
+      {showClientForm ? (
+        <ClientForm
+          onClose={() => setShowClientForm(false)}
+          onSaved={handleClientCreated}
+        />
+      ) : null}
     </section>
   );
 }
