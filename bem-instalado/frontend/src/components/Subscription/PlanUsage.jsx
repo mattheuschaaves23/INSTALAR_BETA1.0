@@ -21,14 +21,14 @@ export default function PlanUsage({ usageKey, compact = false, className = '' })
   const reached = used >= limit;
 
   return (
-    <div className={`rounded-[22px] border border-[var(--line)] bg-[var(--surface-soft)] ${compact ? 'p-4' : 'p-5'} ${className}`}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className={`plan-usage rounded-[22px] border border-[var(--line)] bg-[var(--surface-soft)] ${compact ? 'p-4' : 'p-5'} ${className}`}>
+      <div className="plan-usage-head flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--gold-strong)]">
+          <p className="plan-usage-label text-xs font-semibold uppercase tracking-[0.14em] text-[var(--gold-strong)]">
             {LABELS[usageKey] || 'Uso do plano Grátis'}
           </p>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            <strong className="text-[var(--text)]">{used} de {limit}</strong> usados
+          <p className="plan-usage-copy mt-1 text-sm text-[var(--muted)]">
+            <strong>{used} de {limit}</strong> usados
             {reached ? ' • limite atingido' : ''}
           </p>
         </div>
@@ -36,9 +36,9 @@ export default function PlanUsage({ usageKey, compact = false, className = '' })
           Conhecer o Pro
         </Link>
       </div>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--line)]">
+      <div className="plan-usage-track mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--line)]">
         <span
-          className="block h-full rounded-full bg-[var(--gold-strong)] transition-[width] duration-500"
+          className="plan-usage-progress block h-full rounded-full bg-[var(--gold-strong)] transition-[width] duration-500"
           style={{ width: `${percent}%` }}
         />
       </div>
@@ -48,7 +48,7 @@ export default function PlanUsage({ usageKey, compact = false, className = '' })
 
 export function ProFeatureNotice({ children, title = 'Recurso do plano Pro', className = '' }) {
   return (
-    <div className={`rounded-[22px] border border-[var(--line)] bg-[var(--surface-soft)] p-5 ${className}`}>
+    <div className={`pro-feature-notice rounded-[22px] border border-[var(--line)] bg-[var(--surface-soft)] p-5 ${className}`}>
       <p className="eyebrow">{title}</p>
       <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{children}</p>
       <Link className="ghost-button mt-4 w-full sm:w-auto" to="/subscription">
