@@ -434,6 +434,7 @@ exports.getProfile = async (req, res) => {
           COALESCE(account_type, 'installer') AS account_type,
           name,
           email,
+          email_verified_at,
           phone,
           logo,
           installer_photo,
@@ -487,6 +488,10 @@ exports.getProfile = async (req, res) => {
 
     const profile = {
       ...rows[0],
+      // O front-end usa esta propriedade para decidir se mostra o aviso de
+      // confirmação. A sessão continua válida depois do clique no link, então
+      // o perfil recarregado precisa refletir a confirmação imediatamente.
+      email_verified: Boolean(rows[0]?.email_verified_at),
       installation_gallery: normalizeGallery(rows[0]?.installation_gallery),
     };
     return res.json(profile);
