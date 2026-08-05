@@ -5,8 +5,10 @@ export default function PageIntro({
   actions,
   stats = [],
 }) {
+  const visibleStats = stats.filter(Boolean).slice(0, 4);
+
   return (
-    <section className="page-intro-grid grid min-w-0 gap-5">
+    <section className={`page-intro-grid grid min-w-0 gap-5 ${visibleStats.length ? 'has-stats' : ''}`}>
       <div className="page-intro-main lux-panel fade-up min-w-0 overflow-hidden p-6 sm:p-7">
         <div className="relative z-10 min-w-0">
           <p className="eyebrow">{eyebrow}</p>
@@ -16,21 +18,23 @@ export default function PageIntro({
         </div>
       </div>
 
-      <div className="page-intro-stats grid min-w-0 gap-3 sm:grid-cols-3">
-        {stats.map((stat, index) => (
-          <article
-            className="metric-card page-intro-stat fade-up min-w-0 !p-5"
-            key={`${stat.label}-${index}`}
-            style={{ animationDelay: `${index * 0.08}s` }}
-          >
-            <p className="break-words text-[0.68rem] uppercase tracking-[0.18em] text-[var(--muted)]">
-              {stat.label}
-            </p>
-            <p className="metric-value mt-2 break-words">{stat.value}</p>
-            {stat.detail ? <p className="mt-2 break-words text-sm text-[var(--muted)]">{stat.detail}</p> : null}
-          </article>
-        ))}
-      </div>
+      {visibleStats.length ? (
+        <div className="page-intro-stats grid min-w-0 gap-3 sm:grid-cols-3">
+          {visibleStats.map((stat, index) => (
+            <article
+              className="metric-card page-intro-stat fade-up min-w-0 !p-5"
+              key={`${stat.label}-${index}`}
+              style={{ animationDelay: `${index * 0.08}s` }}
+            >
+              <p className="break-words text-[0.68rem] uppercase tracking-[0.18em] text-[var(--muted)]">
+                {stat.label}
+              </p>
+              <p className="metric-value mt-2 break-words">{stat.value}</p>
+              {stat.detail ? <p className="mt-2 break-words text-sm text-[var(--muted)]">{stat.detail}</p> : null}
+            </article>
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }

@@ -26940,3 +26940,1275 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
     width: 100%;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Painel do instalador: sistema visual unificado
+   -------------------------------------------------------------------------- */
+.dashboard-reference-layout {
+  --site-bg: #f4f6f7;
+  --site-bg-rgb: 244, 246, 247;
+  --site-panel: #ffffff;
+  --site-panel-rgb: 255, 255, 255;
+  --site-panel-soft: #f8fafb;
+  --site-panel-soft-rgb: 248, 250, 251;
+  --site-panel-elevated: #e9eef0;
+  --site-panel-elevated-rgb: 233, 238, 240;
+  --site-accent: #bb8427;
+  --site-accent-rgb: 187, 132, 39;
+  --site-accent-strong: #d7a648;
+  --site-accent-strong-rgb: 215, 166, 72;
+  --site-accent-deep: #815615;
+  --site-accent-deep-rgb: 129, 86, 21;
+  --site-accent-contrast: #231a0d;
+  --site-accent-soft: rgba(187, 132, 39, 0.12);
+  --site-accent-line: rgba(187, 132, 39, 0.36);
+  --site-accent-line-strong: rgba(187, 132, 39, 0.56);
+  --text: #1c272c;
+  --muted: #68767d;
+  --line: #dde4e7;
+  --route-line: #e2e8eb;
+  --route-line-gold: rgba(187, 132, 39, 0.38);
+  --route-panel: #ffffff;
+  --route-muted: #68767d;
+  --shadow: 0 14px 34px rgba(26, 38, 44, 0.07);
+  min-height: 100vh;
+  background: #f4f6f7 !important;
+  color: #1c272c;
+  font-family: 'Public Sans', 'Inter', 'Segoe UI', sans-serif;
+}
+
+.dashboard-reference-layout .ref-panel-shell,
+.dashboard-reference-layout .ref-panel-main,
+.dashboard-reference-layout .panel-flat-language,
+.dashboard-reference-layout .panel-flat-language .page-shell,
+.dashboard-reference-layout .panel-flat-language .agenda-modern-shell,
+.dashboard-reference-layout .panel-flat-language .client-intake-shell,
+.dashboard-reference-layout .panel-flat-language .opportunities-page,
+.dashboard-reference-layout .panel-flat-language .reviews-dashboard-shell,
+.dashboard-reference-layout .panel-flat-language .settings-page,
+.dashboard-reference-layout .budget-modern-shell,
+.dashboard-reference-layout .dashboard-neo-shell {
+  background: #f4f6f7 !important;
+  color: #1c272c;
+}
+
+.dashboard-reference-layout .page-title,
+.dashboard-reference-layout .metric-value,
+.dashboard-reference-layout .agenda-modern-hero h1,
+.dashboard-reference-layout .budget-modern-topbar-copy h1,
+.dashboard-reference-layout .client-intake-form-head h2,
+.dashboard-reference-layout .reviews-dashboard-hero h1,
+.dashboard-reference-layout .dashboard-neo-heading h1,
+.dashboard-reference-layout .subscription-hero h1 {
+  font-family: 'Public Sans', 'Inter', 'Segoe UI', sans-serif;
+  font-weight: 750;
+  letter-spacing: -0.045em;
+}
+
+.dashboard-reference-layout .eyebrow,
+.dashboard-reference-layout .agenda-modern-eyebrow,
+.dashboard-reference-layout .agenda-modern-section-label,
+.dashboard-reference-layout .client-intake-kicker,
+.dashboard-reference-layout .budget-modern-section-label {
+  color: #9a6b1d;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+/* Estrutura e navegação ---------------------------------------------------- */
+.dashboard-reference-layout .ref-panel-sidebar {
+  width: 248px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: #172126 !important;
+  box-shadow: 12px 0 32px rgba(18, 28, 32, 0.08);
+}
+
+.dashboard-reference-layout .ref-panel-shell.is-collapsed .ref-panel-sidebar {
+  width: 76px;
+}
+
+.dashboard-reference-layout .ref-panel-brand {
+  height: 70px;
+  padding-inline: 1.1rem;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dashboard-reference-layout .ref-panel-brand button {
+  color: rgba(255, 255, 255, 0.56);
+}
+
+.dashboard-reference-layout .ref-panel-user {
+  margin: 0.85rem 0.75rem 0;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.dashboard-reference-layout .ref-panel-user strong,
+.dashboard-reference-layout .ref-panel-account strong {
+  color: #f7fafb;
+}
+
+.dashboard-reference-layout .ref-panel-user small {
+  margin-top: 0.12rem;
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.dashboard-reference-layout .ref-panel-user .ref-panel-avatar::after {
+  border-color: #172126;
+}
+
+.dashboard-reference-layout .ref-panel-nav {
+  gap: 0.18rem;
+  padding: 0.8rem 0.65rem;
+}
+
+.dashboard-reference-layout .ref-panel-nav-block p {
+  margin: 1rem 0 0.42rem;
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+}
+
+.dashboard-reference-layout .ref-panel-nav-link,
+.dashboard-reference-layout .ref-panel-logout {
+  min-height: 2.55rem;
+  border-radius: 0.65rem;
+  color: rgba(244, 248, 250, 0.64);
+  font-size: 0.84rem;
+}
+
+.dashboard-reference-layout .ref-panel-nav-link:hover,
+.dashboard-reference-layout .ref-panel-logout:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.07);
+  transform: none;
+}
+
+.dashboard-reference-layout .ref-panel-nav-link.is-active {
+  color: #f6d68d;
+  background: rgba(215, 166, 72, 0.13);
+}
+
+.dashboard-reference-layout .ref-panel-nav-link.is-active::before {
+  top: 0.48rem;
+  bottom: 0.48rem;
+  width: 2px;
+  background: #d7a648;
+}
+
+.dashboard-reference-layout .ref-panel-nav-link em {
+  background: #d7a648;
+  color: #231a0d;
+}
+
+.dashboard-reference-layout .ref-panel-main {
+  padding-left: 248px;
+  background: #f4f6f7 !important;
+}
+
+.dashboard-reference-layout .ref-panel-shell.is-collapsed .ref-panel-main {
+  padding-left: 76px;
+}
+
+.dashboard-reference-layout .ref-panel-topbar {
+  height: 70px;
+  padding-inline: 2rem;
+  border-color: #e1e7e9;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 0 rgba(20, 34, 40, 0.02);
+}
+
+.dashboard-reference-layout .ref-panel-search,
+.dashboard-reference-layout .ref-panel-date,
+.dashboard-reference-layout .ref-panel-bell,
+.dashboard-reference-layout .ref-panel-account {
+  border-color: #e0e6e8;
+  background: #ffffff;
+  color: #627077;
+  box-shadow: none;
+}
+
+.dashboard-reference-layout .ref-panel-search {
+  min-height: 2.5rem;
+  border-radius: 0.65rem;
+}
+
+.dashboard-reference-layout .ref-panel-search input {
+  color: #202b30;
+}
+
+.dashboard-reference-layout .ref-panel-account {
+  border-radius: 0.65rem;
+}
+
+.dashboard-reference-layout .ref-panel-account strong {
+  color: #26343a;
+}
+
+.dashboard-reference-layout .ref-panel-content {
+  width: min(100%, 1540px);
+  gap: 1.75rem;
+  padding: 2rem 2.25rem 3rem;
+}
+
+/* Tipografia, ações e superfícies ----------------------------------------- */
+.dashboard-reference-layout .gold-button,
+.dashboard-reference-layout .budget-modern-primary-cta,
+.dashboard-reference-layout .budget-modern-save-button,
+.dashboard-reference-layout .agenda-modern-primary-button,
+.dashboard-reference-layout .client-intake-primary,
+.dashboard-reference-layout .dashboard-neo-primary {
+  min-height: 2.7rem;
+  border: 1px solid #b47a1f;
+  border-radius: 0.62rem;
+  background: #bd8529;
+  color: #ffffff;
+  box-shadow: 0 7px 16px rgba(151, 98, 23, 0.16);
+  font-size: 0.86rem;
+  font-weight: 750;
+}
+
+.dashboard-reference-layout .gold-button:hover,
+.dashboard-reference-layout .budget-modern-primary-cta:hover,
+.dashboard-reference-layout .budget-modern-save-button:hover,
+.dashboard-reference-layout .agenda-modern-primary-button:hover,
+.dashboard-reference-layout .client-intake-primary:hover,
+.dashboard-reference-layout .dashboard-neo-primary:hover {
+  background: #a9721d;
+  box-shadow: 0 10px 22px rgba(151, 98, 23, 0.2);
+  transform: translateY(-1px);
+}
+
+.dashboard-reference-layout .ghost-button,
+.dashboard-reference-layout .budget-modern-secondary-cta,
+.dashboard-reference-layout .agenda-modern-action,
+.dashboard-reference-layout .agenda-modern-icon-button,
+.dashboard-reference-layout .client-intake-secondary,
+.dashboard-reference-layout .dashboard-neo-ghost {
+  min-height: 2.65rem;
+  border: 1px solid #dce4e6;
+  border-radius: 0.62rem;
+  background: #ffffff;
+  color: #33434a;
+  box-shadow: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.dashboard-reference-layout .ghost-button:hover,
+.dashboard-reference-layout .budget-modern-secondary-cta:hover,
+.dashboard-reference-layout .agenda-modern-action:hover,
+.dashboard-reference-layout .agenda-modern-icon-button:hover,
+.dashboard-reference-layout .client-intake-secondary:hover,
+.dashboard-reference-layout .dashboard-neo-ghost:hover {
+  border-color: #c6d0d4;
+  background: #f8fafb;
+  color: #1d2b30;
+  transform: none;
+}
+
+.dashboard-reference-layout .field-label,
+.dashboard-reference-layout .budget-modern-field > span,
+.dashboard-reference-layout .client-intake-field > span {
+  color: #4e5d64;
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+}
+
+.dashboard-reference-layout .field-input,
+.dashboard-reference-layout .field-select,
+.dashboard-reference-layout .field-textarea,
+.dashboard-reference-layout .budget-modern-field input,
+.dashboard-reference-layout .budget-modern-field select,
+.dashboard-reference-layout .budget-modern-field textarea,
+.dashboard-reference-layout .client-intake-field input,
+.dashboard-reference-layout .client-intake-field select,
+.dashboard-reference-layout .client-intake-field textarea {
+  min-height: 2.7rem;
+  border-color: #dbe3e6;
+  border-radius: 0.58rem;
+  background: #ffffff;
+  color: #223037;
+  box-shadow: none;
+}
+
+.dashboard-reference-layout .field-textarea,
+.dashboard-reference-layout textarea.field-input,
+.dashboard-reference-layout .budget-modern-field textarea,
+.dashboard-reference-layout .client-intake-field textarea {
+  min-height: 6rem;
+}
+
+.dashboard-reference-layout .field-input:focus,
+.dashboard-reference-layout .field-select:focus,
+.dashboard-reference-layout .field-textarea:focus,
+.dashboard-reference-layout .budget-modern-field input:focus,
+.dashboard-reference-layout .budget-modern-field select:focus,
+.dashboard-reference-layout .budget-modern-field textarea:focus,
+.dashboard-reference-layout .client-intake-field input:focus,
+.dashboard-reference-layout .client-intake-field select:focus,
+.dashboard-reference-layout .client-intake-field textarea:focus {
+  border-color: #bc852b;
+  box-shadow: 0 0 0 3px rgba(187, 132, 39, 0.12);
+}
+
+.dashboard-reference-layout .status-pill,
+.dashboard-reference-layout .agenda-modern-status,
+.dashboard-reference-layout .dashboard-neo-status,
+.dashboard-reference-layout .ref-panel-status-pill {
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.dashboard-reference-layout .empty-state,
+.dashboard-reference-layout .opportunity-empty,
+.dashboard-reference-layout .agenda-modern-empty-state,
+.dashboard-reference-layout .reviews-dashboard-empty {
+  border: 1px dashed #ccd7da;
+  border-radius: 0.85rem;
+  background: #fbfcfc;
+  color: #69777e;
+}
+
+/* Cabeçalhos e listas usadas por várias rotas ----------------------------- */
+.dashboard-reference-layout.panel-flat-language .page-intro-grid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0;
+  border: 0;
+}
+
+.dashboard-reference-layout.panel-flat-language .page-intro-main {
+  display: block;
+  padding: 0 !important;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.dashboard-reference-layout.panel-flat-language .page-intro-main::before,
+.dashboard-reference-layout.panel-flat-language .page-intro-main::after,
+.dashboard-reference-layout.panel-flat-language .page-intro-stat::before,
+.dashboard-reference-layout.panel-flat-language .page-intro-stat::after {
+  display: none;
+}
+
+.dashboard-reference-layout.panel-flat-language .page-intro-main .page-title {
+  margin-top: 0.45rem;
+  color: #1d2a30;
+  font-size: clamp(1.75rem, 2.8vw, 2.45rem);
+  line-height: 1.08;
+}
+
+.dashboard-reference-layout.panel-flat-language .page-intro-main .page-copy {
+  margin-top: 0.55rem;
+  color: #68767d;
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+.dashboard-reference-layout.panel-flat-language .page-intro-actions {
+  margin-top: 1rem;
+}
+
+.dashboard-reference-layout.panel-flat-language .page-intro-stats {
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 0.75rem;
+  border: 0;
+  background: transparent;
+}
+
+.dashboard-reference-layout.panel-flat-language .page-intro-stat {
+  min-height: 0;
+  padding: 1rem 1.1rem !important;
+  border: 1px solid #e0e7e9;
+  border-radius: 0.85rem;
+  background: #ffffff;
+  box-shadow: 0 5px 15px rgba(24, 37, 42, 0.035);
+}
+
+.dashboard-reference-layout.panel-flat-language .page-intro-stat .metric-value {
+  color: #26343a;
+  font-size: 1.65rem;
+}
+
+.dashboard-reference-layout.panel-flat-language .page-shell .lux-panel,
+.dashboard-reference-layout.panel-flat-language .page-shell .lux-panel-soft,
+.dashboard-reference-layout .list-surface,
+.dashboard-reference-layout .notification-surface {
+  padding: 1.35rem !important;
+  border: 1px solid #e0e7e9;
+  border-radius: 1rem !important;
+  background: #ffffff;
+  box-shadow: 0 7px 18px rgba(24, 37, 42, 0.04);
+  backdrop-filter: none;
+}
+
+.dashboard-reference-layout.panel-flat-language .page-shell .lux-panel::before,
+.dashboard-reference-layout.panel-flat-language .page-shell .lux-panel::after,
+.dashboard-reference-layout.panel-flat-language .page-shell .lux-panel-soft::before,
+.dashboard-reference-layout.panel-flat-language .page-shell .lux-panel-soft::after {
+  display: none;
+}
+
+.dashboard-reference-layout.panel-flat-language .page-shell .list-row {
+  padding: 1.05rem 0;
+  border: 0;
+  border-bottom: 1px solid #edf0f1;
+  border-radius: 0;
+  background: transparent;
+}
+
+.dashboard-reference-layout.panel-flat-language .page-shell .list-row:first-child {
+  border-top: 0;
+}
+
+.dashboard-reference-layout.panel-flat-language .page-shell .list-row:last-child {
+  border-bottom: 0;
+}
+
+.dashboard-reference-layout.panel-flat-language .page-shell .list-row:hover {
+  background: #fbfcfc;
+}
+
+/* Dashboard ---------------------------------------------------------------- */
+.dashboard-reference-layout .dashboard-neo-shell {
+  display: grid;
+  gap: 1.25rem;
+  padding: 0;
+}
+
+.dashboard-reference-layout .dashboard-neo-toolbar,
+.dashboard-reference-layout .dashboard-neo-frame,
+.dashboard-reference-layout .dashboard-neo-card,
+.dashboard-reference-layout .dashboard-neo-panel {
+  border: 1px solid #e0e7e9;
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 7px 18px rgba(24, 37, 42, 0.04);
+}
+
+.dashboard-reference-layout .dashboard-neo-toolbar {
+  min-height: 4.25rem;
+  padding: 0.75rem 1rem;
+}
+
+.dashboard-reference-layout .dashboard-neo-search,
+.dashboard-reference-layout .dashboard-neo-range,
+.dashboard-reference-layout .dashboard-neo-select,
+.dashboard-reference-layout .dashboard-neo-nav {
+  border-color: #dce4e6;
+  border-radius: 0.6rem;
+  background: #ffffff;
+  color: #53636a;
+}
+
+.dashboard-reference-layout .dashboard-neo-frame {
+  padding: 1.35rem;
+}
+
+.dashboard-reference-layout .dashboard-neo-heading h1 {
+  color: #1f2d33;
+  font-size: clamp(1.65rem, 3vw, 2.3rem);
+}
+
+.dashboard-reference-layout .dashboard-neo-kicker,
+.dashboard-reference-layout .dashboard-neo-card-label,
+.dashboard-reference-layout .dashboard-neo-panel-head p,
+.dashboard-reference-layout .dashboard-neo-mini-title {
+  color: #718087;
+}
+
+.dashboard-reference-layout .dashboard-neo-metrics {
+  gap: 0.75rem;
+}
+
+.dashboard-reference-layout .dashboard-neo-card {
+  min-height: 8.25rem;
+  padding: 1.05rem;
+}
+
+.dashboard-reference-layout .dashboard-neo-card strong,
+.dashboard-reference-layout .dashboard-neo-panel h2,
+.dashboard-reference-layout .dashboard-neo-panel h3 {
+  color: #26343a;
+}
+
+.dashboard-reference-layout .dashboard-neo-card-top > span,
+.dashboard-reference-layout .dashboard-neo-metric-icon {
+  border-radius: 0.6rem;
+  background: #fff5df;
+  color: #a87017;
+}
+
+.dashboard-reference-layout .dashboard-neo-panel {
+  padding: 1.2rem;
+}
+
+.dashboard-reference-layout .dashboard-neo-table th {
+  color: #718087;
+  font-size: 0.72rem;
+}
+
+.dashboard-reference-layout .dashboard-neo-table td {
+  border-color: #edf0f1;
+  color: #33434a;
+}
+
+.dashboard-reference-layout .dashboard-neo-chart-gridline {
+  stroke: #e4eaec;
+}
+
+.dashboard-reference-layout .dashboard-neo-chart-line,
+.dashboard-reference-layout .dashboard-neo-chart-point {
+  stroke: #b77e25;
+}
+
+.dashboard-reference-layout .dashboard-neo-chart-area {
+  fill: rgba(187, 132, 39, 0.14);
+}
+
+/* Agenda, clientes e oportunidades ---------------------------------------- */
+.dashboard-reference-layout .agenda-modern-hero,
+.dashboard-reference-layout .agenda-modern-calendar-card,
+.dashboard-reference-layout .agenda-modern-day-panel,
+.dashboard-reference-layout .agenda-modern-summary-card,
+.dashboard-reference-layout .client-intake-form-shell,
+.dashboard-reference-layout .client-intake-side-card,
+.dashboard-reference-layout .client-intake-mobile-list,
+.dashboard-reference-layout .opportunity-row,
+.dashboard-reference-layout .marketplace-proposal,
+.dashboard-reference-layout .budget-modern-calculator-card,
+.dashboard-reference-layout .budget-modern-summary-panel {
+  border: 1px solid #e0e7e9;
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 7px 18px rgba(24, 37, 42, 0.04);
+}
+
+.dashboard-reference-layout .agenda-modern-hero,
+.dashboard-reference-layout .client-intake-form-shell,
+.dashboard-reference-layout .budget-modern-calculator-card {
+  padding: 1.35rem;
+}
+
+.dashboard-reference-layout .agenda-modern-hero h1,
+.dashboard-reference-layout .client-intake-form-head h2,
+.dashboard-reference-layout .budget-modern-topbar-copy h1 {
+  color: #1f2d33;
+  font-size: clamp(1.55rem, 2.8vw, 2.2rem);
+}
+
+.dashboard-reference-layout .agenda-modern-hero-copy > p,
+.dashboard-reference-layout .client-intake-form-head span,
+.dashboard-reference-layout .budget-modern-topbar-copy p {
+  color: #68767d;
+}
+
+.dashboard-reference-layout .agenda-modern-hero-metrics,
+.dashboard-reference-layout .client-intake-stat-grid {
+  gap: 0.75rem;
+}
+
+.dashboard-reference-layout .agenda-modern-hero-metrics article,
+.dashboard-reference-layout .client-intake-stat-grid article {
+  min-height: 0;
+  padding: 0.9rem;
+  border: 1px solid #e4eaec;
+  border-radius: 0.75rem;
+  background: #fbfcfc;
+}
+
+.dashboard-reference-layout .agenda-modern-calendar-card,
+.dashboard-reference-layout .agenda-modern-day-panel,
+.dashboard-reference-layout .agenda-modern-summary-card,
+.dashboard-reference-layout .client-intake-side-card,
+.dashboard-reference-layout .client-intake-mobile-list {
+  padding: 1.2rem;
+}
+
+.dashboard-reference-layout .agenda-modern-day,
+.dashboard-reference-layout .agenda-modern-appointment,
+.dashboard-reference-layout .client-intake-client-card {
+  border-color: #e1e8ea;
+  background: #ffffff;
+}
+
+.dashboard-reference-layout .agenda-modern-day[data-selected='true'] {
+  border-color: #c79034;
+  background: #fff8e9;
+}
+
+.dashboard-reference-layout .agenda-modern-day-marker,
+.dashboard-reference-layout .agenda-modern-legend .has-events {
+  background: #bd8529;
+}
+
+.dashboard-reference-layout .opportunity-toolbar {
+  gap: 0.85rem;
+  padding-bottom: 0;
+  border: 0;
+}
+
+.dashboard-reference-layout .opportunity-filter-tabs {
+  gap: 0.35rem;
+  padding: 0.3rem;
+  border: 1px solid #dfe6e8;
+  border-radius: 0.72rem;
+  background: #ffffff;
+}
+
+.dashboard-reference-layout .opportunity-filter-tabs button {
+  min-height: 2.35rem;
+  padding-inline: 0.85rem;
+  border: 0;
+  border-radius: 0.5rem;
+  color: #65757c;
+  font-size: 0.8rem;
+}
+
+.dashboard-reference-layout .opportunity-filter-tabs button.is-active {
+  background: #fff4dd;
+  color: #8c601b;
+  box-shadow: none;
+}
+
+.dashboard-reference-layout .opportunity-list {
+  gap: 0.75rem;
+}
+
+.dashboard-reference-layout .opportunity-row {
+  padding: 1.15rem;
+}
+
+.dashboard-reference-layout .opportunity-row:hover {
+  border-color: #cbd6d9;
+  box-shadow: 0 10px 22px rgba(24, 37, 42, 0.06);
+}
+
+.dashboard-reference-layout .opportunity-icon {
+  border-radius: 0.7rem;
+  background: #fff4dd;
+  color: #a87017;
+}
+
+.dashboard-reference-layout .opportunity-meta span,
+.dashboard-reference-layout .opportunity-tags span {
+  border: 1px solid #e3e9eb;
+  border-radius: 999px;
+  background: #f8fafb;
+  color: #63737a;
+}
+
+/* Orçamentos --------------------------------------------------------------- */
+.dashboard-reference-layout .budget-modern-shell {
+  gap: 1.25rem;
+}
+
+.dashboard-reference-layout .budget-modern-topbar {
+  padding: 0 0 1.1rem;
+  border-bottom: 1px solid #dfe6e8;
+  background: transparent;
+}
+
+.dashboard-reference-layout .budget-modern-back-button {
+  border: 1px solid #dce4e6;
+  border-radius: 0.58rem;
+  background: #ffffff;
+  color: #43535a;
+}
+
+.dashboard-reference-layout .budget-modern-stepper,
+.dashboard-reference-layout .budget-modern-section,
+.dashboard-reference-layout .budget-modern-environment,
+.dashboard-reference-layout .budget-modern-payment-box,
+.dashboard-reference-layout .budget-modern-client-box {
+  border-color: #e3e9eb;
+  background: #fbfcfc;
+}
+
+.dashboard-reference-layout .budget-modern-step-bubble,
+.dashboard-reference-layout .budget-modern-head-icon {
+  background: #fff4dd;
+  color: #9b6816;
+}
+
+.dashboard-reference-layout .budget-modern-summary-panel {
+  padding: 1.25rem;
+}
+
+.dashboard-reference-layout .budget-modern-total-box {
+  border-color: #e1c27e;
+  background: #fff8e9;
+  color: #402e14;
+}
+
+.dashboard-reference-layout .budget-modern-mode-switch,
+.dashboard-reference-layout .budget-modern-client-choice {
+  border-color: #dde5e7;
+  background: #ffffff;
+}
+
+.dashboard-reference-layout .budget-modern-mode-switch button.is-active,
+.dashboard-reference-layout .budget-modern-client-choice-button.is-active {
+  background: #fff4dd;
+  color: #8c601b;
+}
+
+/* Avaliações, assinatura, configurações e suporte ------------------------ */
+.dashboard-reference-layout .reviews-dashboard-hero,
+.dashboard-reference-layout .reviews-dashboard-metric,
+.dashboard-reference-layout .reviews-dashboard-panel,
+.dashboard-reference-layout .subscription-hero,
+.dashboard-reference-layout .subscription-card,
+.dashboard-reference-layout .settings-panel,
+.dashboard-reference-layout .support-shell,
+.dashboard-reference-layout .support-message,
+.dashboard-reference-layout .installer-app-download {
+  border: 1px solid #e0e7e9;
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 7px 18px rgba(24, 37, 42, 0.04);
+}
+
+.dashboard-reference-layout .reviews-dashboard-hero,
+.dashboard-reference-layout .subscription-hero {
+  padding: 1.45rem;
+}
+
+.dashboard-reference-layout .reviews-dashboard-hero h1,
+.dashboard-reference-layout .subscription-hero h1 {
+  color: #1f2d33;
+  font-size: clamp(1.65rem, 2.8vw, 2.35rem);
+}
+
+.dashboard-reference-layout .reviews-dashboard-hero-copy > span,
+.dashboard-reference-layout .subscription-hero p,
+.dashboard-reference-layout .reviews-dashboard-panel-head p {
+  color: #68767d;
+}
+
+.dashboard-reference-layout .reviews-dashboard-score-card {
+  border-color: #e3c780;
+  border-radius: 0.85rem;
+  background: #fff8e9;
+  color: #3c2d15;
+}
+
+.dashboard-reference-layout .reviews-dashboard-metrics {
+  gap: 0.75rem;
+}
+
+.dashboard-reference-layout .reviews-dashboard-metric,
+.dashboard-reference-layout .reviews-dashboard-panel,
+.dashboard-reference-layout .settings-panel,
+.dashboard-reference-layout .subscription-card {
+  padding: 1.15rem;
+}
+
+.dashboard-reference-layout .reviews-list-item {
+  border-color: #edf0f1;
+}
+
+.dashboard-reference-layout .reviews-list-avatar,
+.dashboard-reference-layout .reviews-dashboard-metric > span {
+  background: #fff4dd;
+  color: #9b6816;
+}
+
+.dashboard-reference-layout .reviews-filter-tabs button,
+.dashboard-reference-layout .settings-segment button {
+  border-color: #dce4e6;
+  background: #ffffff;
+  color: #64747b;
+}
+
+.dashboard-reference-layout .reviews-filter-tabs button.is-active,
+.dashboard-reference-layout .settings-segment button.is-selected {
+  border-color: #d6ac61;
+  background: #fff4dd;
+  color: #875a18;
+}
+
+.dashboard-reference-layout .settings-live-preview,
+.dashboard-reference-layout .settings-control-block,
+.dashboard-reference-layout .plan-usage,
+.dashboard-reference-layout .pro-feature-notice {
+  border-color: #e1e8ea;
+  background: #f8fafb;
+}
+
+.dashboard-reference-layout .installer-app-download {
+  color: #26343a;
+}
+
+.dashboard-reference-layout .installer-app-download-copy h2,
+.dashboard-reference-layout .installer-app-download-copy p {
+  color: inherit;
+}
+
+.dashboard-reference-layout .installer-app-download-copy p {
+  color: #68767d;
+}
+
+/* Ajustes de leitura e telas pequenas ------------------------------------- */
+.dashboard-reference-layout .fade-up {
+  animation-duration: 260ms;
+}
+
+@media (max-width: 1180px) {
+  .dashboard-reference-layout .ref-panel-content {
+    padding-inline: 1.5rem;
+  }
+
+  .dashboard-reference-layout .dashboard-neo-main-grid,
+  .dashboard-reference-layout .agenda-modern-layout,
+  .dashboard-reference-layout .budget-modern-layout,
+  .dashboard-reference-layout .client-intake-layout {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 860px) {
+  .dashboard-reference-layout .ref-panel-main,
+  .dashboard-reference-layout .ref-panel-shell.is-collapsed .ref-panel-main {
+    padding-left: 0;
+  }
+
+  .dashboard-reference-layout .ref-panel-mobile-header {
+    min-height: 4rem;
+    border-color: #e1e7e9;
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .dashboard-reference-layout .ref-panel-content {
+    gap: 1.25rem;
+    padding: 1.15rem 1rem 6.5rem;
+  }
+
+  .dashboard-reference-layout .dashboard-neo-frame,
+  .dashboard-reference-layout .agenda-modern-hero,
+  .dashboard-reference-layout .client-intake-form-shell,
+  .dashboard-reference-layout .budget-modern-calculator-card,
+  .dashboard-reference-layout .reviews-dashboard-hero,
+  .dashboard-reference-layout .subscription-hero {
+    padding: 1rem;
+  }
+
+  .dashboard-reference-layout .page-intro-stats,
+  .dashboard-reference-layout .dashboard-neo-metrics,
+  .dashboard-reference-layout .reviews-dashboard-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .dashboard-reference-layout .ref-panel-content {
+    padding-inline: 0.85rem;
+  }
+
+  .dashboard-reference-layout.panel-flat-language .page-intro-main .page-title,
+  .dashboard-reference-layout .dashboard-neo-heading h1,
+  .dashboard-reference-layout .agenda-modern-hero h1,
+  .dashboard-reference-layout .reviews-dashboard-hero h1 {
+    font-size: 1.55rem;
+  }
+
+  .dashboard-reference-layout .page-intro-stats,
+  .dashboard-reference-layout .dashboard-neo-metrics,
+  .dashboard-reference-layout .agenda-modern-hero-metrics,
+  .dashboard-reference-layout .client-intake-stat-grid,
+  .dashboard-reference-layout .reviews-dashboard-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-reference-layout .dashboard-neo-toolbar,
+  .dashboard-reference-layout .opportunity-toolbar,
+  .dashboard-reference-layout .agenda-modern-hero-actions,
+  .dashboard-reference-layout .reviews-dashboard-actions {
+    align-items: stretch;
+  }
+
+  .dashboard-reference-layout .gold-button,
+  .dashboard-reference-layout .ghost-button,
+  .dashboard-reference-layout .budget-modern-primary-cta,
+  .dashboard-reference-layout .budget-modern-secondary-cta {
+    width: 100%;
+  }
+}
+
+/* Telas com estruturas próprias: o mesmo acabamento, sem espaço decorativo */
+.dashboard-reference-layout .subscription-v3 {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.dashboard-reference-layout .subscription-v3-hero,
+.dashboard-reference-layout .subscription-v3-current,
+.dashboard-reference-layout .subscription-v3-plan,
+.dashboard-reference-layout .subscription-v3-usage,
+.dashboard-reference-layout .subscription-v3-pro-active,
+.dashboard-reference-layout .subscription-v3-pending,
+.dashboard-reference-layout .installer-app-page-header,
+.dashboard-reference-layout .installer-app-download--page,
+.dashboard-reference-layout .installer-app-page-notes article {
+  border: 1px solid #dde4e7 !important;
+  border-radius: 0.9rem;
+  background: #ffffff !important;
+  box-shadow: 0 10px 26px rgba(26, 38, 44, 0.055) !important;
+}
+
+.dashboard-reference-layout .subscription-v3-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.36fr);
+  gap: 1.5rem;
+  align-items: center;
+  min-height: 0;
+  padding: 1.6rem;
+  overflow: hidden;
+}
+
+.dashboard-reference-layout .subscription-v3-orbit,
+.dashboard-reference-layout .subscription-v3-plan-shine,
+.dashboard-reference-layout .installer-app-download-orbit {
+  display: none;
+}
+
+.dashboard-reference-layout .subscription-v3-kicker,
+.dashboard-reference-layout .installer-app-download-kicker {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 1.75rem;
+  padding: 0.28rem 0.55rem;
+  border: 1px solid rgba(187, 132, 39, 0.3);
+  border-radius: 999px;
+  background: rgba(187, 132, 39, 0.1);
+  color: #815615 !important;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.dashboard-reference-layout .subscription-v3-hero h1,
+.dashboard-reference-layout .installer-app-page-header h1,
+.dashboard-reference-layout .installer-app-download-copy h2 {
+  margin: 0.55rem 0;
+  color: #1c272c !important;
+  font-size: clamp(1.55rem, 2.5vw, 2.2rem);
+  font-weight: 780;
+  letter-spacing: -0.045em;
+  line-height: 1.07;
+}
+
+.dashboard-reference-layout .subscription-v3-hero p,
+.dashboard-reference-layout .subscription-v3-plan-description,
+.dashboard-reference-layout .installer-app-page-header p,
+.dashboard-reference-layout .installer-app-download-copy p {
+  color: #68767d !important;
+  line-height: 1.58;
+}
+
+.dashboard-reference-layout .subscription-v3-hero-points {
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.dashboard-reference-layout .subscription-v3-hero-points span {
+  color: #405058 !important;
+  font-size: 0.82rem;
+}
+
+.dashboard-reference-layout .subscription-v3-current {
+  min-height: 0;
+  padding: 1rem;
+  background: #fffaf0 !important;
+  border-color: #ead8b4 !important;
+  box-shadow: none !important;
+}
+
+.dashboard-reference-layout .subscription-v3-current :is(span, strong, small) {
+  color: #4a3a1c !important;
+}
+
+.dashboard-reference-layout .subscription-v3-plans {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.dashboard-reference-layout .subscription-v3-plan {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 1.35rem;
+  overflow: visible;
+}
+
+.dashboard-reference-layout .subscription-v3-plan.is-current {
+  border-color: #d8b46e !important;
+  box-shadow: 0 12px 30px rgba(151, 103, 29, 0.1) !important;
+}
+
+.dashboard-reference-layout .subscription-v3-plan-pro {
+  background: #fffdf9 !important;
+}
+
+.dashboard-reference-layout .subscription-v3-plan h2,
+.dashboard-reference-layout .subscription-v3-price strong,
+.dashboard-reference-layout .subscription-v3-usage h2,
+.dashboard-reference-layout .subscription-v3-pro-active h2,
+.dashboard-reference-layout .subscription-v3-pending h2 {
+  color: #1c272c !important;
+}
+
+.dashboard-reference-layout .subscription-v3-price {
+  color: #1c272c !important;
+}
+
+.dashboard-reference-layout .subscription-v3-features {
+  display: grid;
+  gap: 0.58rem;
+  margin: 1.1rem 0 1.35rem;
+}
+
+.dashboard-reference-layout .subscription-v3-features li {
+  color: #4b5b62 !important;
+  font-size: 0.86rem;
+}
+
+.dashboard-reference-layout .subscription-v3-current-badge,
+.dashboard-reference-layout .subscription-v3-pro-badge {
+  border-color: #e1c076 !important;
+  background: #fff4d8 !important;
+  color: #815615 !important;
+}
+
+.dashboard-reference-layout .subscription-v3-primary,
+.dashboard-reference-layout .installer-app-download-button {
+  min-height: 2.7rem;
+  border: 1px solid #b47a1f !important;
+  border-radius: 0.62rem !important;
+  background: #bd8529 !important;
+  color: #ffffff !important;
+  box-shadow: 0 7px 16px rgba(151, 98, 23, 0.14) !important;
+  font-weight: 750;
+}
+
+.dashboard-reference-layout .subscription-v3-secondary,
+.dashboard-reference-layout .subscription-v3-profile-link,
+.dashboard-reference-layout .installer-app-download-button--ios {
+  min-height: 2.7rem;
+  border: 1px solid #dce4e6 !important;
+  border-radius: 0.62rem !important;
+  background: #ffffff !important;
+  color: #33434a !important;
+  box-shadow: none !important;
+  font-weight: 700;
+}
+
+.dashboard-reference-layout .subscription-v3-usage,
+.dashboard-reference-layout .subscription-v3-pro-active,
+.dashboard-reference-layout .subscription-v3-pending {
+  padding: 1.35rem;
+}
+
+.dashboard-reference-layout .subscription-v3-usage-item,
+.dashboard-reference-layout .subscription-v3-payment-methods,
+.dashboard-reference-layout .subscription-v3-pending-body {
+  border-color: #e1e7e9 !important;
+  background: #f8fafb !important;
+}
+
+.dashboard-reference-layout .subscription-v3-usage-track {
+  background: #e7edef !important;
+}
+
+.dashboard-reference-layout .subscription-v3-usage-track span {
+  background: #bd8529 !important;
+}
+
+.dashboard-reference-layout .subscription-v3-footer {
+  color: #77858b !important;
+  text-align: left;
+}
+
+.dashboard-reference-layout .installer-app-page {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.dashboard-reference-layout .installer-app-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.45rem 1.6rem;
+}
+
+.dashboard-reference-layout .installer-app-page-status {
+  flex: 0 0 auto;
+  border-color: #d8e2e4 !important;
+  background: #f8fafb !important;
+  color: #4b5b62 !important;
+}
+
+.dashboard-reference-layout .installer-app-page-status i {
+  background: #3d8a63 !important;
+}
+
+.dashboard-reference-layout .installer-app-download--page {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.45fr) minmax(0, 1fr) auto;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1.35rem 1.6rem;
+}
+
+.dashboard-reference-layout .installer-app-download-visual {
+  min-height: 178px;
+  border: 1px solid #e2e8eb;
+  border-radius: 0.72rem;
+  background: #f5f8f9 !important;
+}
+
+.dashboard-reference-layout .installer-app-download-phone {
+  border-color: #243238 !important;
+  background: #172126 !important;
+  box-shadow: 0 12px 24px rgba(23, 33, 38, 0.18) !important;
+}
+
+.dashboard-reference-layout .installer-app-download-meta {
+  color: #68767d !important;
+}
+
+.dashboard-reference-layout .installer-app-download-actions {
+  align-items: stretch;
+}
+
+.dashboard-reference-layout .installer-app-page-notes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.dashboard-reference-layout .installer-app-page-notes article {
+  min-height: 0;
+  padding: 1rem;
+}
+
+.dashboard-reference-layout .installer-app-page-notes :is(strong, p) {
+  color: #26353b !important;
+}
+
+.dashboard-reference-layout .installer-app-page-notes p {
+  color: #68767d !important;
+}
+
+.dashboard-reference-layout .settings-layout,
+.dashboard-reference-layout .support-installer-shell {
+  gap: 1.25rem;
+}
+
+.dashboard-reference-layout .settings-panel {
+  padding: 1.3rem !important;
+}
+
+.dashboard-reference-layout .settings-live-preview,
+.dashboard-reference-layout .settings-control-block,
+.dashboard-reference-layout .settings-save-state,
+.dashboard-reference-layout .settings-shortcuts a {
+  border-color: #e0e7e9 !important;
+  background: #f8fafb !important;
+  color: #314149 !important;
+}
+
+.dashboard-reference-layout .settings-segment {
+  border-color: #dfe6e8 !important;
+  background: #ffffff !important;
+}
+
+.dashboard-reference-layout .settings-segment button.is-active {
+  background: #223137 !important;
+  color: #ffffff !important;
+}
+
+.dashboard-reference-layout .support-chat-panel,
+.dashboard-reference-layout .support-ideas-panel {
+  min-height: 0;
+}
+
+.dashboard-reference-layout .support-message-list,
+.dashboard-reference-layout .support-conversation-list {
+  border-color: #e1e7e9 !important;
+  background: #f8fafb !important;
+}
+
+.dashboard-reference-layout .support-conversation-item,
+.dashboard-reference-layout .support-idea-card,
+.dashboard-reference-layout .support-message {
+  border-color: #e1e7e9 !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.dashboard-reference-layout .support-conversation-item-active,
+.dashboard-reference-layout .support-message-admin {
+  border-color: #e3c57f !important;
+  background: #fff9ea !important;
+}
+
+.dashboard-reference-layout .support-message :is(p, strong),
+.dashboard-reference-layout .support-idea-card :is(p, strong) {
+  color: #33434a !important;
+}
+
+.dashboard-reference-layout .support-message-time,
+.dashboard-reference-layout .support-conversation-last,
+.dashboard-reference-layout .support-idea-meta {
+  color: #77858b !important;
+}
+
+@media (max-width: 860px) {
+  .dashboard-reference-layout .subscription-v3-hero,
+  .dashboard-reference-layout .installer-app-download--page {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-reference-layout .installer-app-download-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-reference-layout .installer-app-page-notes {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .dashboard-reference-layout .subscription-v3-plans,
+  .dashboard-reference-layout .installer-app-download-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-reference-layout .subscription-v3-hero,
+  .dashboard-reference-layout .subscription-v3-plan,
+  .dashboard-reference-layout .subscription-v3-usage,
+  .dashboard-reference-layout .subscription-v3-pro-active,
+  .dashboard-reference-layout .subscription-v3-pending,
+  .dashboard-reference-layout .installer-app-page-header,
+  .dashboard-reference-layout .installer-app-download--page {
+    padding: 1rem;
+  }
+
+  .dashboard-reference-layout .installer-app-page-header {
+    display: grid;
+  }
+}
