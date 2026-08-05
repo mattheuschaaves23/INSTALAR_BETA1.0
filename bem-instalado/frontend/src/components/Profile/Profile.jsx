@@ -436,6 +436,17 @@ export default function Profile() {
     }
   };
 
+  const handleCopy2FAKey = async () => {
+    if (!setup?.secret) return;
+
+    try {
+      await navigator.clipboard.writeText(setup.secret);
+      toast.success('Chave copiada. Cole-a no Google Authenticator.');
+    } catch (_error) {
+      toast.error('Não foi possível copiar automaticamente. Selecione a chave abaixo.');
+    }
+  };
+
   const handleEnable2FA = async () => {
     setSecuritySaving(true);
     try {
@@ -1066,14 +1077,25 @@ export default function Profile() {
                   </button>
                 ) : (
                   <div className="space-y-4">
+                    <div className="rounded-[18px] border border-[var(--line)] bg-[rgba(216,155,53,0.08)] px-4 py-3 text-sm leading-6 text-[var(--muted)]">
+                      <strong className="text-[var(--text)]">Abra seu autenticador.</strong> No celular, tente abrir direto pelo botão abaixo. Se ele não aparecer, no Google Authenticator toque em <strong>+</strong> e escaneie o QR Code.
+                    </div>
+                    {setup.otpauth_url ? (
+                      <a className="gold-button flex w-full items-center justify-center" href={setup.otpauth_url}>
+                        Abrir app autenticador
+                      </a>
+                    ) : null}
                     <img
                       alt="QR Code de autenticação"
                       className="w-full rounded-[24px] border border-[var(--line)] bg-white p-4"
                       src={setup.qrCode}
                     />
-                    <p className="rounded-[18px] border border-[var(--line)] bg-[rgba(255,255,255,0.02)] px-4 py-3 text-sm break-all text-[var(--muted)]">
-                      Chave manual: <span className="text-[var(--gold-strong)]">{setup.secret}</span>
-                    </p>
+                    <div className="rounded-[18px] border border-[var(--line)] bg-[rgba(255,255,255,0.02)] px-4 py-3 text-sm text-[var(--muted)]">
+                      <p className="break-all">Chave manual: <span className="text-[var(--gold-strong)]">{setup.secret}</span></p>
+                      <button className="ghost-button mt-3 !min-h-0 !px-3 !py-2 text-xs" onClick={handleCopy2FAKey} type="button">
+                        Copiar chave
+                      </button>
+                    </div>
                     <label className="block">
                       <span className="field-label">Código do aplicativo</span>
                       <input

@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/database');
 const { jwtSecret, jwtExpiresIn } = require('../config/auth');
-const { generateSecret, verifyToken, generateQrCode } = require('../utils/totp');
+const { buildOtpAuthUrl, generateSecret, verifyToken, generateQrCode } = require('../utils/totp');
 const { logAudit } = require('../utils/auditLog');
 const { normalizeEmail } = require('../utils/adminAccess');
 const {
@@ -1016,7 +1016,12 @@ exports.setup2FA = async (req, res) => {
       jwtSecret,
       { expiresIn: TWO_FACTOR_SETUP_EXPIRES_IN }
     );
-    return res.json({ secret: secret.base32, qrCode, setupToken });
+    return res.json({
+      secret: secret.base32,
+      qrCode,
+      otpauth_url: buildOtpAuthUrl(secret.base32, user.email),
+      setupToken,
+    });
   } catch (_error) {
     return res.status(500).json({ error: 'Erro ao configurar 2FA.' });
   }

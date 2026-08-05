@@ -16,13 +16,15 @@ exports.verifyToken = (secret, token) =>
     window: 1,
   });
 
-exports.generateQrCode = async (secret, email) => {
-  const otpauthUrl = speakeasy.otpauthURL({
+exports.buildOtpAuthUrl = (secret, email) =>
+  speakeasy.otpauthURL({
     secret,
     label: `InstalaPro (${email})`,
     issuer: 'InstalaPro',
     encoding: 'base32',
   });
 
+exports.generateQrCode = async (secret, email) => {
+  const otpauthUrl = exports.buildOtpAuthUrl(secret, email);
   return QRCode.toDataURL(otpauthUrl);
 };
