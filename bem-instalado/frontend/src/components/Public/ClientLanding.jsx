@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import ThemeToggle from '../Layout/ThemeToggle';
 import api from '../../services/api';
 import './ClientLanding.css';
+import PageMetadata from './PageMetadata';
 
 const REQUEST_PATH = '/cliente';
 const CLIENT_LOGIN_PATH = '/cliente/entrar';
@@ -400,6 +401,11 @@ export default function ClientLanding() {
 
   return (
     <div className="lp6-page">
+      <PageMetadata
+        canonicalPath="/"
+        description="Encontre instaladores de papel de parede verificados, envie seu pedido e acompanhe proposta e agendamento em um só lugar."
+        title="InstalaPro | Encontre instaladores de papel de parede"
+      />
       <a className="lp6-skip-link" href="#conteudo">Pular para o conteúdo</a>
       <Header />
       <main id="conteudo">

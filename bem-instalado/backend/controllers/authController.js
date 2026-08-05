@@ -6,12 +6,20 @@ const { jwtSecret, jwtExpiresIn } = require('../config/auth');
 const { generateSecret, verifyToken, generateQrCode } = require('../utils/totp');
 const { logAudit } = require('../utils/auditLog');
 const { normalizeEmail } = require('../utils/adminAccess');
-const { isEmailEnabled, sendPasswordResetEmail } = require('../services/email');
+const {
+  isEmailEnabled,
+  sendEmailVerificationEmail,
+  sendPasswordResetEmail,
+} = require('../services/email');
+const { decryptSecret, encryptSecret, isEncryptionConfigured } = require('../utils/secretEncryption');
 
 const REGISTER_PLAN_PRICE = Number(process.env.SUBSCRIPTION_PRICE || 49.9);
 const PASSWORD_RESET_EXPIRATION_MINUTES = Number(process.env.PASSWORD_RESET_EXPIRATION_MINUTES || 30);
+const EMAIL_VERIFICATION_EXPIRATION_MINUTES = Number(process.env.EMAIL_VERIFICATION_EXPIRATION_MINUTES || 30);
 const OAUTH_STATE_EXPIRES_IN = '10m';
 const TWO_FACTOR_SETUP_EXPIRES_IN = '10m';
+const SESSION_COOKIE_NAME = 'instalapro_session';
+const SESSION_COOKIE_MAX_AGE_MS = Number(process.env.SESSION_COOKIE_MAX_AGE_MS || 7 * 24 * 60 * 60 * 1000);
 const OAUTH_ALLOWED_ROLES = new Set(['installer', 'client']);
 const OAUTH_ALLOWED_PLATFORMS = new Set(['web', 'android']);
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
@@ -38,6 +46,90 @@ function signToken(user) {
   const id = typeof user === 'object' ? user.id : user;
   const authVersion = typeof user === 'object' ? Number(user.auth_version || 0) : 0;
   return jwt.sign({ id, v: authVersion }, jwtSecret, { expiresIn: jwtExpiresIn });
+}
+
+function setSessionCookie(res, token, remember = true) {
+  res.cookie(SESSION_COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    ...(remember ? { maxAge: SESSION_COOKIE_MAX_AGE_MS } : {}),
+  });
+}
+
+function clearSessionCookie(res) {
+  res.clearCookie(SESSION_COOKIE_NAME, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+  });
+}
+
+function tokenHash(token) {
+  return crypto.createHash('sha256').update(String(token)).digest('hex');
+}
+
+function createRandomToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+function createRecoveryCodes() {
+  return Array.from({ length: 10 }, () => crypto.randomBytes(5).toString('hex').toUpperCase());
+}
+
+function normalizeRecoveryCode(value) {
+  return String(value || '').trim().replace(/[^a-z\d]/gi, '').toUpperCase();
+}
+
+async function consumeRecoveryCode(userId, value) {
+  const code = normalizeRecoveryCode(value);
+  if (!code) return false;
+
+  const result = await pool.query(
+    `UPDATE two_factor_recovery_codes
+     SET used_at = NOW()
+     WHERE user_id = $1 AND code_hash = $2 AND used_at IS NULL
+     RETURNING id`,
+    [userId, tokenHash(code)]
+  );
+  return result.rowCount > 0;
+}
+
+async function createEmailVerificationToken(db, userId) {
+  const token = createRandomToken();
+  await db.query(
+    `UPDATE email_verification_tokens SET used_at = NOW() WHERE user_id = $1 AND used_at IS NULL`,
+    [userId]
+  );
+  await db.query(
+    `INSERT INTO email_verification_tokens (user_id, token_hash, expires_at)
+     VALUES ($1, $2, NOW() + ($3::int * INTERVAL '1 minute'))`,
+    [userId, tokenHash(token), EMAIL_VERIFICATION_EXPIRATION_MINUTES]
+  );
+  return token;
+}
+
+function buildEmailVerificationUrl(req, token) {
+  return `${getFrontendBaseUrl(req)}/auth/confirmar-email?token=${encodeURIComponent(token)}`;
+}
+
+async function sendVerificationForUser(req, user, db = pool) {
+  const token = await createEmailVerificationToken(db, user.id);
+  const delivery = await sendEmailVerificationEmail({
+    to: user.email,
+    verificationUrl: buildEmailVerificationUrl(req, token),
+    expiresInMinutes: EMAIL_VERIFICATION_EXPIRATION_MINUTES,
+  });
+  return delivery;
+}
+
+function buildAuthPayload(user) {
+  return {
+    user: sanitizeUser(user),
+    token: signToken(user),
+  };
 }
 
 function firstEnvValue(...names) {
@@ -220,6 +312,12 @@ function redirectOAuthResult(req, res, { token, next, role, platform, error }) {
   const isAndroid = targetPlatform === 'android';
 
   if (token) {
+    if (!isAndroid) {
+      setSessionCookie(res, token);
+      const query = new URLSearchParams({ next: sanitizeNextPath(next, role) });
+      return res.redirect(`${frontendUrl}/auth/social/callback?${query.toString()}`);
+    }
+
     const hash = new URLSearchParams({
       token,
       next: sanitizeNextPath(next, role),
@@ -308,6 +406,7 @@ function sanitizeUser(user) {
     default_removal_price: user.default_removal_price,
     is_admin: Boolean(user.is_admin),
     two_factor_enabled: Boolean(user.two_factor_enabled),
+    email_verified: Boolean(user.email_verified_at),
   };
 }
 
@@ -331,6 +430,7 @@ async function fetchSanitizedUserById(userId) {
         default_removal_price,
         is_admin,
         two_factor_enabled,
+        email_verified_at,
         auth_version
       FROM users
       WHERE id = $1
@@ -551,6 +651,7 @@ async function registerPasswordAccount(req, res, accountType) {
       ]
     );
     const user = rows[0];
+    let verificationToken = '';
 
     if (accountType === 'installer') {
       await db.query(
@@ -562,6 +663,8 @@ async function registerPasswordAccount(req, res, accountType) {
       );
     }
 
+    verificationToken = await createEmailVerificationToken(db, user.id);
+
     await db.query('COMMIT');
     await logAudit({
       actorUserId: user.id,
@@ -572,9 +675,17 @@ async function registerPasswordAccount(req, res, accountType) {
       req,
     });
 
-    const payload = {
-      user: sanitizeUser(user),
-      token: signToken(user),
+    const payload = buildAuthPayload(user);
+
+    const verificationDelivery = await sendEmailVerificationEmail({
+      to: user.email,
+      verificationUrl: buildEmailVerificationUrl(req, verificationToken),
+      expiresInMinutes: EMAIL_VERIFICATION_EXPIRATION_MINUTES,
+    }).catch(() => ({ sent: false }));
+
+    payload.email_verification = {
+      required: true,
+      delivery: verificationDelivery.sent ? 'sent' : 'pending_configuration',
     };
 
     if (accountType === 'installer') {
@@ -586,6 +697,7 @@ async function registerPasswordAccount(req, res, accountType) {
       };
     }
 
+    setSessionCookie(res, payload.token, true);
     return res.status(201).json(payload);
   } catch (error) {
     await db?.query('ROLLBACK').catch(() => null);
@@ -668,7 +780,23 @@ exports.login = async (req, res) => {
         return res.status(401).json({ error: 'Código 2FA necessário.', twoFactorRequired: true });
       }
 
-      if (!verifyToken(user.two_factor_secret, twoFactorToken)) {
+      let validSecondFactor = false;
+      let usedRecoveryCode = false;
+
+      try {
+        validSecondFactor = verifyToken(decryptSecret(user.two_factor_secret), twoFactorToken);
+      } catch (_error) {
+        return res.status(503).json({
+          error: 'A validação em duas etapas está temporariamente indisponível. Tente novamente mais tarde.',
+          code: 'TWO_FACTOR_ENCRYPTION_NOT_CONFIGURED',
+        });
+      }
+
+      if (!validSecondFactor) {
+        usedRecoveryCode = await consumeRecoveryCode(user.id, twoFactorToken);
+      }
+
+      if (!validSecondFactor && !usedRecoveryCode) {
         await logAudit({
           actorUserId: user.id,
           action: 'auth.login_failed_invalid_2fa',
@@ -690,10 +818,9 @@ exports.login = async (req, res) => {
       req,
     });
 
-    return res.json({
-      user: sanitizeUser(user),
-      token: signToken(user),
-    });
+    const payload = buildAuthPayload(user);
+    setSessionCookie(res, payload.token, req.body?.remember !== false);
+    return res.json(payload);
   } catch (_error) {
     return res.status(500).json({ error: 'Erro ao fazer login.' });
   }
@@ -861,6 +988,13 @@ exports.handleOAuthCallback = async (req, res) => {
 
 exports.setup2FA = async (req, res) => {
   try {
+    if (!isEncryptionConfigured()) {
+      return res.status(503).json({
+        error: 'A proteção criptográfica do 2FA ainda não foi configurada.',
+        code: 'TWO_FACTOR_ENCRYPTION_NOT_CONFIGURED',
+      });
+    }
+
     const { rows } = await pool.query(
       'SELECT email, two_factor_enabled FROM users WHERE id = $1',
       [req.userId]
@@ -889,6 +1023,7 @@ exports.setup2FA = async (req, res) => {
 };
 
 exports.enable2FA = async (req, res) => {
+  let db;
   try {
     const { setupToken, token } = req.body;
     let setup;
@@ -909,19 +1044,32 @@ exports.enable2FA = async (req, res) => {
       return res.status(400).json({ error: 'Dados de 2FA inválidos.' });
     }
 
-    const enabled = await pool.query(
+    const recoveryCodes = createRecoveryCodes();
+    db = await pool.connect();
+    await db.query('BEGIN');
+    const enabled = await db.query(
       `
         UPDATE users
         SET two_factor_secret = $1, two_factor_enabled = true, updated_at = NOW()
         WHERE id = $2 AND two_factor_enabled = false
         RETURNING id
       `,
-      [setup.secret, req.userId]
+      [encryptSecret(setup.secret), req.userId]
     );
 
     if (!enabled.rows[0]) {
+      await db.query('ROLLBACK');
       return res.status(409).json({ error: 'O 2FA já está ativo nesta conta.' });
     }
+
+    await db.query('DELETE FROM two_factor_recovery_codes WHERE user_id = $1', [req.userId]);
+    for (const code of recoveryCodes) {
+      await db.query(
+        'INSERT INTO two_factor_recovery_codes (user_id, code_hash) VALUES ($1, $2)',
+        [req.userId, tokenHash(normalizeRecoveryCode(code))]
+      );
+    }
+    await db.query('COMMIT');
 
     await logAudit({
       actorUserId: req.userId,
@@ -931,9 +1079,15 @@ exports.enable2FA = async (req, res) => {
       req,
     });
 
-    return res.json({ success: true });
-  } catch (_error) {
+    return res.json({ success: true, recovery_codes: recoveryCodes });
+  } catch (error) {
+    await db?.query('ROLLBACK').catch(() => null);
+    if (error.code === 'TWO_FACTOR_ENCRYPTION_NOT_CONFIGURED') {
+      return res.status(503).json({ error: error.message, code: error.code });
+    }
     return res.status(500).json({ error: 'Erro ao ativar 2FA.' });
+  } finally {
+    db?.release();
   }
 };
 
@@ -954,7 +1108,17 @@ exports.disable2FA = async (req, res) => {
       return res.status(409).json({ error: 'O 2FA já está desativado.' });
     }
 
-    if (!token || !verifyToken(user.two_factor_secret, token)) {
+    let validToken = false;
+    try {
+      validToken = Boolean(token) && verifyToken(decryptSecret(user.two_factor_secret), token);
+    } catch (_error) {
+      return res.status(503).json({
+        error: 'A validação em duas etapas está temporariamente indisponível.',
+        code: 'TWO_FACTOR_ENCRYPTION_NOT_CONFIGURED',
+      });
+    }
+
+    if (!validToken) {
       await logAudit({
         actorUserId: req.userId,
         action: 'auth.2fa_disable_failed',
@@ -973,6 +1137,7 @@ exports.disable2FA = async (req, res) => {
       `,
       [req.userId]
     );
+    await pool.query('DELETE FROM two_factor_recovery_codes WHERE user_id = $1', [req.userId]);
 
     await logAudit({
       actorUserId: req.userId,
@@ -985,6 +1150,94 @@ exports.disable2FA = async (req, res) => {
     return res.json({ success: true });
   } catch (_error) {
     return res.status(500).json({ error: 'Erro ao desativar 2FA.' });
+  }
+};
+
+exports.getSession = async (req, res) => {
+  try {
+    const user = await fetchSanitizedUserById(req.userId);
+    if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
+    return res.json({ user: sanitizeUser(user) });
+  } catch (_error) {
+    return res.status(500).json({ error: 'Não foi possível carregar a sessão.' });
+  }
+};
+
+exports.logout = (_req, res) => {
+  clearSessionCookie(res);
+  return res.json({ success: true });
+};
+
+exports.resendEmailVerification = async (req, res) => {
+  try {
+    if (process.env.NODE_ENV === 'production' && !isEmailEnabled()) {
+      return res.status(503).json({
+        error: 'O envio de confirmação por e-mail ainda não está configurado.',
+        code: 'EMAIL_NOT_CONFIGURED',
+      });
+    }
+
+    const userResult = await pool.query(
+      'SELECT id, email, email_verified_at FROM users WHERE id = $1 AND deleted_at IS NULL LIMIT 1',
+      [req.userId]
+    );
+    const user = userResult.rows[0];
+    if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
+    if (user.email_verified_at) return res.json({ success: true, already_verified: true });
+
+    const delivery = await sendVerificationForUser(req, user);
+    await logAudit({
+      actorUserId: user.id,
+      action: 'auth.email_verification_resent',
+      entityType: 'user',
+      entityId: user.id,
+      req,
+    });
+    return res.json({ success: true, delivery: delivery.sent ? 'sent' : 'pending_configuration' });
+  } catch (_error) {
+    return res.status(500).json({ error: 'Não foi possível reenviar a confirmação agora.' });
+  }
+};
+
+exports.verifyEmail = async (req, res) => {
+  let db;
+  try {
+    const token = String(req.body?.token || req.query?.token || '').trim();
+    if (token.length < 32) return res.status(400).json({ error: 'Link de confirmação inválido.' });
+
+    db = await pool.connect();
+    await db.query('BEGIN');
+    const result = await db.query(
+      `SELECT evt.id, evt.user_id
+       FROM email_verification_tokens evt
+       WHERE evt.token_hash = $1
+         AND evt.used_at IS NULL
+         AND evt.expires_at > NOW()
+       FOR UPDATE`,
+      [tokenHash(token)]
+    );
+    const verification = result.rows[0];
+    if (!verification) {
+      await db.query('ROLLBACK');
+      return res.status(400).json({ error: 'Este link expirou ou já foi utilizado. Solicite um novo e-mail.' });
+    }
+
+    await db.query('UPDATE email_verification_tokens SET used_at = NOW() WHERE user_id = $1 AND used_at IS NULL', [verification.user_id]);
+    await db.query('UPDATE users SET email_verified_at = COALESCE(email_verified_at, NOW()), updated_at = NOW() WHERE id = $1', [verification.user_id]);
+    await db.query('COMMIT');
+    await logAudit({
+      actorUserId: verification.user_id,
+      action: 'auth.email_verified',
+      entityType: 'user',
+      entityId: verification.user_id,
+      req,
+    });
+    return res.json({ success: true, message: 'E-mail confirmado com sucesso.' });
+  } catch (_error) {
+    await db?.query('ROLLBACK').catch(() => null);
+    return res.status(500).json({ error: 'Não foi possível confirmar seu e-mail agora.' });
+  } finally {
+    db?.release();
   }
 };
 

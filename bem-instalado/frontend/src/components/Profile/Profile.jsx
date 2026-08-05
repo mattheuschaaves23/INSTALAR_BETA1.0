@@ -153,6 +153,7 @@ export default function Profile() {
   const [availabilitySlots, setAvailabilitySlots] = useState([]);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [slotSaving, setSlotSaving] = useState(false);
+  const [recoveryCodes, setRecoveryCodes] = useState([]);
   const [slotForm, setSlotForm] = useState(() => ({
     ...initialSlotForm,
     slot_date: buildDateKey(),
@@ -438,13 +439,14 @@ export default function Profile() {
   const handleEnable2FA = async () => {
     setSecuritySaving(true);
     try {
-      await enable2FARequest({ setupToken: setup.setupToken, token: token.trim() });
+      const result = await enable2FARequest({ setupToken: setup.setupToken, token: token.trim() });
       const profile = await api.get('/users/profile');
       setForm(normalizeProfilePayload(profile.data));
       setUser((current) => ({ ...current, ...profile.data }));
       setSetup(null);
       setToken('');
-      toast.success('2FA ativado.');
+      setRecoveryCodes(result.recovery_codes || []);
+      toast.success('2FA ativado. Guarde os códigos de recuperação.');
     } catch (error) {
       toast.error(error.response?.data?.error || 'Não foi possível ativar o 2FA.');
     } finally {
@@ -1122,6 +1124,15 @@ export default function Profile() {
                 </button>
               </div>
             )}
+            {recoveryCodes.length > 0 ? (
+              <div className="mt-5 rounded-[22px] border border-amber-400/50 bg-amber-100/70 p-5 text-stone-900 dark:bg-amber-950/40 dark:text-amber-50">
+                <p className="font-semibold">Guarde seus códigos de recuperação agora</p>
+                <p className="mt-2 text-sm">Cada código só funciona uma vez. Eles não serão mostrados novamente nesta tela.</p>
+                <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-sm sm:grid-cols-3">
+                  {recoveryCodes.map((code) => <code className="rounded bg-white/60 px-2 py-1 dark:bg-black/20" key={code}>{code}</code>)}
+                </div>
+              </div>
+            ) : null}
           </section>
 
           <section className="lux-panel-soft fade-up rounded-[28px] p-6" style={{ animationDelay: '0.14s' }}>

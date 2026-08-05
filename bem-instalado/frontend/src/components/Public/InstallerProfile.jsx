@@ -7,6 +7,7 @@ import DecoratingWallLoader from '../Layout/DecoratingWallLoader';
 import './Home.css';
 import { formatCurrency, formatLongDate, formatShortDate } from '../../utils/formatters';
 import { formatInstallationDays } from '../../utils/installerDays';
+import PageMetadata from './PageMetadata';
 
 const emptyReviewForm = {
   reviewer_name: '',
@@ -173,6 +174,11 @@ export default function InstallerProfile() {
 
   return (
     <div className="auth-scene min-h-screen overflow-x-hidden px-4 py-8 md:px-6 lg:px-8">
+      <PageMetadata
+        canonicalPath={`/installers/${installer.id}`}
+        description={`${installer.display_name || installer.name} é instalador(a) de papel de parede${installer.city ? ` em ${installer.city}` : ''}. Veja perfil, avaliações e disponibilidade na InstalaPro.`}
+        title={`${installer.display_name || installer.name} | Instalador de papel de parede`}
+      />
       <div className="page-shell mx-auto flex w-full max-w-6xl flex-col gap-7">
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_360px]">
           <div className="lux-panel fade-up overflow-hidden p-7 sm:p-9 lg:p-12">

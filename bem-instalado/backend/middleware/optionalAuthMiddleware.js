@@ -6,24 +6,36 @@ function normalizeAccountType(value) {
   return String(value || '').trim().toLowerCase() === 'client' ? 'client' : 'installer';
 }
 
+function readSessionCookie(req) {
+  const raw = String(req.headers.cookie || '');
+  const entry = raw.split(';').map((item) => item.trim()).find((item) => item.startsWith('instalapro_session='));
+  if (!entry) return '';
+  try {
+    return decodeURIComponent(entry.slice('instalapro_session='.length));
+  } catch (_error) {
+    return '';
+  }
+}
+
 module.exports = async (req, _res, next) => {
   const header = String(req.headers.authorization || '').trim();
 
-  if (!header) {
+  if (!header && !readSessionCookie(req)) {
     return next();
   }
 
-  const [scheme, token] = header.split(' ');
+  const [scheme, bearerToken] = header.split(' ');
 
-  if (!/^Bearer$/i.test(scheme) || !token) {
+  if (header && (!/^Bearer$/i.test(scheme) || !bearerToken)) {
     return next();
   }
+  const token = bearerToken || readSessionCookie(req);
 
   try {
     const decoded = jwt.verify(token, jwtSecret);
     const { rows } = await pool.query(
       `
-        SELECT id, account_type, is_admin, auth_version
+        SELECT id, account_type, is_admin, auth_version, email_verified_at
         FROM users
         WHERE id = $1 AND deleted_at IS NULL
         LIMIT 1
@@ -38,6 +50,7 @@ module.exports = async (req, _res, next) => {
         id: user.id,
         account_type: normalizeAccountType(user.account_type),
         is_admin: Boolean(user.is_admin),
+        email_verified: Boolean(user.email_verified_at),
       };
     }
   } catch (_error) {

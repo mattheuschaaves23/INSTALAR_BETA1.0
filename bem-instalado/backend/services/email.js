@@ -87,6 +87,53 @@ async function sendServiceRequestInterestEmail({ to, clientName, installerName, 
   return { sent: true };
 }
 
+async function sendEmailVerificationEmail({ to, verificationUrl, expiresInMinutes }) {
+  if (!isEmailEnabled() || !to) {
+    return { sent: false, reason: 'smtp_not_configured' };
+  }
+
+  const from = firstEnvValue('SMTP_FROM') || firstEnvValue('SMTP_USER');
+  const appName = firstEnvValue('APP_NAME') || 'InstalaPro';
+  const transporter = createTransporter();
+
+  await transporter.sendMail({
+    from,
+    to,
+    ...buildEmailVerificationMessage({ appName, verificationUrl, expiresInMinutes }),
+  });
+
+  return { sent: true };
+}
+
+async function sendMarketplaceEmail({ to, subject, title, body, actionLabel, actionUrl }) {
+  if (!isEmailEnabled() || !to) {
+    return { sent: false, reason: 'smtp_not_configured' };
+  }
+
+  const from = firstEnvValue('SMTP_FROM') || firstEnvValue('SMTP_USER');
+  const transporter = createTransporter();
+  const safeTitle = escapeHtml(title || subject || 'Atualização da InstalaPro');
+  const safeBody = escapeHtml(body || '').replace(/\n/g, '<br />');
+  const safeActionUrl = actionUrl ? escapeHtml(actionUrl) : '';
+  const safeActionLabel = escapeHtml(actionLabel || 'Abrir InstalaPro');
+
+  await transporter.sendMail({
+    from,
+    to,
+    subject,
+    text: [title, body, actionUrl].filter(Boolean).join('\n\n'),
+    html: `
+      <div style="font-family:Arial,sans-serif;line-height:1.55;color:#1f1f1f">
+        <h2 style="margin:0 0 12px">${safeTitle}</h2>
+        <p>${safeBody}</p>
+        ${safeActionUrl ? `<p><a href="${safeActionUrl}" style="display:inline-block;padding:12px 18px;background:#d89b35;color:#111;text-decoration:none;border-radius:8px;font-weight:700">${safeActionLabel}</a></p>` : ''}
+      </div>
+    `,
+  });
+
+  return { sent: true };
+}
+
 function buildPasswordResetMessage({ appName = 'InstalaPro', resetUrl, expiresInMinutes }) {
   const safeResetUrl = escapeHtml(resetUrl);
 
@@ -111,6 +158,30 @@ function buildPasswordResetMessage({ appName = 'InstalaPro', resetUrl, expiresIn
         </p>
         <p>Este link expira em ${expiresInMinutes} minutos.</p>
         <p>Se você não solicitou essa alteração, ignore este e-mail.</p>
+      </div>
+    `,
+  };
+}
+
+function buildEmailVerificationMessage({ appName = 'InstalaPro', verificationUrl, expiresInMinutes }) {
+  const safeVerificationUrl = escapeHtml(verificationUrl);
+
+  return {
+    subject: `Confirme seu e-mail - ${appName}`,
+    text: [
+      'Confirme seu e-mail para ativar os recursos da sua conta.',
+      '',
+      `Abra este link: ${verificationUrl}`,
+      '',
+      `Este link expira em ${expiresInMinutes} minutos.`,
+      'Se você não criou uma conta, ignore este e-mail.',
+    ].join('\n'),
+    html: `
+      <div style="font-family:Arial,sans-serif;line-height:1.55;color:#1f1f1f">
+        <h2 style="margin:0 0 12px">Confirme seu e-mail</h2>
+        <p>Confirme seu e-mail para ativar os recursos da sua conta na ${escapeHtml(appName)}.</p>
+        <p><a href="${safeVerificationUrl}" style="display:inline-block;padding:12px 18px;background:#d89b35;color:#111;text-decoration:none;border-radius:8px;font-weight:700">Confirmar e-mail</a></p>
+        <p>Este link expira em ${expiresInMinutes} minutos.</p>
       </div>
     `,
   };
@@ -159,8 +230,11 @@ function buildServiceRequestInterestMessage({
 
 module.exports = {
   buildPasswordResetMessage,
+  buildEmailVerificationMessage,
   buildServiceRequestInterestMessage,
   isEmailEnabled,
+  sendEmailVerificationEmail,
+  sendMarketplaceEmail,
   sendPasswordResetEmail,
   sendServiceRequestInterestEmail,
 };

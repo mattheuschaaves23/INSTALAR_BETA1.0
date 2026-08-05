@@ -1,6 +1,7 @@
 const express = require('express');
 const controller = require('../controllers/publicController');
 const serviceRequestController = require('../controllers/serviceRequestController');
+const marketplaceFlowController = require('../controllers/marketplaceFlowController');
 const { createRateLimiter } = require('../middleware/rateLimit');
 const authMiddleware = require('../middleware/authMiddleware');
 const optionalAuthMiddleware = require('../middleware/optionalAuthMiddleware');
@@ -57,6 +58,8 @@ router.get('/service-requests/mine', authMiddleware, publicSearchLimiter, servic
 router.post('/service-requests/:id/claim', authMiddleware, serviceRequestLimiter, serviceRequestController.claimServiceRequest);
 router.get('/service-requests/:id/interests', publicSearchLimiter, serviceRequestController.getPublicServiceRequestInterests);
 router.post('/service-requests/:id/interests/:interestId/select', serviceRequestLimiter, serviceRequestController.selectServiceRequestInterest);
+router.get('/service-requests/:id/proposal', optionalAuthMiddleware, publicSearchLimiter, marketplaceFlowController.getClientProposal);
+router.post('/service-requests/:id/proposal/respond', optionalAuthMiddleware, serviceRequestLimiter, marketplaceFlowController.respondToProposal);
 router.patch('/service-requests/:id/status', optionalAuthMiddleware, serviceRequestLimiter, serviceRequestController.updateClientServiceRequestStatus);
 router.post('/installers/:id/reviews', authMiddleware, reviewLimiter, controller.createReview);
 

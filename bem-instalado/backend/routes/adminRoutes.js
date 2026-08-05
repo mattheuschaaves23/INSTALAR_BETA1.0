@@ -12,6 +12,7 @@ router.use(adminAudit);
 
 router.get('/overview', controller.getOverview);
 router.get('/users', controller.listUsers);
+router.get('/installer-verifications', controller.listInstallerVerifications);
 router.get('/payments', controller.listPayments);
 router.get('/service-requests', controller.listServiceRequests);
 router.get('/recommended-stores', controller.listRecommendedStores);
@@ -22,6 +23,7 @@ router.post('/recommended-stores', controller.createRecommendedStore);
 router.patch('/users/:id/subscription', controller.updateUserSubscription);
 router.patch('/users/:id/public-profile', controller.updateUserPublicProfile);
 router.patch('/users/:id/trust', controller.updateUserTrust);
+router.post('/installer-verifications/:id/decision', controller.decideInstallerVerification);
 router.patch('/users/:id/admin', controller.updateUserAdmin);
 router.patch('/users/:id/restore', controller.restoreUser);
 router.patch('/recommended-stores/:id', controller.updateRecommendedStore);

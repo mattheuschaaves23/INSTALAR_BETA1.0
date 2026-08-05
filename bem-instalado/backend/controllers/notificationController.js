@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const { isPushConfigured, registerDevice, unregisterDevice } = require('../services/push');
 
 exports.getNotifications = async (req, res) => {
   try {
@@ -56,4 +57,26 @@ exports.markAllAsRead = async (req, res) => {
   } catch (_error) {
     return res.status(500).json({ error: 'Erro ao atualizar notificações.' });
   }
+};
+
+exports.getDeviceCapabilities = (_req, res) => res.json({ push_configured: isPushConfigured() });
+
+exports.registerDevice = async (req, res) => {
+  try {
+    const device = await registerDevice({
+      userId: req.userId,
+      platform: req.body?.platform,
+      token: req.body?.token,
+    });
+    return res.status(201).json({ device, push_configured: isPushConfigured() });
+  } catch (error) {
+    return res.status(400).json({ error: error.message || 'Não foi possível registrar este dispositivo.', code: error.code });
+  }
+};
+
+exports.unregisterDevice = async (req, res) => {
+  const deviceId = Number(req.params.id);
+  if (!Number.isInteger(deviceId) || deviceId <= 0) return res.status(400).json({ error: 'Dispositivo inválido.' });
+  const removed = await unregisterDevice({ userId: req.userId, deviceId });
+  return res.json({ success: removed });
 };

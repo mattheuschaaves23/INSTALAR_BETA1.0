@@ -84,16 +84,64 @@ exports.getSchedules = async (req, res) => {
     query += ' ORDER BY s.date ASC';
 
     const { rows } = await pool.query(query, params);
-    const schedules = rows.map((row) => {
+    const bookingParams = [req.userId];
+    let bookingQuery = `
+      SELECT
+        sb.id,
+        sb.scheduled_start AS date,
+        sb.scheduled_end,
+        sb.status,
+        sr.client_name,
+        sr.service_label,
+        sr.service,
+        sr.address_reference AS service_reference,
+        sr.neighborhood AS service_neighborhood,
+        sr.city AS service_city,
+        sr.state AS service_state,
+        sr.zip_code AS service_zip_code
+      FROM service_bookings sb
+      JOIN service_requests sr ON sr.id = sb.service_request_id
+      WHERE sb.installer_id = $1
+    `;
+
+    if (req.query.start && req.query.end) {
+      bookingQuery += ' AND sb.scheduled_start BETWEEN $2 AND $3';
+      bookingParams.push(req.query.start, req.query.end);
+    }
+
+    bookingQuery += ' ORDER BY sb.scheduled_start ASC';
+    const bookingResult = await pool.query(bookingQuery, bookingParams);
+
+    const legacySchedules = rows.map((row) => {
       const destination = buildDestination(row);
       const route_links = buildRouteLinks(destination.route_query);
 
       return {
         ...row,
+        source: 'manual',
         destination,
         route_links,
       };
     });
+
+    const marketplaceBookings = bookingResult.rows.map((row) => {
+      const destination = buildDestination(row);
+      const route_links = buildRouteLinks(destination.route_query);
+
+      return {
+        ...row,
+        id: `marketplace-${row.id}`,
+        marketplace_booking_id: row.id,
+        source: 'marketplace',
+        title: row.service_label || row.service || 'ServiÃ§o contratado pela plataforma',
+        destination,
+        route_links,
+      };
+    });
+
+    const schedules = [...legacySchedules, ...marketplaceBookings].sort(
+      (first, second) => new Date(first.date).getTime() - new Date(second.date).getTime()
+    );
 
     return res.json(schedules);
   } catch (_error) {

@@ -1,10 +1,12 @@
 const express = require('express');
 const pool = require('../config/database');
 const authMiddleware = require('../middleware/authMiddleware');
+const requireVerifiedEmail = require('../middleware/verifiedEmailMiddleware');
 
 const router = express.Router();
 
 router.use(authMiddleware);
+router.use(requireVerifiedEmail);
 
 router.get('/', async (req, res) => {
   try {

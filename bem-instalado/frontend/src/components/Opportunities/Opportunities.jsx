@@ -6,6 +6,7 @@ import PageIntro from '../Layout/PageIntro';
 import { notifyPanelBadgeCountsChanged } from '../Layout/panelBadgeCounts';
 import PlanUsage from '../Subscription/PlanUsage';
 import { useSubscription } from '../../contexts/SubscriptionContext';
+import MarketplaceProposal from './MarketplaceProposal';
 
 const FILTERS = [
   { value: 'open', label: 'Novas' },
@@ -282,9 +283,10 @@ export default function Opportunities() {
                   </span>
 
                   {opportunity.selected_by_me && opportunity.whatsapp_url ? (
-                    <a className="gold-button" href={opportunity.whatsapp_url} rel="noreferrer" target="_blank">
-                      Chamar no WhatsApp
-                    </a>
+                    <>
+                      <MarketplaceProposal onUpdated={() => loadOpportunities('selected')} requestId={opportunity.id} requestStatus={opportunity.status} />
+                      <a className="gold-button" href={opportunity.whatsapp_url} rel="noreferrer" target="_blank">Chamar no WhatsApp</a>
+                    </>
                   ) : opportunity.not_selected ? (
                     <button className="gold-button" disabled type="button">
                       Pedido finalizado

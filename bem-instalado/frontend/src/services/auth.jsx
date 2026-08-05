@@ -20,6 +20,21 @@ export async function resetPasswordRequest(payload) {
   return response.data;
 }
 
+export async function verifyEmailRequest(token) {
+  const response = await api.post('/auth/verify-email', { token });
+  return response.data;
+}
+
+export async function resendEmailVerificationRequest() {
+  const response = await api.post('/auth/resend-verification');
+  return response.data;
+}
+
+export async function logoutRequest() {
+  const response = await api.post('/auth/logout');
+  return response.data;
+}
+
 function getSocialLoginBaseUrl() {
   return String(api.defaults.baseURL || '/api').replace(/\/+$/, '');
 }

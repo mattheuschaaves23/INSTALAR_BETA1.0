@@ -427,11 +427,11 @@ export default function Login() {
                   <InstallerLoginIcon name="lock" />
                   <input
                     autoComplete="one-time-code"
-                    inputMode="numeric"
-                    maxLength={6}
+                        inputMode="text"
+                        maxLength={16}
                     name="twoFactorToken"
                     onChange={handleChange}
-                    placeholder="000000"
+                        placeholder="000000 ou código de recuperação"
                     value={form.twoFactorToken}
                   />
                 </div>

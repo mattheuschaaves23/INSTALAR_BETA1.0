@@ -20,6 +20,8 @@ const {
   isLimitReached,
   upgradeRequired,
 } = require('../services/planAccess');
+const { sendMarketplaceEmail } = require('../services/email');
+const { sendPushToUser } = require('../services/push');
 
 function normalizeStringList(values, maxItems = 8) {
   if (!Array.isArray(values)) {
@@ -439,6 +441,10 @@ exports.getProfile = async (req, res) => {
           certificate_file,
           certificate_name,
           certification_verified,
+          certification_status,
+          certificate_submitted_at,
+          certificate_reviewed_at,
+          certificate_rejection_reason,
           featured_installer,
           business_name,
           city,
@@ -531,6 +537,15 @@ exports.updateProfile = async (req, res) => {
     if (certificate_file !== undefined && normalizedCertificateFile === null) {
       return res.status(400).json({ error: 'Envie o certificado pelo campo de upload antes de salvar.' });
     }
+
+    const currentCertificate = await pool.query(
+      'SELECT certificate_file FROM users WHERE id = $1 LIMIT 1',
+      [req.userId]
+    );
+    const certificateChanged = Boolean(
+      normalizedCertificateFile
+      && normalizedCertificateFile !== String(currentCertificate.rows[0]?.certificate_file || '')
+    );
 
     const normalizedDays = normalizeInstallationDays(installation_days);
     const normalizedGallery = normalizeGallery(installation_gallery);
@@ -691,10 +706,56 @@ exports.updateProfile = async (req, res) => {
       ]
     );
 
-    const profile = {
+    let profile = {
       ...rows[0],
       installation_gallery: normalizeGallery(rows[0]?.installation_gallery),
     };
+
+    if (certificateChanged) {
+      const statusResult = await pool.query(
+        `UPDATE users
+         SET certification_verified = FALSE,
+             public_profile = FALSE,
+             certification_status = 'pending',
+             certificate_submitted_at = NOW(),
+             certificate_reviewed_at = NULL,
+             certificate_reviewed_by = NULL,
+             certificate_rejection_reason = NULL,
+             updated_at = NOW()
+         WHERE id = $1
+         RETURNING certification_verified, public_profile, certification_status, certificate_submitted_at,
+                   certificate_reviewed_at, certificate_rejection_reason`,
+        [req.userId]
+      );
+      profile = { ...profile, ...statusResult.rows[0] };
+
+      await pool.query(
+        `INSERT INTO notifications (user_id, title, message, type, read)
+         SELECT id, 'Novo certificado para análise', $1, 'info', FALSE
+         FROM users
+         WHERE is_admin = TRUE AND deleted_at IS NULL`,
+        [`${profile.business_name || profile.name || 'Um instalador'} enviou um certificado para validação.`]
+      );
+
+      const admins = await pool.query(
+        'SELECT id, email FROM users WHERE is_admin = TRUE AND deleted_at IS NULL'
+      );
+      await Promise.all(admins.rows.map((admin) => sendMarketplaceEmail({
+        to: admin.email,
+        subject: 'Novo certificado aguardando análise - InstalaPro',
+        title: 'Novo certificado para análise',
+        body: `${profile.business_name || profile.name || 'Um instalador'} enviou um certificado. Abra o painel administrativo para aprovar ou recusar.`,
+        actionLabel: 'Abrir fila de verificação',
+        actionUrl: `${String(process.env.FRONTEND_URL || process.env.APP_URL || '').replace(/\/+$/, '')}/admin`,
+      }).catch(() => null)));
+      await Promise.all(admins.rows.map((admin) => sendPushToUser({
+        userId: admin.id,
+        title: 'Novo certificado para análise',
+        body: `${profile.business_name || profile.name || 'Um instalador'} enviou um documento.`,
+        data: { route: '/admin' },
+      }).catch(() => null)));
+    }
+
     return res.json(profile);
   } catch (_error) {
     return res.status(500).json({ error: 'Erro ao atualizar perfil.' });

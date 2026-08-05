@@ -69,12 +69,19 @@ function resolveApiTimeout() {
 const api = axios.create({
   baseURL: resolveBaseUrl(),
   timeout: resolveApiTimeout(),
+  withCredentials: true,
 });
 
 function isLoginRoute(pathname) {
   return ['/instalador/entrar', '/cliente/entrar', '/login'].some((route) =>
     String(pathname || '').startsWith(route)
   );
+}
+
+function isPublicRoute(pathname) {
+  const path = String(pathname || '');
+  return path === '/' || path === '/cliente' || path === '/papelperto' || path === '/termos' || path === '/privacidade'
+    || path.startsWith('/installers/');
 }
 
 function getLoginRoute(pathname) {
@@ -113,7 +120,8 @@ api.interceptors.response.use(
       if (
         status === 401 &&
         INVALID_SESSION_CODES.has(code) &&
-        !isLoginRoute(window.location.pathname)
+        !isLoginRoute(window.location.pathname) &&
+        !(isPublicRoute(window.location.pathname) && !getAuthToken())
       ) {
         void clearAuthToken();
         redirectTo(getLoginRoute(window.location.pathname));
@@ -121,6 +129,10 @@ api.interceptors.response.use(
 
       if (status === 403 && code === 'ACCOUNT_TYPE_FORBIDDEN') {
         redirectTo(error.response?.data?.account_type === 'client' ? '/cliente' : '/dashboard');
+      }
+
+      if (status === 403 && code === 'ADMIN_TWO_FACTOR_REQUIRED') {
+        redirectTo('/profile?security=2fa');
       }
     }
 

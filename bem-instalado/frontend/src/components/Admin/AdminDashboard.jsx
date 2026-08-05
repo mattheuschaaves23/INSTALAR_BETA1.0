@@ -97,6 +97,7 @@ export default function AdminDashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [overview, setOverview] = useState(initialOverview);
   const [users, setUsers] = useState([]);
+  const [pendingVerifications, setPendingVerifications] = useState([]);
   const [payments, setPayments] = useState([]);
   const [serviceRequests, setServiceRequests] = useState([]);
   const [recommendedStores, setRecommendedStores] = useState([]);
@@ -149,6 +150,13 @@ export default function AdminDashboard() {
     } finally {
       setLoadingUsers(false);
     }
+  }, []);
+
+  const loadVerifications = useCallback(async () => {
+    const response = await api.get('/admin/installer-verifications', {
+      params: { status: 'pending', limit: 50 },
+    });
+    setPendingVerifications(response.data?.verifications || []);
   }, []);
 
   const loadPayments = useCallback(async (nextFilters = initialPaymentFilters, page = 1) => {
@@ -205,12 +213,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     setLoading(true);
 
-    Promise.all([loadOverview(), loadUsers(), loadPayments(), loadServiceRequests(), loadRecommendedStores(), loadApplicationErrors()])
+    Promise.all([loadOverview(), loadUsers(), loadVerifications(), loadPayments(), loadServiceRequests(), loadRecommendedStores(), loadApplicationErrors()])
       .catch((error) => {
         toast.error(error.response?.data?.error || 'Não foi possível carregar o painel administrativo.');
       })
       .finally(() => setLoading(false));
-  }, [loadApplicationErrors, loadOverview, loadPayments, loadRecommendedStores, loadServiceRequests, loadUsers]);
+  }, [loadApplicationErrors, loadOverview, loadPayments, loadRecommendedStores, loadServiceRequests, loadUsers, loadVerifications]);
 
   const resolveApplicationError = async (errorId) => {
     try {
@@ -436,7 +444,37 @@ export default function AdminDashboard() {
       return;
     }
 
-    await updateTrust(targetUser.id, { certification_verified: nextVerified });
+    if (!nextVerified) {
+      await updateTrust(targetUser.id, { certification_verified: false });
+      return;
+    }
+
+    setSavingUserId(targetUser.id);
+    try {
+      await api.post(`/admin/installer-verifications/${targetUser.id}/decision`, { decision: 'approve', publish: true });
+      toast.success('Certificado aprovado e perfil publicado na vitrine.');
+      await Promise.all([loadUsers(userFilters), loadVerifications(), loadOverview()]);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Não foi possível aprovar e publicar este instalador.');
+    } finally {
+      setSavingUserId(null);
+    }
+  };
+
+  const rejectCertificationAction = async (targetUser) => {
+    if (!targetUser.has_certificate) return;
+    const reason = window.prompt(`Informe o motivo da recusa para ${targetUser.name}:`);
+    if (!reason?.trim()) return;
+    setSavingUserId(targetUser.id);
+    try {
+      await api.post(`/admin/installer-verifications/${targetUser.id}/decision`, { decision: 'reject', reason: reason.trim() });
+      toast.success('Certificado recusado e instalador avisado.');
+      await Promise.all([loadUsers(userFilters), loadVerifications(), loadOverview()]);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Não foi possível recusar o certificado.');
+    } finally {
+      setSavingUserId(null);
+    }
   };
 
   const deleteUser = async (targetUser) => {
@@ -668,6 +706,7 @@ export default function AdminDashboard() {
   const adminSections = [
     { key: 'overview', label: 'Visão geral', detail: 'Métricas e atividade recente' },
     { key: 'requests', label: 'Pedidos', detail: 'Solicitações e interessados' },
+    { key: 'verifications', label: 'Aprovações', detail: 'Certificados aguardando revisão e publicação' },
     { key: 'users', label: 'Usuários', detail: 'Perfis, permissões e confiança' },
     { key: 'payments', label: 'Pagamentos', detail: 'Cobrança, pendências e status' },
     { key: 'stores', label: 'Lojas da página inicial', detail: 'Escolha e ordene o carrossel público' },
@@ -1030,7 +1069,64 @@ export default function AdminDashboard() {
           ) : null}
         </section>
 
-        <aside className={`${['users', 'stores', 'announcements', 'monitoring'].includes(activeAdminSection.key) ? 'grid gap-6' : 'hidden'}`}>
+        <aside className={`${['users', 'verifications', 'stores', 'announcements', 'monitoring'].includes(activeAdminSection.key) ? 'grid gap-6' : 'hidden'}`}>
+          {activeAdminSection.key === 'verifications' ? (
+          <section className="admin-content-panel lux-panel fade-up p-6" style={{ animationDelay: '0.1s' }}>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="eyebrow">Fila de aprovação</p>
+                <h2 className="mt-2 text-xl font-semibold text-[var(--text)]">Instaladores aguardando revisão</h2>
+                <p className="mt-1 text-sm text-[var(--muted)]">
+                  Ao aprovar, o selo é validado e o perfil entra automaticamente na vitrine pública.
+                </p>
+              </div>
+              <button className="ghost-button !min-h-0 !px-3 !py-2 text-xs" onClick={loadVerifications} type="button">
+                Atualizar fila
+              </button>
+            </div>
+
+            <div className="mt-5 grid gap-3">
+              {pendingVerifications.length === 0 ? (
+                <div className="empty-state">Nenhum certificado aguardando análise agora.</div>
+              ) : pendingVerifications.map((item) => (
+                <article className="list-row" key={item.id}>
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-[var(--text)]">{item.business_name || item.name}</p>
+                      <p className="text-xs text-[var(--muted)]">{item.email}</p>
+                      <p className="mt-2 text-xs text-[var(--muted)]">
+                        {item.city || 'Cidade não informada'}{item.state ? ` - ${item.state}` : ''} · enviado {formatDateTime(item.certificate_submitted_at)}
+                      </p>
+                    </div>
+                    <span className="status-pill" data-tone="pending">AGUARDANDO</span>
+                  </div>
+                  <div className="action-cluster mt-4 grid gap-2 sm:grid-cols-3">
+                    <button className="ghost-button w-full !min-h-0 !px-3 !py-2 text-xs" onClick={() => openInstallerCertificate(item)} type="button">
+                      Abrir certificado
+                    </button>
+                    <button
+                      className="gold-button w-full !min-h-0 !px-3 !py-2 text-xs"
+                      disabled={savingUserId === item.id}
+                      onClick={() => confirmCertificationAction({ ...item, certification_verified: false, has_certificate: true })}
+                      type="button"
+                    >
+                      Aprovar e publicar
+                    </button>
+                    <button
+                      className="danger-button w-full !min-h-0 !px-3 !py-2 text-xs"
+                      disabled={savingUserId === item.id}
+                      onClick={() => rejectCertificationAction({ ...item, has_certificate: true })}
+                      type="button"
+                    >
+                      Recusar com motivo
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+          ) : null}
+
           {activeAdminSection.key === 'users' ? (
           <section className="admin-content-panel lux-panel fade-up p-6" style={{ animationDelay: '0.1s' }}>
             <p className="eyebrow">Gestão de usuários</p>
@@ -1152,6 +1248,15 @@ export default function AdminDashboard() {
                       type="button"
                     >
                       {item.certification_verified ? 'Remover selo certificado' : 'Validar certificado'}
+                    </button> : null}
+
+                    {item.account_type === 'installer' && item.has_certificate && !item.certification_verified ? <button
+                      className="ghost-button w-full !min-h-0 !px-3 !py-2 text-xs"
+                      disabled={savingUserId === item.id || Boolean(item.deleted_at)}
+                      onClick={() => rejectCertificationAction(item)}
+                      type="button"
+                    >
+                      Recusar certificado
                     </button> : null}
 
                     <button

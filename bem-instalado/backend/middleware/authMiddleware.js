@@ -6,18 +6,30 @@ function normalizeAccountType(value) {
   return String(value || '').trim().toLowerCase() === 'client' ? 'client' : 'installer';
 }
 
-module.exports = async (req, res, next) => {
-  const header = req.headers.authorization;
+function readSessionCookie(req) {
+  const raw = String(req.headers.cookie || '');
+  const entry = raw.split(';').map((item) => item.trim()).find((item) => item.startsWith('instalapro_session='));
+  if (!entry) return '';
+  try {
+    return decodeURIComponent(entry.slice('instalapro_session='.length));
+  } catch (_error) {
+    return '';
+  }
+}
 
-  if (!header) {
+module.exports = async (req, res, next) => {
+  const header = String(req.headers.authorization || '').trim();
+  const cookieToken = readSessionCookie(req);
+
+  if (!header && !cookieToken) {
     return res.status(401).json({ error: 'Token não informado.', code: 'AUTH_TOKEN_MISSING' });
   }
 
-  const [scheme, token] = header.split(' ');
-
-  if (!/^Bearer$/i.test(scheme) || !token) {
+  const [scheme, bearerToken] = header.split(' ');
+  if (header && (!/^Bearer$/i.test(scheme) || !bearerToken)) {
     return res.status(401).json({ error: 'Token mal formatado.', code: 'AUTH_TOKEN_MALFORMED' });
   }
+  const token = bearerToken || cookieToken;
 
   let decoded;
 
@@ -30,7 +42,7 @@ module.exports = async (req, res, next) => {
   try {
     const { rows } = await pool.query(
       `
-        SELECT id, account_type, is_admin, auth_version
+        SELECT id, account_type, is_admin, auth_version, email_verified_at
         FROM users
         WHERE id = $1 AND deleted_at IS NULL
         LIMIT 1
@@ -52,6 +64,7 @@ module.exports = async (req, res, next) => {
       id: user.id,
       account_type: normalizeAccountType(user.account_type),
       is_admin: Boolean(user.is_admin),
+      email_verified: Boolean(user.email_verified_at),
     };
 
     return next();

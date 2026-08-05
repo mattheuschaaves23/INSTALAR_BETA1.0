@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /agenda
+Disallow: /budgets
+Disallow: /clients
+Disallow: /notifications
+Disallow: /opportunities
+Disallow: /profile
+Disallow: /settings
+Disallow: /subscription
+Disallow: /support
+Disallow: /cliente/pedidos
+Disallow: /cliente/pedido
+Disallow: /instalador/
+Disallow: /auth/
+
+Sitemap: https://instalar-sigma.vercel.app/sitemap.xml

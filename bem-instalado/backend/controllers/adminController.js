@@ -1,5 +1,7 @@
 const pool = require('../config/database');
 const { expireOpenServiceRequests } = require('../utils/serviceRequestLifecycle');
+const { sendMarketplaceEmail } = require('../services/email');
+const { sendPushToUser } = require('../services/push');
 const ADMIN_MUTATION_LOCK_ID = 19772402;
 
 function parseLimit(value, fallback = 20) {
@@ -288,6 +290,10 @@ exports.getOverview = async (_req, res) => {
           u.is_admin,
           u.featured_installer,
           u.certification_verified,
+          u.certification_status,
+          u.certificate_submitted_at,
+          u.certificate_reviewed_at,
+          u.certificate_rejection_reason,
           u.certificate_file,
           (u.certificate_file IS NOT NULL AND LENGTH(TRIM(u.certificate_file)) > 0) AS has_certificate,
           CASE
@@ -619,6 +625,129 @@ exports.updateServiceRequestStatus = async (req, res) => {
     return res.json({ request: rows[0] });
   } catch (_error) {
     return res.status(500).json({ error: 'Erro ao atualizar o pedido.' });
+  }
+};
+
+exports.listInstallerVerifications = async (req, res) => {
+  try {
+    const requestedStatus = String(req.query.status || 'pending').trim().toLowerCase();
+    const status = ['pending', 'approved', 'rejected', 'all'].includes(requestedStatus) ? requestedStatus : 'pending';
+    const limit = parseLimit(req.query.limit, 30);
+    const { rows } = await pool.query(
+      `SELECT
+         u.id,
+         u.name,
+         u.business_name,
+         u.email,
+         u.city,
+         u.state,
+         u.certificate_file,
+         u.certificate_name,
+         u.certification_status,
+         u.certificate_submitted_at,
+         u.certificate_reviewed_at,
+         u.certificate_rejection_reason,
+         u.public_profile,
+         reviewer.name AS reviewed_by_name,
+         EXTRACT(EPOCH FROM (NOW() - COALESCE(u.certificate_submitted_at, u.updated_at)))::int AS waiting_seconds
+       FROM users u
+       LEFT JOIN users reviewer ON reviewer.id = u.certificate_reviewed_by
+       WHERE u.account_type = 'installer'
+         AND u.deleted_at IS NULL
+         AND ($1 = 'all' OR u.certification_status = $1)
+       ORDER BY
+         CASE WHEN u.certification_status = 'pending' THEN 0 ELSE 1 END,
+         u.certificate_submitted_at ASC NULLS LAST,
+         u.updated_at DESC
+       LIMIT $2`,
+      [status, limit]
+    );
+    return res.json({ verifications: rows });
+  } catch (_error) {
+    return res.status(500).json({ error: 'Erro ao carregar a fila de certificados.' });
+  }
+};
+
+exports.decideInstallerVerification = async (req, res) => {
+  let db;
+  try {
+    const installerId = Number(req.params.id);
+    const decision = String(req.body?.decision || '').trim().toLowerCase();
+    const reason = String(req.body?.reason || '').trim().slice(0, 1000);
+    const publish = req.body?.publish !== false;
+    if (!Number.isInteger(installerId) || installerId <= 0 || !['approve', 'reject'].includes(decision)) {
+      return res.status(400).json({ error: 'Decisão de verificação inválida.' });
+    }
+    if (decision === 'reject' && reason.length < 8) {
+      return res.status(400).json({ error: 'Informe um motivo claro para a recusa do certificado.' });
+    }
+
+    db = await pool.connect();
+    await db.query('BEGIN');
+    const result = await db.query(
+      `SELECT id, name, business_name, email, certificate_file
+       FROM users
+       WHERE id = $1 AND account_type = 'installer' AND deleted_at IS NULL
+       FOR UPDATE`,
+      [installerId]
+    );
+    const installer = result.rows[0];
+    if (!installer) {
+      await db.query('ROLLBACK');
+      return res.status(404).json({ error: 'Instalador não encontrado.' });
+    }
+    if (decision === 'approve' && !String(installer.certificate_file || '').trim()) {
+      await db.query('ROLLBACK');
+      return res.status(409).json({ error: 'Este instalador ainda não enviou certificado.' });
+    }
+
+    const approved = decision === 'approve';
+    const updated = await db.query(
+      `UPDATE users
+       SET certification_verified = $2,
+           certification_status = $3,
+           public_profile = $4,
+           certificate_reviewed_at = NOW(),
+           certificate_reviewed_by = $5,
+           certificate_rejection_reason = $6,
+           updated_at = NOW()
+       WHERE id = $1
+       RETURNING id, certification_verified, certification_status, public_profile,
+                 certificate_reviewed_at, certificate_rejection_reason`,
+      [installerId, approved, approved ? 'approved' : 'rejected', approved && publish, req.userId, approved ? null : reason]
+    );
+    const title = approved ? 'Certificado aprovado e perfil publicado' : 'Certificado precisa de ajuste';
+    const message = approved
+      ? 'Seu certificado foi aprovado e seu perfil já está visível para clientes na busca.'
+      : `Seu certificado não foi aprovado. Motivo: ${reason}`;
+    await db.query(
+      `INSERT INTO notifications (user_id, title, message, type, read)
+       VALUES ($1, $2, $3, $4, FALSE)`,
+      [installerId, title, message, approved ? 'success' : 'warning']
+    );
+    await db.query('COMMIT');
+
+    await sendMarketplaceEmail({
+      to: installer.email,
+      subject: `${title} - InstalaPro`,
+      title,
+      body: message,
+      actionLabel: approved ? 'Ver meu perfil' : 'Corrigir meu cadastro',
+      actionUrl: `${String(process.env.FRONTEND_URL || process.env.APP_URL || '').replace(/\/+$/, '')}/profile`,
+    }).catch(() => null);
+    await sendPushToUser({
+      userId: installerId,
+      title,
+      body: message,
+      data: { route: '/profile' },
+    }).catch(() => null);
+
+    return res.json({ verification: updated.rows[0] });
+  } catch (_error) {
+    await db?.query('ROLLBACK').catch(() => null);
+    return res.status(500).json({ error: 'Não foi possível registrar a decisão.' });
+  } finally {
+    db?.release();
   }
 };
 

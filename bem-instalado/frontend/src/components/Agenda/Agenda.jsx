@@ -596,30 +596,43 @@ export default function Agenda() {
                       <AgendaIcon type="copy" />
                       Copiar
                     </button>
-                    <button
-                      className="agenda-modern-action is-success"
-                      onClick={() => updateStatus(item.id, 'completed')}
-                      type="button"
-                    >
-                      <AgendaIcon type="check" />
-                      Concluir
-                    </button>
-                    <button
-                      className="agenda-modern-action is-warning"
-                      onClick={() => updateStatus(item.id, 'canceled')}
-                      type="button"
-                    >
-                      <AgendaIcon type="x" />
-                      Cancelar
-                    </button>
-                    <button
-                      className="agenda-modern-action is-danger"
-                      onClick={() => deleteSchedule(item.id)}
-                      type="button"
-                    >
-                      <AgendaIcon type="trash" />
-                      Excluir
-                    </button>
+                    {item.source === 'marketplace' ? (
+                      <button
+                        className="agenda-modern-action"
+                        onClick={() => navigate('/opportunities')}
+                        type="button"
+                      >
+                        <AgendaIcon type="calendar" />
+                        Abrir pedido
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          className="agenda-modern-action is-success"
+                          onClick={() => updateStatus(item.id, 'completed')}
+                          type="button"
+                        >
+                          <AgendaIcon type="check" />
+                          Concluir
+                        </button>
+                        <button
+                          className="agenda-modern-action is-warning"
+                          onClick={() => updateStatus(item.id, 'canceled')}
+                          type="button"
+                        >
+                          <AgendaIcon type="x" />
+                          Cancelar
+                        </button>
+                        <button
+                          className="agenda-modern-action is-danger"
+                          onClick={() => deleteSchedule(item.id)}
+                          type="button"
+                        >
+                          <AgendaIcon type="trash" />
+                          Excluir
+                        </button>
+                      </>
+                    )}
                   </div>
                 </article>
               );

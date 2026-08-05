@@ -54,6 +54,7 @@ const Settings = lazy(() => import('./components/Settings/Settings'));
 const SupportChat = lazy(() => import('./components/Support/SupportChat'));
 const Subscription = lazy(() => import('./components/Subscription/Subscription'));
 const AppDownload = lazy(() => import('./components/AppDownload/AppDownload'));
+const EmailVerification = lazy(() => import('./components/Auth/EmailVerification'));
 
 function RouteLoading() {
   return (
@@ -104,6 +105,7 @@ export default function App() {
           <Route element={<PasswordRecovery />} path="/instalador/recuperar-senha" />
           <Route element={<PasswordRecovery />} path="/cliente/recuperar-senha" />
           <Route element={<OAuthCallback />} path="/auth/social/callback" />
+          <Route element={<EmailVerification />} path="/auth/confirmar-email" />
           <Route element={<MobileOAuthRedirect />} path="/auth/mobile/callback" />
           <Route element={<Navigate replace to="/" />} path="/register" />
           <Route element={<Register />} path="/instalador/cadastro" />

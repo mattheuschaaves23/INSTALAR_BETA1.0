@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { getProfileRequest, loginRequest, registerClientRequest, registerRequest } from '../services/auth';
-import { clearAuthToken, getAuthToken, hydrateAuthToken, setAuthToken } from '../utils/safeStorage';
+import { getProfileRequest, loginRequest, logoutRequest, registerClientRequest, registerRequest } from '../services/auth';
+import { clearAuthToken, hydrateAuthToken, setAuthToken } from '../utils/safeStorage';
+import { registerNativePushNotifications, resetNativePushRegistration } from '../services/pushNotifications';
 
 const AuthContext = createContext(null);
 
@@ -10,15 +11,6 @@ export function AuthProvider({ children }) {
   const [authError, setAuthError] = useState('');
 
   const loadProfile = useCallback(async () => {
-    const token = getAuthToken();
-
-    if (!token) {
-      setUser(null);
-      setAuthError('');
-      setLoading(false);
-      return null;
-    }
-
     setLoading(true);
     setAuthError('');
 
@@ -51,15 +43,9 @@ export function AuthProvider({ children }) {
 
     const restoreSession = async () => {
       try {
-        const token = await hydrateAuthToken();
+        await hydrateAuthToken();
 
         if (!active) {
-          return;
-        }
-
-        if (!token) {
-          setUser(null);
-          setAuthError('');
           return;
         }
 
@@ -85,8 +71,14 @@ export function AuthProvider({ children }) {
     };
   }, [loadProfile]);
 
+  useEffect(() => {
+    if (user) {
+      void registerNativePushNotifications();
+    }
+  }, [user]);
+
   const login = async (payload, { remember = true } = {}) => {
-    const result = await loginRequest(payload);
+    const result = await loginRequest({ ...payload, remember });
     await setAuthToken(result.token, remember);
     setUser(result.user);
     setAuthError('');
@@ -110,7 +102,9 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
+    await logoutRequest().catch(() => null);
     await clearAuthToken();
+    resetNativePushRegistration();
     setUser(null);
     setAuthError('');
   };

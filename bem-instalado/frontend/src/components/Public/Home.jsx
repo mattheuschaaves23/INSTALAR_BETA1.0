@@ -17,6 +17,7 @@ import { safeSessionStorage } from '../../utils/safeStorage';
 import BrandWordmark from '../Layout/BrandWordmark';
 import PaginationControls from '../Layout/PaginationControls';
 import './Home.css';
+import PageMetadata from './PageMetadata';
 
 const AnimatedLocationGlobe = lazy(() => import('./AnimatedLocationGlobe'));
 
@@ -735,6 +736,9 @@ export default function Home() {
   const [requestInterests, setRequestInterests] = useState([]);
   const [loadingInterests, setLoadingInterests] = useState(false);
   const [selectingInterestId, setSelectingInterestId] = useState(null);
+  const [serviceProposal, setServiceProposal] = useState(null);
+  const [loadingProposal, setLoadingProposal] = useState(false);
+  const [respondingProposal, setRespondingProposal] = useState(false);
   const [privacyConsent, setPrivacyConsent] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState(
     typeof Notification === 'undefined' ? 'unsupported' : Notification.permission
@@ -1075,6 +1079,29 @@ export default function Home() {
     }
   }, [publishedRequest]);
 
+  const loadServiceProposal = useCallback(async (request = publishedRequest) => {
+    if (!request?.id || !request?.client_access_token) {
+      setServiceProposal(null);
+      return;
+    }
+    setLoadingProposal(true);
+    try {
+      const response = await api.get(`/public/service-requests/${request.id}/proposal`, {
+        headers: { 'X-Client-Request-Token': request.client_access_token },
+      });
+      setServiceProposal(response.data?.proposal || null);
+      if (response.data?.request_status && response.data.request_status !== request.status) {
+        const nextRequest = { ...request, status: response.data.request_status };
+        setPublishedRequest(nextRequest);
+        writePublishedClientRequest(nextRequest);
+      }
+    } catch (_error) {
+      setServiceProposal(null);
+    } finally {
+      setLoadingProposal(false);
+    }
+  }, [publishedRequest]);
+
   const restorePublishedRequest = useCallback(async (request) => {
     if (!request?.id || !request?.client_access_token) {
       return false;
@@ -1096,8 +1123,9 @@ export default function Home() {
     }));
 
     await loadRequestInterests(request);
+    await loadServiceProposal(request);
     return true;
-  }, [loadRequestInterests]);
+  }, [loadRequestInterests, loadServiceProposal]);
 
   const handleTrackingLookup = async (event) => {
     event.preventDefault();
@@ -1331,6 +1359,7 @@ export default function Home() {
       }
 
       toast.success('Instalador escolhido. Agora vocês já podem conversar pelo WhatsApp.');
+      await loadServiceProposal({ ...publishedRequest, ...response.data?.request });
     } catch (error) {
       toast.error(error.response?.data?.error || 'Não foi possível escolher o instalador.');
     } finally {
@@ -1338,21 +1367,50 @@ export default function Home() {
     }
   };
 
+  const respondToServiceProposal = async (decision) => {
+    if (!publishedRequest?.id || !publishedRequest?.client_access_token || !serviceProposal || respondingProposal) return;
+    let message = '';
+    if (decision === 'request_changes') {
+      message = window.prompt('O que você gostaria de ajustar na proposta?') || '';
+      if (!message.trim()) return;
+    }
+    if (decision === 'reject' && !await confirm('Deseja recusar esta proposta?')) return;
+    if (decision === 'accept' && !await confirm('Confirmar esta proposta e reservar o horário?')) return;
+    setRespondingProposal(true);
+    try {
+      const response = await api.post(
+        `/public/service-requests/${publishedRequest.id}/proposal/respond`,
+        { decision, message },
+        { headers: { 'X-Client-Request-Token': publishedRequest.client_access_token } }
+      );
+      setServiceProposal(response.data?.proposal || serviceProposal);
+      const nextRequest = { ...publishedRequest, status: response.data?.request_status || publishedRequest.status };
+      setPublishedRequest(nextRequest);
+      writePublishedClientRequest(nextRequest);
+      toast.success(decision === 'accept' ? 'Proposta aceita. Seu horário está confirmado.' : decision === 'request_changes' ? 'Pedido de ajuste enviado.' : 'Proposta recusada.');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Não foi possível responder à proposta.');
+    } finally {
+      setRespondingProposal(false);
+    }
+  };
+
   useEffect(() => {
     if (
       !publishedRequest?.id ||
       !publishedRequest?.client_access_token ||
-      !['open', 'selected'].includes(publishedRequest.status)
+      !['open', 'selected', 'proposal_sent', 'scheduled', 'in_progress'].includes(publishedRequest.status)
     ) {
       return undefined;
     }
 
     const interval = setInterval(() => {
       loadRequestInterests(publishedRequest);
+      loadServiceProposal(publishedRequest);
     }, 15000);
 
     return () => clearInterval(interval);
-  }, [loadRequestInterests, publishedRequest]);
+  }, [loadRequestInterests, loadServiceProposal, publishedRequest]);
 
   const handlePublishServiceRequest = async () => {
     const phoneDigits = requestContact.phone.replace(/\D/g, '');
@@ -1779,6 +1837,12 @@ export default function Home() {
 
   return (
     <div className="client-app-page" id="top">
+      <PageMetadata
+        canonicalPath="/cliente"
+        description="Publique seu pedido de instalação de papel de parede e acompanhe propostas e agendamentos com profissionais verificados."
+        noIndex
+        title="PapelPerto | Pedido de instalação de papel de parede"
+      />
       <div className="client-app-shell">
         <header className="client-app-topbar fade-up">
           <div className="client-app-brand">
@@ -2826,6 +2890,28 @@ export default function Home() {
                 </div>
               </div>
             )}
+
+            {selectedInterest ? (
+              <section className="client-app-interest-empty mt-4 text-left">
+                <strong>{serviceProposal ? 'Proposta e agendamento' : loadingProposal ? 'Procurando proposta...' : 'Aguardando proposta do instalador'}</strong>
+                {serviceProposal ? (
+                  <div className="mt-3 grid gap-2 text-sm">
+                    <span><b>Valor:</b> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(serviceProposal.amount || 0))}</span>
+                    <span><b>Horário sugerido:</b> {new Date(serviceProposal.scheduled_start).toLocaleString('pt-BR')} até {new Date(serviceProposal.scheduled_end).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                    <span><b>Incluso:</b> {serviceProposal.scope}</span>
+                    {serviceProposal.materials ? <span><b>Materiais:</b> {serviceProposal.materials}</span> : null}
+                    {serviceProposal.notes ? <span><b>Observações:</b> {serviceProposal.notes}</span> : null}
+                    {serviceProposal.status === 'sent' ? (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <button className="gold-button" disabled={respondingProposal} onClick={() => respondToServiceProposal('accept')} type="button">Aceitar e agendar</button>
+                        <button className="client-app-ghost-button" disabled={respondingProposal} onClick={() => respondToServiceProposal('request_changes')} type="button">Pedir ajuste</button>
+                        <button className="client-app-opportunity-cancel" disabled={respondingProposal} onClick={() => respondToServiceProposal('reject')} type="button">Recusar</button>
+                      </div>
+                    ) : serviceProposal.status === 'accepted' ? <strong className="mt-2">Horário confirmado. Você receberá atualizações do serviço por aqui.</strong> : serviceProposal.status === 'change_requested' ? <strong className="mt-2">Seu pedido de ajuste foi enviado ao instalador.</strong> : <strong className="mt-2">Esta proposta foi recusada.</strong>}
+                  </div>
+                ) : <span>O profissional foi avisado para enviar valor, itens inclusos e horário. Você não precisa aceitar nada pelo WhatsApp.</span>}
+              </section>
+            ) : null}
           </section>
         ) : null}
 

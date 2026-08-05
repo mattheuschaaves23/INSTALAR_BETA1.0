@@ -2,6 +2,7 @@ const express = require('express');
 const controller = require('../controllers/userController');
 const auth = require('../middleware/authMiddleware');
 const requireAccountType = require('../middleware/accountTypeMiddleware');
+const requireVerifiedEmail = require('../middleware/verifiedEmailMiddleware');
 const profileUpload = require('../middleware/profileUpload');
 
 const router = express.Router();
@@ -18,15 +19,15 @@ const uploadSingleProfileAsset = (req, res, next) => {
 
 router.get('/profile', auth, controller.getProfile);
 router.delete('/account', auth, controller.deleteOwnAccount);
-router.get('/dashboard', auth, requireInstaller, controller.getDashboard);
-router.get('/reviews/summary', auth, requireInstaller, controller.getReviewsSummary);
-router.get('/reviews-dashboard', auth, requireInstaller, controller.getReviewsDashboard);
-router.put('/profile', auth, requireInstaller, controller.updateProfile);
-router.get('/uploads/capabilities', auth, requireInstaller, controller.getUploadCapabilities);
-router.get('/uploads/file/:assetKey', auth, requireInstaller, controller.getStoredProfileAsset);
-router.post('/uploads', auth, requireInstaller, uploadSingleProfileAsset, controller.uploadProfileAsset);
-router.get('/availability', auth, requireInstaller, controller.getAvailabilitySlots);
-router.post('/availability', auth, requireInstaller, controller.createAvailabilitySlot);
-router.delete('/availability/:id', auth, requireInstaller, controller.deleteAvailabilitySlot);
+router.get('/dashboard', auth, requireInstaller, requireVerifiedEmail, controller.getDashboard);
+router.get('/reviews/summary', auth, requireInstaller, requireVerifiedEmail, controller.getReviewsSummary);
+router.get('/reviews-dashboard', auth, requireInstaller, requireVerifiedEmail, controller.getReviewsDashboard);
+router.put('/profile', auth, requireInstaller, requireVerifiedEmail, controller.updateProfile);
+router.get('/uploads/capabilities', auth, requireInstaller, requireVerifiedEmail, controller.getUploadCapabilities);
+router.get('/uploads/file/:assetKey', auth, requireInstaller, requireVerifiedEmail, controller.getStoredProfileAsset);
+router.post('/uploads', auth, requireInstaller, requireVerifiedEmail, uploadSingleProfileAsset, controller.uploadProfileAsset);
+router.get('/availability', auth, requireInstaller, requireVerifiedEmail, controller.getAvailabilitySlots);
+router.post('/availability', auth, requireInstaller, requireVerifiedEmail, controller.createAvailabilitySlot);
+router.delete('/availability/:id', auth, requireInstaller, requireVerifiedEmail, controller.deleteAvailabilitySlot);
 
 module.exports = router;

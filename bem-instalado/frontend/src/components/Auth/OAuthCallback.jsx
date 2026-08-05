@@ -55,13 +55,10 @@ export default function OAuthCallback() {
         return;
       }
 
-      if (!token) {
-        setError('Token de acesso ausente.');
-        return;
-      }
-
       try {
-        setAuthToken(token, true);
+        if (token) {
+          await setAuthToken(token, true);
+        }
         const profile = await getProfileRequest();
 
         if (!isMounted) {

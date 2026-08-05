@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const pool = require('../config/database');
 const generateWhatsAppLink = require('../utils/whatsapp');
 const { sendServiceRequestInterestEmail } = require('../services/email');
+const { sendPushToUser } = require('../services/push');
 const { publicAssetUrl, storeProfileAsset } = require('../services/objectStorage');
 const { normalizeSearchText } = require('../utils/textSearch');
 const forwardGeocode = require('../utils/forwardGeocode');
@@ -1194,6 +1195,13 @@ exports.selectServiceRequestInterest = async (req, res) => {
     await client.query('COMMIT');
 
     const updatedRequest = updatedRequestResult.rows[0];
+
+    await sendPushToUser({
+      userId: interest.installer_id,
+      title: 'Você foi escolhido',
+      body: 'O cliente escolheu você. Envie uma proposta pela InstalaPro.',
+      data: { route: '/opportunities', requestId },
+    }).catch(() => null);
 
     return res.json({
       request: serializeClientRequest(updatedRequest),

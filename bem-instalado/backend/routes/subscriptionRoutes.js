@@ -3,6 +3,7 @@ const controller = require('../controllers/subscriptionController');
 const auth = require('../middleware/authMiddleware');
 const requireAccountType = require('../middleware/accountTypeMiddleware');
 const { createRateLimiter } = require('../middleware/rateLimit');
+const requireVerifiedEmail = require('../middleware/verifiedEmailMiddleware');
 
 const router = express.Router();
 
@@ -15,6 +16,7 @@ const paymentCreationLimiter = createRateLimiter({
 router.post('/webhooks/asaas', controller.handleAsaasWebhook);
 router.use(auth);
 router.use(requireAccountType('installer'));
+router.use(requireVerifiedEmail);
 router.get('/', controller.getSubscription);
 router.post('/pay', paymentCreationLimiter, controller.createPayment);
 router.delete('/', controller.cancelSubscription);
