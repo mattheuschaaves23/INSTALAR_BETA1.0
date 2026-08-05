@@ -511,7 +511,7 @@ export default function Agenda() {
             </div>
 
             <button className="agenda-modern-primary-button" onClick={() => navigate('/budgets/new')} type="button">
-              + Agendar instalação
+              Criar orçamento
             </button>
           </div>
 
@@ -656,7 +656,7 @@ export default function Agenda() {
         </div>
 
         <button className="agenda-modern-summary-link" onClick={handleJumpToNext} type="button">
-          Ver agenda completa
+          Ver próximo compromisso
         </button>
       </section>
     </section>

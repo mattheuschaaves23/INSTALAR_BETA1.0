@@ -939,7 +939,7 @@ export default function Dashboard() {
 
   const useLegacyDashboard = process.env.REACT_APP_DASHBOARD_VARIANT === 'legacy';
 
-  if (!useLegacyDashboard) {
+  if (useLegacyDashboard) {
     return (
     <section className={`ref-panel-shell ${sidebarCollapsed ? 'is-collapsed' : ''}`}>
       <aside className="ref-panel-sidebar" aria-label="Navegação do painel">

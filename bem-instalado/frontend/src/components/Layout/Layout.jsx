@@ -9,6 +9,7 @@ const PANEL_ROUTE_PREFIXES = [
   '/agenda',
   '/budgets',
   '/clients',
+  '/dashboard',
   '/download-app',
   '/opportunities',
   '/reviews',
@@ -23,7 +24,6 @@ const PANEL_ROUTE_PREFIXES = [
 export default function Layout() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const isStandaloneDashboard = location.pathname === '/dashboard';
   const isInstallerPanelRoute = PANEL_ROUTE_PREFIXES.some((route) =>
     location.pathname === route || location.pathname.startsWith(`${route}/`)
   );
@@ -32,18 +32,9 @@ export default function Layout() {
     setSidebarOpen(false);
   }, [location.pathname]);
 
-  if (isStandaloneDashboard) {
-    return (
-      <div className="app-layout dashboard-reference-layout panel-flat-language panel-v3">
-        <EmailVerificationNotice />
-        <Outlet />
-      </div>
-    );
-  }
-
   if (isInstallerPanelRoute) {
     return (
-      <div className="app-layout dashboard-reference-layout panel-flat-language panel-v3">
+      <div className="app-layout dashboard-reference-layout installer-workspace">
         <InstallerPanelShell>
           <EmailVerificationNotice />
           <Outlet />

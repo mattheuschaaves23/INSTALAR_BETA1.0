@@ -135,6 +135,7 @@ export default function App() {
               <Route element={<Dashboard />} path="/dashboard" />
               <Route element={<Opportunities />} path="/opportunities" />
               <Route element={<Clients />} path="/clients" />
+              <Route element={<Clients />} path="/clients/new" />
               <Route element={<Budgets />} path="/budgets" />
               <Route element={<BudgetForm />} path="/budgets/new" />
               <Route element={<Agenda />} path="/agenda" />

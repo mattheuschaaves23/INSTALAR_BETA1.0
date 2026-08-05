@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import PaginationControls from '../Layout/PaginationControls';
@@ -142,10 +142,13 @@ function ClientCard({ client, onDelete, onEdit }) {
 
 export default function Clients() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { refreshSubscription } = useSubscription();
   const [clients, setClients] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [editingClient, setEditingClient] = useState(null);
+  const isCreateRoute = location.pathname === '/clients/new';
+  const [creatingClient, setCreatingClient] = useState(isCreateRoute);
 
   const loadClients = async () => {
     try {
@@ -159,6 +162,10 @@ export default function Clients() {
   useEffect(() => {
     loadClients();
   }, []);
+
+  useEffect(() => {
+    setCreatingClient(isCreateRoute);
+  }, [isCreateRoute]);
 
   const stats = useMemo(
     () => ({
@@ -182,15 +189,40 @@ export default function Clients() {
 
   const handleClientSaved = async (savedClient) => {
     if (savedClient?.id) {
-      setClients((current) => current.map((client) => (
-        Number(client.id) === Number(savedClient.id) ? savedClient : client
-      )));
+      setClients((current) => {
+        const alreadyExists = current.some((client) => Number(client.id) === Number(savedClient.id));
+
+        if (!alreadyExists) {
+          return [savedClient, ...current];
+        }
+
+        return current.map((client) => (
+          Number(client.id) === Number(savedClient.id) ? savedClient : client
+        ));
+      });
     } else {
       await loadClients();
     }
 
     setEditingClient(null);
+    setCreatingClient(false);
+    if (isCreateRoute) {
+      navigate('/clients', { replace: true });
+    }
     refreshSubscription().catch(() => null);
+  };
+
+  const closeClientForm = () => {
+    setEditingClient(null);
+    setCreatingClient(false);
+    if (isCreateRoute) {
+      navigate('/clients', { replace: true });
+    }
+  };
+
+  const openClientForm = () => {
+    setCreatingClient(true);
+    navigate('/clients/new');
   };
 
   const totalPages = Math.max(1, Math.ceil(clients.length / CLIENTS_PER_PAGE));
@@ -210,10 +242,10 @@ export default function Clients() {
           <p>Consulte e mantenha atualizada a sua carteira</p>
         </div>
 
-        <Link className="client-intake-save" to="/budgets/new">
+        <button className="client-intake-save" onClick={openClientForm} type="button">
           <ClientUiIcon type="plus" />
-          <span>Criar orçamento</span>
-        </Link>
+          <span>Novo cliente</span>
+        </button>
       </header>
 
       <div className="client-intake-layout">
@@ -230,7 +262,7 @@ export default function Clients() {
             </div>
 
             <p className="client-intake-list-intro">
-              Para incluir um novo cliente, inicie um orçamento e escolha <strong>Criar cliente</strong>.
+              Cadastre clientes aqui e use-os nos próximos orçamentos.
             </p>
 
             <div className="client-intake-panel-list">
@@ -249,10 +281,10 @@ export default function Clients() {
                   <ClientUiIcon type="users" />
                 </div>
                 <strong>Nenhum cliente cadastrado</strong>
-                <span>Crie o primeiro cliente diretamente na criação de orçamento.</span>
-                <Link className="client-intake-primary mt-5" to="/budgets/new">
-                  Criar orçamento
-                </Link>
+                <span>Cadastre o primeiro contato para usar nos próximos orçamentos.</span>
+                <button className="client-intake-primary mt-5" onClick={openClientForm} type="button">
+                  Cadastrar primeiro cliente
+                </button>
               </div>
             ) : null}
           </section>
@@ -285,19 +317,19 @@ export default function Clients() {
 
           <section className="client-intake-side-card client-intake-side-card--action">
             <p className="client-intake-kicker">Novo atendimento</p>
-            <h3>Cadastre enquanto cria a proposta</h3>
-            <p>Assim o cliente já fica vinculado ao orçamento, sem cadastro duplicado.</p>
-            <Link className="client-intake-primary" to="/budgets/new">
-              Criar orçamento
-            </Link>
+            <h3>Adicione um cliente</h3>
+            <p>Deixe a carteira organizada antes de montar o próximo orçamento.</p>
+            <button className="client-intake-primary" onClick={openClientForm} type="button">
+              Novo cliente
+            </button>
           </section>
         </aside>
       </div>
 
-      {editingClient ? (
+      {editingClient || creatingClient ? (
         <ClientForm
           client={editingClient}
-          onClose={() => setEditingClient(null)}
+          onClose={closeClientForm}
           onSaved={handleClientSaved}
         />
       ) : null}
