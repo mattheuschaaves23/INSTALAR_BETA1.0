@@ -144,6 +144,7 @@ export default function Profile() {
   const { setUser } = useAuth();
   const { isPro, planAccess, refreshSubscription } = useSubscription();
   const [form, setForm] = useState(initialForm);
+  const [activeProfileTab, setActiveProfileTab] = useState('profile');
   const [setup, setSetup] = useState(null);
   const [token, setToken] = useState('');
   const [disableToken, setDisableToken] = useState('');
@@ -486,29 +487,44 @@ export default function Profile() {
   return (
     <section className="page-shell space-y-7">
       <PageIntro
-        description="Complete seu perfil para gerar confiança: foto profissional, logo usada no PDF, dados de segurança e horários vagos do mês."
-        eyebrow="Perfil do instalador"
-        stats={[
-          {
-            label: 'Empresa',
-            value: form.business_name || form.name || 'Sem marca',
-            detail: 'Nome que aparece para clientes e no ranking.',
-          },
-          {
-            label: 'Dias de instalação',
-            value: `${form.installation_days?.length || 0}`,
-            detail: formatInstallationDays(form.installation_days),
-          },
-          {
-            label: 'Segurança do perfil',
-            value: `${securityScore}%`,
-            detail: 'Quanto mais completo, maior a confiança do cliente.',
-          },
-        ]}
-        title="Seu perfil precisa vender confiança antes mesmo da primeira conversa."
+        description={activeProfileTab === 'security'
+          ? 'Proteção da conta e informações que ajudam o cliente a confiar no seu perfil.'
+          : 'Dados públicos, portfólio, região atendida, horários e valores.'}
+        eyebrow="Perfil"
+        stats={activeProfileTab === 'security' ? [{
+          label: 'Perfil completo',
+          value: `${securityScore}%`,
+          detail: 'Documento, garantia, contrato e dados do perfil.',
+        }] : [{
+          label: 'Empresa',
+          value: form.business_name || form.name || 'Sem marca',
+          detail: 'Nome exibido para os clientes.',
+        }, {
+          label: 'Atendimento',
+          value: `${form.installation_days?.length || 0} dias`,
+          detail: formatInstallationDays(form.installation_days),
+        }]}
+        title={activeProfileTab === 'security' ? 'Segurança da conta' : 'Perfil profissional'}
       />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
+      <nav aria-label="Seções do perfil" className="flex border-b border-[var(--line)]">
+        <button
+          className={`border-b-2 px-4 py-3 text-sm font-semibold transition ${activeProfileTab === 'profile' ? 'border-[var(--gold-strong)] text-[var(--text)]' : 'border-transparent text-[var(--muted)]'}`}
+          onClick={() => setActiveProfileTab('profile')}
+          type="button"
+        >
+          Perfil
+        </button>
+        <button
+          className={`border-b-2 px-4 py-3 text-sm font-semibold transition ${activeProfileTab === 'security' ? 'border-[var(--gold-strong)] text-[var(--text)]' : 'border-transparent text-[var(--muted)]'}`}
+          onClick={() => setActiveProfileTab('security')}
+          type="button"
+        >
+          Segurança
+        </button>
+      </nav>
+
+      {activeProfileTab === 'profile' ? (
         <form className="lux-panel fade-up p-6" onSubmit={handleSubmit}>
           <div className="grid gap-5 md:grid-cols-2">
             <label className="block">
@@ -1042,90 +1058,88 @@ export default function Profile() {
           </button>
         </form>
 
-        <aside className="grid gap-6">
-          <section className="lux-panel fade-up p-6" style={{ animationDelay: '0.08s' }}>
-            <p className="eyebrow">Confiança do cliente</p>
-            <h2 className="mt-3 text-2xl font-semibold text-[var(--text)]">Selo de segurança do perfil</h2>
-
-            <div className="mt-5 rounded-[22px] border border-[var(--line)] bg-[rgba(255,255,255,0.03)] p-4">
-              <p className="text-sm text-[var(--muted)]">Nível atual de segurança</p>
-              <p className="mt-2 text-3xl font-semibold text-[var(--gold-strong)]">{securityScore}%</p>
-              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-                Documento: {getDocumentTypeLabel(form.document_type)} {form.document_id ? 'informado' : 'não informado'}.
-              </p>
-              <p className="text-sm leading-7 text-[var(--muted)]">
-                Garantia: {form.provides_warranty ? `${form.warranty_days || 0} dias` : 'não oferece'}.
-              </p>
-              <p className="text-sm leading-7 text-[var(--muted)]">
-                Contrato: {form.accepts_service_contract ? 'oferece contrato' : 'não informado'}.
-              </p>
+      ) : (
+        <section className="lux-panel fade-up max-w-4xl p-6">
+          <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[var(--line)] pb-5">
+            <div>
+              <p className="eyebrow">Conta</p>
+              <h2 className="mt-2 text-2xl font-semibold text-[var(--text)]">Segurança</h2>
             </div>
-          </section>
+            <span className="status-pill" data-tone={form.two_factor_enabled ? 'success' : 'pending'}>
+              2FA {form.two_factor_enabled ? 'ativo' : 'não configurado'}
+            </span>
+          </div>
 
-          <section className="lux-panel fade-up p-6" style={{ animationDelay: '0.1s' }}>
-            <p className="eyebrow">Segurança</p>
-            <h2 className="mt-3 text-2xl font-semibold text-[var(--text)]">Autenticação em dois fatores</h2>
-            <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
-              Proteja seu painel, os dados dos clientes e o faturamento com uma camada extra de segurança.
-            </p>
+          <div className="grid gap-4 py-5 sm:grid-cols-[140px_1fr]">
+            <div>
+              <p className="text-sm text-[var(--muted)]">Perfil</p>
+              <p className="mt-1 text-3xl font-semibold text-[var(--gold-strong)]">{securityScore}%</p>
+            </div>
+            <div className="grid gap-1 text-sm text-[var(--muted)] sm:grid-cols-3">
+              <p>Documento: <strong className="text-[var(--text)]">{form.document_id ? 'informado' : 'pendente'}</strong></p>
+              <p>Garantia: <strong className="text-[var(--text)]">{form.provides_warranty ? `${form.warranty_days || 0} dias` : 'não oferece'}</strong></p>
+              <p>Contrato: <strong className="text-[var(--text)]">{form.accepts_service_contract ? 'sim' : 'não'}</strong></p>
+            </div>
+          </div>
+
+          <div className="border-t border-[var(--line)] pt-5">
+            <h3 className="text-lg font-semibold text-[var(--text)]">Autenticação em dois fatores</h3>
+            <p className="mt-1 text-sm text-[var(--muted)]">Obrigatória para acessar o painel administrativo.</p>
 
             {!form.two_factor_enabled ? (
-              <div className="mt-6 space-y-4">
+              <div className="mt-4 space-y-4">
                 {!setup ? (
                   <button className="gold-button" disabled={securitySaving} onClick={handleSetup2FA} type="button">
-                    {securitySaving ? 'Preparando...' : 'Iniciar configuração'}
+                    {securitySaving ? 'Preparando...' : 'Configurar 2FA'}
                   </button>
                 ) : (
-                  <div className="space-y-4">
-                    <div className="rounded-[18px] border border-[var(--line)] bg-[rgba(216,155,53,0.08)] px-4 py-3 text-sm leading-6 text-[var(--muted)]">
-                      <strong className="text-[var(--text)]">Abra seu autenticador.</strong> No celular, tente abrir direto pelo botão abaixo. Se ele não aparecer, no Google Authenticator toque em <strong>+</strong> e escaneie o QR Code.
-                    </div>
-                    {setup.otpauth_url ? (
-                      <a className="gold-button flex w-full items-center justify-center" href={setup.otpauth_url}>
-                        Abrir app autenticador
-                      </a>
-                    ) : null}
-                    <img
-                      alt="QR Code de autenticação"
-                      className="w-full rounded-[24px] border border-[var(--line)] bg-white p-4"
-                      src={setup.qrCode}
-                    />
-                    <div className="rounded-[18px] border border-[var(--line)] bg-[rgba(255,255,255,0.02)] px-4 py-3 text-sm text-[var(--muted)]">
-                      <p className="break-all">Chave manual: <span className="text-[var(--gold-strong)]">{setup.secret}</span></p>
-                      <button className="ghost-button mt-3 !min-h-0 !px-3 !py-2 text-xs" onClick={handleCopy2FAKey} type="button">
-                        Copiar chave
+                  <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
+                    <div className="space-y-4">
+                      <p className="text-sm text-[var(--muted)]">Abra o autenticador, adicione esta conta e informe o código gerado.</p>
+                      {setup.otpauth_url ? (
+                        <a className="gold-button flex w-full items-center justify-center sm:w-fit" href={setup.otpauth_url}>
+                          Abrir app autenticador
+                        </a>
+                      ) : null}
+                      <div className="rounded-[14px] border border-[var(--line)] px-4 py-3 text-sm text-[var(--muted)]">
+                        <p className="break-all">Chave manual: <span className="text-[var(--gold-strong)]">{setup.secret}</span></p>
+                        <button className="ghost-button mt-3 !min-h-0 !px-3 !py-2 text-xs" onClick={handleCopy2FAKey} type="button">
+                          Copiar chave
+                        </button>
+                      </div>
+                      <label className="block">
+                        <span className="field-label">Código de 6 dígitos</span>
+                        <input
+                          autoComplete="one-time-code"
+                          className="field-input"
+                          inputMode="numeric"
+                          maxLength={6}
+                          onChange={(event) => setToken(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                          placeholder="000000"
+                          value={token}
+                        />
+                      </label>
+                      <button
+                        className="gold-button"
+                        disabled={securitySaving || token.length !== 6}
+                        onClick={handleEnable2FA}
+                        type="button"
+                      >
+                        {securitySaving ? 'Ativando...' : 'Ativar 2FA'}
                       </button>
                     </div>
-                    <label className="block">
-                      <span className="field-label">Código do aplicativo</span>
-                      <input
-                        autoComplete="one-time-code"
-                        className="field-input"
-                        inputMode="numeric"
-                        maxLength={6}
-                        onChange={(event) => setToken(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                        placeholder="000000"
-                        value={token}
-                      />
-                    </label>
-                    <button
-                      className="gold-button w-full"
-                      disabled={securitySaving || token.length !== 6}
-                      onClick={handleEnable2FA}
-                      type="button"
-                    >
-                      {securitySaving ? 'Ativando...' : 'Confirmar e ativar'}
-                    </button>
+                    <img
+                      alt="QR Code de autenticação"
+                      className="w-full rounded-[14px] border border-[var(--line)] bg-white p-3"
+                      src={setup.qrCode}
+                    />
                   </div>
                 )}
               </div>
             ) : (
-              <div className="mt-6 rounded-[22px] border border-[var(--line)] bg-[rgba(79,184,141,0.08)] p-5">
-                <p className="text-sm text-[var(--muted)]">
-                  O 2FA está ativo para esta conta. Isso dificulta acessos indevidos.
-                </p>
-                <label className="mt-4 block">
-                  <span className="field-label">Código atual do aplicativo</span>
+              <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+                <label className="block">
+                  <span className="field-label">Código atual para desativar</span>
                   <input
                     autoComplete="one-time-code"
                     className="field-input"
@@ -1137,34 +1151,27 @@ export default function Profile() {
                   />
                 </label>
                 <button
-                  className="ghost-button mt-4"
+                  className="ghost-button"
                   disabled={securitySaving || disableToken.length !== 6}
                   onClick={handleDisable2FA}
                   type="button"
                 >
-                  {securitySaving ? 'Desativando...' : 'Confirmar e desativar 2FA'}
+                  {securitySaving ? 'Desativando...' : 'Desativar 2FA'}
                 </button>
               </div>
             )}
             {recoveryCodes.length > 0 ? (
-              <div className="mt-5 rounded-[22px] border border-amber-400/50 bg-amber-100/70 p-5 text-stone-900 dark:bg-amber-950/40 dark:text-amber-50">
-                <p className="font-semibold">Guarde seus códigos de recuperação agora</p>
-                <p className="mt-2 text-sm">Cada código só funciona uma vez. Eles não serão mostrados novamente nesta tela.</p>
+              <div className="mt-5 border-t border-[var(--line)] pt-5">
+                <p className="font-semibold text-[var(--text)]">Códigos de recuperação</p>
+                <p className="mt-1 text-sm text-[var(--muted)]">Guarde-os agora. Cada um funciona uma vez.</p>
                 <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-sm sm:grid-cols-3">
                   {recoveryCodes.map((code) => <code className="rounded bg-white/60 px-2 py-1 dark:bg-black/20" key={code}>{code}</code>)}
                 </div>
               </div>
             ) : null}
-          </section>
-
-          <section className="lux-panel-soft fade-up rounded-[28px] p-6" style={{ animationDelay: '0.14s' }}>
-            <p className="eyebrow">Vitrine pública</p>
-            <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
-              Mantenha foto, documento, contrato, garantia e horários atualizados para o cliente consultar.
-            </p>
-          </section>
-        </aside>
-      </div>
+          </div>
+        </section>
+      )}
     </section>
   );
 }
