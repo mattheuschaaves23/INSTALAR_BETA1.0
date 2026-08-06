@@ -315,8 +315,14 @@ exports.respondToProposal = async (req, res) => {
       data: { route: '/opportunities', requestId },
     }).catch(() => null);
     return res.json({ proposal: serializeProposal(fresh.rows[0]), request_status: decision === 'accept' ? 'scheduled' : 'selected' });
-  } catch (_error) {
+  } catch (error) {
     await db?.query('ROLLBACK').catch(() => null);
+    if (error.code === '23P01') {
+      return res.status(409).json({
+        error: 'Esse horário acabou de ficar indisponível. Peça uma nova opção ao instalador.',
+        code: 'BOOKING_TIME_CONFLICT',
+      });
+    }
     return res.status(500).json({ error: 'Não foi possível registrar sua resposta.' });
   } finally {
     db?.release();

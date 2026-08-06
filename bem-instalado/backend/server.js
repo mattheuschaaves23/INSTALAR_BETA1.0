@@ -25,6 +25,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const supportRoutes = require('./routes/supportRoutes');
 const opportunityRoutes = require('./routes/opportunityRoutes');
 const { logApplicationError } = require('./utils/errorMonitoring');
+const { requireCsrfForCookieSession } = require('./middleware/csrfMiddleware');
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
@@ -150,6 +151,7 @@ app.use(
 );
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '64kb' }));
+app.use(requireCsrfForCookieSession);
 
 app.get('/api/health', async (_req, res) => {
   res.set('Cache-Control', 'no-store');

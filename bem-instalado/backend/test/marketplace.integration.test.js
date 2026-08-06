@@ -45,6 +45,7 @@ test('cadastro, pagamento, pedido, interesse e escolha do instalador', { skip: !
         password: 'TesteSeguro123!',
         phone: '48999999999',
         business_name: 'Teste Papel',
+        platform: 'android',
       }),
     });
     assert.equal(registration.response.status, 201, JSON.stringify(registration.body));
@@ -70,6 +71,7 @@ test('cadastro, pagamento, pedido, interesse e escolha do instalador', { skip: !
         email: `cliente-${email}`,
         password: 'ClienteSeguro123!',
         phone: '48988888888',
+        platform: 'android',
       }),
     });
     assert.equal(clientRegistration.response.status, 201, JSON.stringify(clientRegistration.body));
@@ -113,6 +115,7 @@ test('cadastro, pagamento, pedido, interesse e escolha do instalador', { skip: !
         password: 'TesteSeguro123!',
         phone: '48977777777',
         business_name: 'Outro Papel Teste',
+        platform: 'android',
       }),
     });
     assert.equal(secondRegistration.response.status, 201, JSON.stringify(secondRegistration.body));
@@ -273,7 +276,7 @@ test('cadastro, pagamento, pedido, interesse e escolha do instalador', { skip: !
 
     const loginAfterReset = await requestJson(baseUrl, '/api/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password: 'NovaSenhaSegura456!', account_type: 'installer' }),
+      body: JSON.stringify({ email, password: 'NovaSenhaSegura456!', account_type: 'installer', platform: 'android' }),
     });
     assert.equal(loginAfterReset.response.status, 200, JSON.stringify(loginAfterReset.body));
     const renewedHeaders = { Authorization: `Bearer ${loginAfterReset.body.token}` };
@@ -300,7 +303,7 @@ test('cadastro, pagamento, pedido, interesse e escolha do instalador', { skip: !
 
     const loginWithoutTotp = await requestJson(baseUrl, '/api/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password: 'NovaSenhaSegura456!', account_type: 'installer' }),
+      body: JSON.stringify({ email, password: 'NovaSenhaSegura456!', account_type: 'installer', platform: 'android' }),
     });
     assert.equal(loginWithoutTotp.response.status, 401, JSON.stringify(loginWithoutTotp.body));
     assert.equal(loginWithoutTotp.body.twoFactorRequired, true);
@@ -312,6 +315,7 @@ test('cadastro, pagamento, pedido, interesse e escolha do instalador', { skip: !
         password: 'NovaSenhaSegura456!',
         account_type: 'installer',
         twoFactorToken: currentTotp(),
+        platform: 'android',
       }),
     });
     assert.equal(loginWithTotp.response.status, 200, JSON.stringify(loginWithTotp.body));

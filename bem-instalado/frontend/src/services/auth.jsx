@@ -6,7 +6,7 @@ import { getNativeStorePlatform } from '../utils/nativePlatform';
 const IS_INSTALLER_APP = process.env.REACT_APP_INSTALLER_APP === 'true';
 
 export async function loginRequest(payload) {
-  const response = await api.post('/auth/login', payload, { timeout: 45000 });
+  const response = await api.post('/auth/login', { ...payload, platform: getNativeStorePlatform() }, { timeout: 45000 });
   return response.data;
 }
 
@@ -60,8 +60,8 @@ export function buildSocialLoginUrl(
 
   url.searchParams.set('role', normalizedRole);
   url.searchParams.set('next', sanitizeNextPath(next, fallbackNext));
-  if (targetPlatform === 'android') {
-    url.searchParams.set('platform', 'android');
+  if (targetPlatform !== 'web') {
+    url.searchParams.set('platform', targetPlatform);
   }
 
   return url.toString();
@@ -83,12 +83,12 @@ export async function startSocialLogin(provider, options) {
 }
 
 export async function registerRequest(payload) {
-  const response = await api.post('/auth/register', payload);
+  const response = await api.post('/auth/register', { ...payload, platform: getNativeStorePlatform() });
   return response.data;
 }
 
 export async function registerClientRequest(payload) {
-  const response = await api.post('/auth/register/client', payload);
+  const response = await api.post('/auth/register/client', { ...payload, platform: getNativeStorePlatform() });
   return response.data;
 }
 

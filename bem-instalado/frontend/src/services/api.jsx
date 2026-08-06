@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { clearAuthToken, getAuthToken } from '../utils/safeStorage';
+import { getCsrfToken } from '../utils/csrfToken';
 
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
 const DEFAULT_API_TIMEOUT_MS = 20000;
@@ -101,10 +102,19 @@ function redirectTo(targetPath) {
 
 api.interceptors.request.use((config) => {
   const token = getAuthToken();
+  const method = String(config.method || 'get').toUpperCase();
 
   if (token) {
     config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+    const csrfToken = getCsrfToken();
+    if (csrfToken) {
+      config.headers = config.headers || {};
+      config.headers['X-CSRF-Token'] = csrfToken;
+    }
   }
 
   return config;

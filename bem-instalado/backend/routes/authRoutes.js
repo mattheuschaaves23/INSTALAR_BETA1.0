@@ -2,6 +2,7 @@ const express = require('express');
 const controller = require('../controllers/authController');
 const auth = require('../middleware/authMiddleware');
 const { createRateLimiter } = require('../middleware/rateLimit');
+const { issueCsrfToken } = require('../middleware/csrfMiddleware');
 
 const router = express.Router();
 
@@ -39,6 +40,7 @@ const twoFactorLimiter = createRateLimiter({
 });
 
 router.get('/capabilities', controller.getCapabilities);
+router.get('/csrf', issueCsrfToken);
 router.post('/register', authBurstLimiter, controller.register);
 router.post('/register/client', authBurstLimiter, controller.registerClient);
 router.post('/login', loginLimiter, controller.login);

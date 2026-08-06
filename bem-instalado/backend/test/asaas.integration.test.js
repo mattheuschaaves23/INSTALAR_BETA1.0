@@ -119,6 +119,7 @@ test('Asaas cria checkout mensal, ativa assinatura e reverte acesso após estorn
         password: 'TesteSeguro123!',
         phone: '48999999999',
         business_name: 'Integração Asaas',
+        platform: 'android',
       }),
     });
     assert.equal(registration.response.status, 201, JSON.stringify(registration.body));

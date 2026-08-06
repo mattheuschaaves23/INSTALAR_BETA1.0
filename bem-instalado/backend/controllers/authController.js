@@ -12,6 +12,7 @@ const {
   sendPasswordResetEmail,
 } = require('../services/email');
 const { decryptSecret, encryptSecret, isEncryptionConfigured } = require('../utils/secretEncryption');
+const { clearCsrfCookie } = require('../middleware/csrfMiddleware');
 
 const REGISTER_PLAN_PRICE = Number(process.env.SUBSCRIPTION_PRICE || 49.9);
 const PASSWORD_RESET_EXPIRATION_MINUTES = Number(process.env.PASSWORD_RESET_EXPIRATION_MINUTES || 30);
@@ -21,7 +22,7 @@ const TWO_FACTOR_SETUP_EXPIRES_IN = '10m';
 const SESSION_COOKIE_NAME = 'instalapro_session';
 const SESSION_COOKIE_MAX_AGE_MS = Number(process.env.SESSION_COOKIE_MAX_AGE_MS || 7 * 24 * 60 * 60 * 1000);
 const OAUTH_ALLOWED_ROLES = new Set(['installer', 'client']);
-const OAUTH_ALLOWED_PLATFORMS = new Set(['web', 'android']);
+const OAUTH_ALLOWED_PLATFORMS = new Set(['web', 'android', 'ios']);
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
 const OAUTH_REDIRECT_ERROR_CODES = new Set([
   'account_type_mismatch',
@@ -125,10 +126,18 @@ async function sendVerificationForUser(req, user, db = pool) {
   return delivery;
 }
 
-function buildAuthPayload(user) {
+function isNativeMobilePlatform(value) {
+  return ['android', 'ios'].includes(String(value || '').trim().toLowerCase());
+}
+
+function buildAuthPayload(user, { includeToken = false } = {}) {
+  const token = signToken(user);
   return {
-    user: sanitizeUser(user),
-    token: signToken(user),
+    token,
+    body: {
+      user: sanitizeUser(user),
+      ...(includeToken ? { token } : {}),
+    },
   };
 }
 
@@ -309,10 +318,10 @@ function sanitizeNextPath(value, role = 'installer') {
 function redirectOAuthResult(req, res, { token, next, role, platform, error }) {
   const frontendUrl = getFrontendBaseUrl(req);
   const targetPlatform = normalizeOAuthPlatform(platform);
-  const isAndroid = targetPlatform === 'android';
+  const isNativeMobile = isNativeMobilePlatform(targetPlatform);
 
   if (token) {
-    if (!isAndroid) {
+    if (!isNativeMobile) {
       setSessionCookie(res, token);
       const query = new URLSearchParams({ next: sanitizeNextPath(next, role) });
       return res.redirect(`${frontendUrl}/auth/social/callback?${query.toString()}`);
@@ -321,17 +330,17 @@ function redirectOAuthResult(req, res, { token, next, role, platform, error }) {
     const hash = new URLSearchParams({
       token,
       next: sanitizeNextPath(next, role),
-      ...(isAndroid ? { platform: 'android' } : {}),
+      platform: targetPlatform,
     });
 
-    const callbackPath = isAndroid ? '/auth/mobile/callback' : '/auth/social/callback';
+    const callbackPath = '/auth/mobile/callback';
     return res.redirect(`${frontendUrl}${callbackPath}#${hash.toString()}`);
   }
 
-  if (isAndroid) {
+  if (isNativeMobile) {
     const hash = new URLSearchParams({
       oauth_error: error || 'oauth_failed',
-      platform: 'android',
+      platform: targetPlatform,
     });
 
     return res.redirect(`${frontendUrl}/auth/mobile/callback#${hash.toString()}`);
@@ -675,7 +684,8 @@ async function registerPasswordAccount(req, res, accountType) {
       req,
     });
 
-    const payload = buildAuthPayload(user);
+    const nativeMobile = isNativeMobilePlatform(req.body?.platform);
+    const payload = buildAuthPayload(user, { includeToken: nativeMobile });
 
     const verificationDelivery = await sendEmailVerificationEmail({
       to: user.email,
@@ -683,13 +693,13 @@ async function registerPasswordAccount(req, res, accountType) {
       expiresInMinutes: EMAIL_VERIFICATION_EXPIRATION_MINUTES,
     }).catch(() => ({ sent: false }));
 
-    payload.email_verification = {
+    payload.body.email_verification = {
       required: true,
       delivery: verificationDelivery.sent ? 'sent' : 'pending_configuration',
     };
 
     if (accountType === 'installer') {
-      payload.onboarding = {
+      payload.body.onboarding = {
         subscription_price: REGISTER_PLAN_PRICE,
         currency: 'BRL',
         period: 'mensal',
@@ -697,8 +707,10 @@ async function registerPasswordAccount(req, res, accountType) {
       };
     }
 
-    setSessionCookie(res, payload.token, true);
-    return res.status(201).json(payload);
+    if (!nativeMobile) {
+      setSessionCookie(res, payload.token, true);
+    }
+    return res.status(201).json(payload.body);
   } catch (error) {
     await db?.query('ROLLBACK').catch(() => null);
     if (error.code === '23505') {
@@ -818,9 +830,12 @@ exports.login = async (req, res) => {
       req,
     });
 
-    const payload = buildAuthPayload(user);
-    setSessionCookie(res, payload.token, req.body?.remember !== false);
-    return res.json(payload);
+    const nativeMobile = isNativeMobilePlatform(req.body?.platform);
+    const payload = buildAuthPayload(user, { includeToken: nativeMobile });
+    if (!nativeMobile) {
+      setSessionCookie(res, payload.token, req.body?.remember !== false);
+    }
+    return res.json(payload.body);
   } catch (_error) {
     return res.status(500).json({ error: 'Erro ao fazer login.' });
   }
@@ -1170,6 +1185,7 @@ exports.getSession = async (req, res) => {
 
 exports.logout = (_req, res) => {
   clearSessionCookie(res);
+  clearCsrfCookie(res);
   return res.json({ success: true });
 };
 

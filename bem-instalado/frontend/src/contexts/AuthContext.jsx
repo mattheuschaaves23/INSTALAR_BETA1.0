@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import { getProfileRequest, loginRequest, logoutRequest, registerClientRequest, registerRequest } from '../services/auth';
 import { clearAuthToken, hydrateAuthToken, setAuthToken } from '../utils/safeStorage';
 import { registerNativePushNotifications, resetNativePushRegistration } from '../services/pushNotifications';
+import { clearCsrfToken, refreshCsrfToken } from '../services/csrf';
 
 const AuthContext = createContext(null);
 
@@ -43,6 +44,7 @@ export function AuthProvider({ children }) {
 
     const restoreSession = async () => {
       try {
+        await refreshCsrfToken();
         await hydrateAuthToken();
 
         if (!active) {
@@ -104,6 +106,7 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     await logoutRequest().catch(() => null);
     await clearAuthToken();
+    clearCsrfToken();
     resetNativePushRegistration();
     setUser(null);
     setAuthError('');
