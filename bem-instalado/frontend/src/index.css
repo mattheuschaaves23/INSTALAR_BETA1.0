@@ -30409,6 +30409,31 @@ html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .agend
   background: #d6a43d !important;
 }
 
+/* Indicadores circulares da dashboard: texto claro sobre o miolo preto. */
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .dashboard-neo-donut-hole,
+  .ref-panel-donut > span
+) {
+  border-color: #6b5224 !important;
+  background: linear-gradient(180deg, #1b1b1b, #0d0d0d) !important;
+  color: #ffffff !important;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.38) !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .dashboard-neo-donut-hole strong,
+  .ref-panel-donut > span
+) {
+  color: #ffffff !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .dashboard-neo-donut-hole span,
+  .ref-panel-donut > span small
+) {
+  color: #c9c9c9 !important;
+}
+
 @media (max-width: 860px) {
   html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .ref-panel-mobile-drawer {
     background: #0a0a0a !important;
