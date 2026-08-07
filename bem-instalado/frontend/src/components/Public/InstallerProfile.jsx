@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import DecoratingWallLoader from '../Layout/DecoratingWallLoader';
-import './Home.css';
+import './InstallerProfile.css';
 import { formatCurrency, formatLongDate, formatShortDate } from '../../utils/formatters';
 import { formatInstallationDays } from '../../utils/installerDays';
 import PageMetadata from './PageMetadata';
@@ -18,11 +18,11 @@ const emptyReviewForm = {
 
 const defaultMarketplace = {
   title: 'Loja Oficial InstalaPro',
-  description:
-    'Materiais para todos os estilos, com atendimento especializado para você encontrar o acabamento ideal.',
+  description: 'Materiais selecionados para deixar cada ambiente mais bonito.',
   url: 'https://www.beminstalado.com.br',
-  cta_label: 'Visitar loja oficial',
-  highlights: ['Papel de parede', 'Infantil e ambientes', 'Pagamento via Pix'],
+  cta_label: 'Conhecer a loja',
+  whatsapp_url: 'https://api.whatsapp.com/send?phone=5548999816000',
+  highlights: ['Papel de parede', 'Pagamento via Pix'],
 };
 
 function getInitials(name) {
@@ -34,13 +34,24 @@ function getInitials(name) {
     .join('');
 }
 
+function getProfileHandle(name) {
+  const normalized = String(name || 'instalapro')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '')
+    .slice(0, 20);
+
+  return `@${normalized || 'instalapro'}`;
+}
+
 function RatingStars({ value }) {
-  const rounded = Math.round(Number(value || 0));
+  const rounded = Math.max(0, Math.min(5, Math.round(Number(value || 0))));
 
   return (
-    <span aria-label={`${rounded} de 5 estrelas`} className="installer-profile-rating-stars">
+    <span aria-label={`${rounded} de 5 estrelas`} className="social-installer-stars">
       {Array.from({ length: 5 }).map((_, index) => (
-        <i className={index < rounded ? 'is-filled' : ''} key={index}>★</i>
+        <i aria-hidden="true" className={index < rounded ? 'is-filled' : ''} key={index}>★</i>
       ))}
     </span>
   );
@@ -52,10 +63,7 @@ function groupAvailabilitySlots(slots = []) {
       return accumulator;
     }
 
-    if (!accumulator[slot.slot_date]) {
-      accumulator[slot.slot_date] = [];
-    }
-
+    accumulator[slot.slot_date] = accumulator[slot.slot_date] || [];
     accumulator[slot.slot_date].push(slot);
     return accumulator;
   }, {});
@@ -137,7 +145,7 @@ export default function InstallerProfile() {
     }
   };
 
-  const requireClientLogin = (event, nextPath, message) => {
+  const requestClientLogin = (event, nextPath, message) => {
     if (user) {
       return true;
     }
@@ -149,15 +157,18 @@ export default function InstallerProfile() {
   };
 
   if (!payload) {
-    return <DecoratingWallLoader phrase="Preparando o perfil deste profissional." />;
+    return <DecoratingWallLoader phrase="Abrindo o perfil deste profissional." />;
   }
 
   const { installer, reviews = [], marketplace: apiMarketplace } = payload;
   const marketplace = apiMarketplace || defaultMarketplace;
-  const groupedSlots = groupAvailabilitySlots(installer.availability_slots || []);
-  const groupedSlotEntries = Object.entries(groupedSlots).sort(([left], [right]) => left.localeCompare(right));
-  const isOwnInstallerProfile = Boolean(user && Number(user.id) === Number(installer.id));
+  const gallery = Array.isArray(installer.installation_gallery) ? installer.installation_gallery : [];
+  const groupedSlotEntries = Object.entries(groupAvailabilitySlots(installer.availability_slots || []))
+    .sort(([left], [right]) => left.localeCompare(right));
   const serviceRequestId = Number(new URLSearchParams(location.search).get('pedido')) || null;
+  const requestPath = serviceRequestId ? '/cliente/pedido' : '/cliente';
+  const requestActionLabel = serviceRequestId ? 'Voltar ao pedido' : 'Publicar pedido';
+  const isOwnInstallerProfile = Boolean(user && Number(user.id) === Number(installer.id));
   const locationLabel =
     [installer.city, installer.state].filter(Boolean).join(' · ') ||
     installer.service_region ||
@@ -166,237 +177,208 @@ export default function InstallerProfile() {
   const warrantyLabel = installer.safety?.provides_warranty
     ? `${installer.safety.warranty_days || 0} dias de garantia`
     : 'Garantia a combinar';
-  const requestPath = serviceRequestId ? '/cliente/pedido' : '/cliente';
-  const requestActionLabel = serviceRequestId ? 'Voltar aos interessados' : 'Publicar meu pedido';
+  const profileHandle = getProfileHandle(installer.display_name || installer.name);
+  const profilePhoto = installer.installer_photo || installer.logo || null;
 
   return (
-    <main className="installer-public-page">
+    <main className="social-installer-profile">
       <PageMetadata
         canonicalPath={`/installers/${installer.id}`}
-        description={`${installer.display_name || installer.name} é instalador(a) de papel de parede${installer.city ? ` em ${installer.city}` : ''}. Veja perfil, avaliações e disponibilidade na InstalaPro.`}
+        description={`${installer.display_name || installer.name} é instalador(a) de papel de parede${installer.city ? ` em ${installer.city}` : ''}. Veja trabalhos, avaliações e disponibilidade na InstalaPro.`}
         title={`${installer.display_name || installer.name} | Instalador de papel de parede`}
       />
 
-      <header className="installer-profile-nav">
-        <Link className="installer-profile-nav-back" to={serviceRequestId ? '/cliente/pedido' : '/cliente'}>
-          ← {serviceRequestId ? 'Voltar aos interessados' : 'Encontrar instaladores'}
-        </Link>
-        <Link aria-label="Ir para a página inicial" className="installer-profile-nav-brand" to="/">
-          Instala<span>Pro</span>
-        </Link>
-        <a className="installer-profile-nav-link" href="#avaliacoes-instalador">Avaliações</a>
-      </header>
+      <nav aria-label="Navegação do perfil" className="social-installer-nav">
+        <Link className="social-installer-nav-brand" to="/">Instala<span>Pro</span></Link>
+        <Link className="social-installer-nav-back" to={requestPath}>← {serviceRequestId ? 'Meu pedido' : 'Encontrar instaladores'}</Link>
+      </nav>
 
-      <div className="installer-profile-shell">
-        <section className="installer-profile-hero">
-          <div className="installer-profile-hero-glow" aria-hidden="true" />
-          <div className="installer-profile-hero-intro">
-            <div className="installer-profile-avatar-wrap">
-              {installer.installer_photo ? (
-                <img alt={`Foto de ${installer.display_name}`} className="installer-profile-avatar" src={installer.installer_photo} />
-              ) : installer.logo ? (
-                <img alt={`Logo de ${installer.display_name}`} className="installer-profile-avatar" src={installer.logo} />
+      <div className="social-installer-shell">
+        <section className="social-installer-header">
+          <div className="social-installer-cover" aria-hidden="true">
+            {gallery[0] ? <img alt="" src={gallery[0]} /> : <div className="social-installer-cover-art" />}
+            <div className="social-installer-cover-shade" />
+            <span className="social-installer-cover-label">Perfil profissional</span>
+          </div>
+
+          <div className="social-installer-identity">
+            <div className="social-installer-avatar-wrap">
+              {profilePhoto ? (
+                <img alt={`Foto de ${installer.display_name}`} className="social-installer-avatar" src={profilePhoto} />
               ) : (
-                <div className="installer-profile-avatar installer-profile-avatar--initials">{getInitials(installer.display_name)}</div>
+                <div className="social-installer-avatar social-installer-avatar--initials">{getInitials(installer.display_name)}</div>
               )}
-              {installer.certificate_verified || installer.safety?.document_masked ? <span className="installer-profile-verified">✓</span> : null}
+              {installer.certificate_verified || installer.safety?.document_masked ? <span aria-label="Perfil verificado" className="social-installer-verified">✓</span> : null}
             </div>
 
-            <div className="installer-profile-hero-copy">
-              <p className="installer-profile-kicker">Instalador parceiro</p>
-              <h1>{installer.display_name}</h1>
-              <p className="installer-profile-location">{locationLabel}</p>
-              <div className="installer-profile-rating-line">
-                <RatingStars value={installer.average_rating} />
-                <strong>{hasReviews ? Number(installer.average_rating || 0).toFixed(1) : 'Novo perfil'}</strong>
-                <span>{hasReviews ? `${installer.review_count} avaliações` : 'Pronto para atender'}</span>
+            <div className="social-installer-identity-copy">
+              <div className="social-installer-name-line">
+                <h1>{installer.display_name}</h1>
+                {installer.featured_installer ? <span className="social-installer-featured">Destaque</span> : null}
               </div>
+              <p>{profileHandle}</p>
+              <span>{locationLabel}</span>
+            </div>
+
+            <div className="social-installer-header-actions">
+              <Link className="social-installer-primary-button" to={requestPath}>{requestActionLabel}</Link>
+              <a className="social-installer-secondary-button" href="#disponibilidade">Disponibilidade</a>
             </div>
           </div>
 
-          <div className="installer-profile-hero-body">
-            <p>{installer.bio || 'Profissional especializado em instalações cuidadosas, com atendimento organizado do orçamento à finalização.'}</p>
-            <div className="installer-profile-trust-tags">
-              {installer.safety?.document_masked ? <span>Documento verificado</span> : <span>Dados profissionais cadastrados</span>}
-              {installer.safety?.accepts_service_contract ? <span>Contrato de serviço</span> : null}
-              {installer.safety?.provides_warranty ? <span>{warrantyLabel}</span> : null}
-              {installer.featured_installer ? <span>Em destaque</span> : null}
+          <div className="social-installer-headline">
+            <p>{installer.bio || 'Instalações cuidadosas, atendimento próximo e acabamento que valoriza cada ambiente.'}</p>
+            <div className="social-installer-follow-row" aria-label="Resumo profissional">
+              <div><strong>{installer.completed_jobs || 0}</strong><span>trabalhos</span></div>
+              <div><strong>{installer.unique_clients_served || 0}</strong><span>clientes</span></div>
+              <div><strong>{installer.review_count || 0}</strong><span>avaliações</span></div>
+              <div className="social-installer-rating-summary"><RatingStars value={installer.average_rating} /><span>{hasReviews ? Number(installer.average_rating || 0).toFixed(1) : 'Novo perfil'}</span></div>
             </div>
-          </div>
-
-          <div className="installer-profile-hero-actions">
-            <Link className="installer-profile-primary-action" to={requestPath}>{requestActionLabel}</Link>
-            <a className="installer-profile-secondary-action" href="#disponibilidade">Ver disponibilidade</a>
-          </div>
-
-          <div className="installer-profile-hero-stats" aria-label="Resumo do profissional">
-            <article><strong>{installer.completed_jobs || 0}</strong><span>instalações concluídas</span></article>
-            <article><strong>{installer.unique_clients_served || 0}</strong><span>clientes atendidos</span></article>
-            <article><strong>{installer.review_count || 0}</strong><span>avaliações recebidas</span></article>
           </div>
         </section>
 
-        <section className="installer-profile-layout">
-          <div className="installer-profile-main-column">
-            <section className="installer-profile-section installer-profile-about">
-              <div className="installer-profile-section-heading">
-                <p>Como funciona</p>
-                <h2>Atendimento pensado para sua instalação</h2>
+        <div className="social-installer-layout">
+          <section className="social-installer-feed">
+            <article className="social-installer-card social-installer-intro-card">
+              <div className="social-installer-card-heading">
+                <div><p>Sobre o profissional</p><h2>Atendimento que começa pelo seu ambiente</h2></div>
+                {installer.safety?.document_masked ? <span className="social-installer-verified-label">✓ Verificado</span> : null}
               </div>
-              <div className="installer-profile-detail-grid">
-                <article>
-                  <span>Região atendida</span>
-                  <strong>{locationLabel}</strong>
-                  <p>{installer.service_region || 'A área exata é confirmada antes do orçamento.'}</p>
-                </article>
-                <article>
-                  <span>Horários</span>
-                  <strong>{installer.service_hours || 'A combinar'}</strong>
-                  <p>Dias de instalação: {formatInstallationDays(installer.installation_days)}</p>
-                </article>
-                <article>
-                  <span>Forma de trabalho</span>
-                  <p>{installer.installation_method || 'Cada ambiente é analisado antes da instalação para orientar o melhor acabamento.'}</p>
-                </article>
+              <p className="social-installer-intro-text">{installer.installation_method || 'Cada serviço é planejado antes da instalação para alinhar o material, o espaço e o acabamento esperado.'}</p>
+              <div className="social-installer-highlight-list">
+                <span>{installer.safety?.accepts_service_contract ? 'Contrato disponível' : 'Combinações registradas antes do serviço'}</span>
+                <span>{warrantyLabel}</span>
+                <span>{installer.service_hours || 'Horários a combinar'}</span>
               </div>
-            </section>
+            </article>
 
-            <section className="installer-profile-section installer-profile-pricing">
-              <div className="installer-profile-section-heading">
-                <p>Referência de valores</p>
-                <h2>Custos apresentados com transparência</h2>
+            <article className="social-installer-card social-installer-work-card">
+              <div className="social-installer-card-heading social-installer-card-heading--inline">
+                <div><p>Trabalhos publicados</p><h2>Inspirações para o seu ambiente</h2></div>
+                <span>{gallery.length ? `${gallery.length} fotos` : 'Em atualização'}</span>
               </div>
-              <div className="installer-profile-price-grid">
-                <article><span>Visita técnica</span><strong>{formatCurrency(installer.base_service_cost)}</strong></article>
-                <article><span>Deslocamento</span><strong>{formatCurrency(installer.travel_fee)}</strong></article>
-                <article><span>Instalação por rolo</span><strong>{formatCurrency(installer.default_price_per_roll)}</strong></article>
-                <article><span>Remoção</span><strong>{formatCurrency(installer.default_removal_price)}</strong></article>
-              </div>
-              <p className="installer-profile-section-note">Os valores servem como referência. O orçamento final considera ambiente, medida, material e condições do local.</p>
-            </section>
-
-            <section className="installer-profile-section installer-profile-portfolio">
-              <div className="installer-profile-section-heading installer-profile-section-heading--inline">
-                <div><p>Portfólio</p><h2>Instalações realizadas</h2></div>
-                {installer.certificate_file ? (
-                  <a className="installer-profile-text-link" href={installer.certificate_file} rel="noreferrer" target="_blank">Ver certificado</a>
-                ) : null}
-              </div>
-              {Array.isArray(installer.installation_gallery) && installer.installation_gallery.length > 0 ? (
-                <div className="installer-profile-gallery">
-                  {installer.installation_gallery.slice(0, 8).map((photo, index) => (
-                    <img
-                      alt={`Instalação ${index + 1} de ${installer.display_name}`}
-                      decoding="async"
-                      key={`${index}-${photo.slice(0, 24)}`}
-                      loading="lazy"
-                      src={photo}
-                    />
+              {gallery.length ? (
+                <div className="social-installer-work-grid">
+                  {gallery.slice(0, 9).map((photo, index) => (
+                    <figure key={`${index}-${photo}`}>
+                      <img alt={`Trabalho realizado por ${installer.display_name} — foto ${index + 1}`} decoding="async" loading="lazy" src={photo} />
+                    </figure>
                   ))}
                 </div>
               ) : (
-                <div className="installer-profile-portfolio-empty">
-                  <strong>Portfólio em atualização</strong>
-                  <p>As fotos dos trabalhos deste instalador aparecerão aqui assim que forem publicadas.</p>
+                <div className="social-installer-empty-work">
+                  <span>✦</span>
+                  <strong>Novos trabalhos em breve</strong>
+                  <p>Este profissional ainda está organizando o portfólio para publicar aqui.</p>
                 </div>
               )}
-            </section>
-          </div>
+            </article>
 
-          <aside className="installer-profile-sidebar">
-            <section className="installer-profile-availability" id="disponibilidade">
-              <p className="installer-profile-kicker">Disponibilidade</p>
-              <h2>Próximos horários livres</h2>
-              <p className="installer-profile-availability-copy">Consulte as datas informadas pelo profissional antes de enviar o pedido.</p>
-              <div className="installer-profile-slots">
-                {groupedSlotEntries.length ? (
-                  groupedSlotEntries.slice(0, 4).map(([date, slots]) => (
-                    <article key={date}>
-                      <strong>{formatLongDate(`${date}T12:00:00`)}</strong>
-                      <div>{slots.map((slot) => <span key={slot.id}>{slot.start_time} – {slot.end_time}</span>)}</div>
+            <article className="social-installer-card social-installer-reviews" id="avaliacoes-instalador">
+              <div className="social-installer-card-heading social-installer-card-heading--inline">
+                <div><p>Recomendações</p><h2>O que os clientes dizem</h2></div>
+                {!isOwnInstallerProfile ? (
+                  <a
+                    href="#avaliar-instalador"
+                    onClick={(event) => requestClientLogin(event, `/installers/${installer.id}#avaliar-instalador`, 'Entre para avaliar este profissional.')}
+                  >
+                    Avaliar
+                  </a>
+                ) : null}
+              </div>
+              {reviews.length ? (
+                <div className="social-installer-review-list">
+                  {reviews.map((review, index) => (
+                    <article key={`${review.reviewer_name}-${review.created_at}-${index}`}>
+                      <div className="social-installer-review-avatar">{getInitials(review.reviewer_name)}</div>
+                      <div className="social-installer-review-copy">
+                        <div><strong>{review.reviewer_name}</strong><span>{review.reviewer_region || 'Cliente InstalaPro'}</span></div>
+                        <RatingStars value={review.rating} />
+                        <p>{review.comment || 'Cliente recomendou este profissional.'}</p>
+                        <time>{formatShortDate(review.created_at)}</time>
+                      </div>
                     </article>
-                  ))
-                ) : installer.available_dates?.length ? (
-                  installer.available_dates.slice(0, 4).map((date) => <span className="installer-profile-date-chip" key={date}>{formatLongDate(date)}</span>)
-                ) : (
-                  <div className="installer-profile-no-slots">Os horários ainda não foram informados. Você pode enviar o pedido para combinar a melhor data.</div>
-                )}
-              </div>
-              <Link className="installer-profile-sidebar-action" to={requestPath}>{requestActionLabel}</Link>
-            </section>
+                  ))}
+                </div>
+              ) : (
+                <div className="social-installer-empty-reviews">As recomendações aparecerão aqui depois das primeiras instalações concluídas.</div>
+              )}
+            </article>
 
-            <section className="installer-profile-security-card">
-              <p>Confiança InstalaPro</p>
-              <ul>
-                <li>{installer.safety?.document_masked ? 'Documento cadastrado e conferido' : 'Dados profissionais cadastrados'}</li>
-                <li>{installer.safety?.accepts_service_contract ? 'Pode formalizar o atendimento em contrato' : 'Detalhes combinados antes da execução'}</li>
-                <li>{warrantyLabel}</li>
-              </ul>
-            </section>
-          </aside>
-        </section>
-
-        <section className="installer-profile-section installer-profile-reviews" id="avaliacoes-instalador">
-          <div className="installer-profile-section-heading installer-profile-section-heading--inline">
-            <div><p>Avaliações</p><h2>O que os clientes contam</h2></div>
-            {!isOwnInstallerProfile ? (
-              <a
-                className="installer-profile-text-link"
-                href="#avaliar-instalador"
-                onClick={(event) => requireClientLogin(event, `/installers/${installer.id}#avaliar-instalador`, 'Entre para avaliar este profissional.')}
-              >
-                Avaliar profissional
-              </a>
-            ) : null}
-          </div>
-          {reviews.length ? (
-            <div className="installer-profile-review-grid">
-              {reviews.map((review, index) => (
-                <article key={`${review.reviewer_name}-${index}-${review.created_at}`}>
-                  <div className="installer-profile-review-top"><strong>{review.reviewer_name}</strong><span>{review.rating}/5</span></div>
-                  <p className="installer-profile-review-region">{review.reviewer_region || 'Região não informada'}</p>
-                  <p>{review.comment || 'Avaliação enviada sem comentário adicional.'}</p>
-                  <time>{formatShortDate(review.created_at)}</time>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <div className="installer-profile-review-empty">Ainda não há avaliações públicas. Os primeiros clientes poderão deixar um relato após a conclusão do serviço.</div>
-          )}
-        </section>
-
-        <section className="installer-profile-bottom-grid">
-          <section className="installer-profile-section installer-profile-review-form" id="avaliar-instalador">
-            <div className="installer-profile-section-heading"><p>Avaliar</p><h2>Conte como foi sua experiência</h2></div>
-            {!user ? (
-              <div className="installer-profile-form-lock">
-                <p>As avaliações são liberadas para clientes que concluíram um pedido na plataforma.</p>
-                <Link className="installer-profile-primary-action" to={getClientLoginPath(`/installers/${installer.id}#avaliar-instalador`)}>Entrar para avaliar</Link>
-              </div>
-            ) : isOwnInstallerProfile ? (
-              <div className="installer-profile-form-lock"><p>Você está vendo seu próprio perfil. Por segurança, não é possível enviar uma autoavaliação.</p></div>
-            ) : (
-              <form className="installer-profile-form" onSubmit={handleReviewSubmit}>
-                <label><span>Seu nome</span><input name="reviewer_name" onChange={handleReviewChange} placeholder="Como você quer aparecer" required value={reviewForm.reviewer_name} /></label>
-                <label><span>Sua região</span><input name="reviewer_region" onChange={handleReviewChange} placeholder="Cidade ou bairro" value={reviewForm.reviewer_region} /></label>
-                <label><span>Nota</span><select name="rating" onChange={handleReviewChange} value={reviewForm.rating}><option value={5}>5 estrelas</option><option value={4}>4 estrelas</option><option value={3}>3 estrelas</option><option value={2}>2 estrelas</option><option value={1}>1 estrela</option></select></label>
-                <label className="installer-profile-form-comment"><span>Comentário</span><textarea name="comment" onChange={handleReviewChange} placeholder="Conte como foi sua experiência" rows="4" value={reviewForm.comment} /></label>
-                <button className="installer-profile-primary-action" disabled={sendingReview} type="submit">{sendingReview ? 'Enviando avaliação...' : 'Enviar avaliação'}</button>
-              </form>
-            )}
+            <article className="social-installer-card social-installer-review-form" id="avaliar-instalador">
+              <div className="social-installer-card-heading"><p>Sua experiência</p><h2>Deixe uma recomendação</h2></div>
+              {!user ? (
+                <div className="social-installer-review-lock">
+                  <p>As avaliações são liberadas para clientes que concluíram um pedido pela plataforma.</p>
+                  <Link className="social-installer-primary-button" to={getClientLoginPath(`/installers/${installer.id}#avaliar-instalador`)}>Entrar para avaliar</Link>
+                </div>
+              ) : isOwnInstallerProfile ? (
+                <div className="social-installer-review-lock"><p>Este é o seu perfil. Autoavaliações não são permitidas.</p></div>
+              ) : (
+                <form className="social-installer-review-fields" onSubmit={handleReviewSubmit}>
+                  <label><span>Seu nome</span><input name="reviewer_name" onChange={handleReviewChange} placeholder="Como você quer aparecer" required value={reviewForm.reviewer_name} /></label>
+                  <label><span>Sua região</span><input name="reviewer_region" onChange={handleReviewChange} placeholder="Cidade ou bairro" value={reviewForm.reviewer_region} /></label>
+                  <label><span>Nota</span><select name="rating" onChange={handleReviewChange} value={reviewForm.rating}><option value={5}>5 estrelas</option><option value={4}>4 estrelas</option><option value={3}>3 estrelas</option><option value={2}>2 estrelas</option><option value={1}>1 estrela</option></select></label>
+                  <label className="social-installer-review-comment"><span>Comentário</span><textarea name="comment" onChange={handleReviewChange} placeholder="Conte como foi sua experiência" rows="4" value={reviewForm.comment} /></label>
+                  <button className="social-installer-primary-button" disabled={sendingReview} type="submit">{sendingReview ? 'Enviando...' : 'Publicar recomendação'}</button>
+                </form>
+              )}
+            </article>
           </section>
 
-          <aside className="installer-profile-marketplace">
-            <p>Materiais recomendados</p>
-            <h2>{marketplace?.title}</h2>
-            <span>{marketplace?.description}</span>
-            <div>{(marketplace?.highlights || []).slice(0, 3).map((highlight) => <i key={highlight}>{highlight}</i>)}</div>
-            <a href={marketplace?.url || 'https://www.beminstalado.com.br'} rel="noreferrer" target="_blank">{marketplace?.cta_label || 'Visitar loja oficial'} →</a>
+          <aside className="social-installer-aside">
+            <article className="social-installer-side-card">
+              <p>Informações</p>
+              <dl>
+                <div><dt>Atende em</dt><dd>{installer.service_region || locationLabel}</dd></div>
+                <div><dt>Dias disponíveis</dt><dd>{formatInstallationDays(installer.installation_days)}</dd></div>
+                <div><dt>Documento</dt><dd>{installer.safety?.document_masked || 'Cadastro profissional'}</dd></div>
+              </dl>
+              {installer.certificate_file ? <a href={installer.certificate_file} rel="noreferrer" target="_blank">Ver certificado ↗</a> : null}
+            </article>
+
+            <article className="social-installer-side-card social-installer-availability" id="disponibilidade">
+              <p>Agenda</p>
+              <h2>Próximos horários</h2>
+              {groupedSlotEntries.length ? (
+                <div className="social-installer-slot-list">
+                  {groupedSlotEntries.slice(0, 4).map(([date, slots]) => (
+                    <div key={date}>
+                      <strong>{formatLongDate(`${date}T12:00:00`)}</strong>
+                      <span>{slots.map((slot) => `${slot.start_time} – ${slot.end_time}`).join(' · ')}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : installer.available_dates?.length ? (
+                <div className="social-installer-date-list">{installer.available_dates.slice(0, 4).map((date) => <span key={date}>{formatLongDate(date)}</span>)}</div>
+              ) : (
+                <div className="social-installer-no-slots">Os próximos horários ainda serão informados. Envie o pedido para combinar uma data.</div>
+              )}
+              <Link className="social-installer-side-action" to={requestPath}>{requestActionLabel}</Link>
+            </article>
+
+            <article className="social-installer-side-card social-installer-prices">
+              <p>Valores de referência</p>
+              <div><span>Visita técnica</span><strong>{formatCurrency(installer.base_service_cost)}</strong></div>
+              <div><span>Deslocamento</span><strong>{formatCurrency(installer.travel_fee)}</strong></div>
+              <div><span>Por rolo</span><strong>{formatCurrency(installer.default_price_per_roll)}</strong></div>
+              <div><span>Remoção</span><strong>{formatCurrency(installer.default_removal_price)}</strong></div>
+              <small>O valor final é confirmado no orçamento.</small>
+            </article>
+
+            <article className="social-installer-store-card">
+              <span>Parceiro recomendado</span>
+              <h2>{marketplace.title}</h2>
+              <p>{marketplace.description}</p>
+              <div>{(marketplace.highlights || []).slice(0, 2).map((highlight) => <i key={highlight}>{highlight}</i>)}</div>
+              <a href={marketplace.url || 'https://www.beminstalado.com.br'} rel="noreferrer" target="_blank">{marketplace.cta_label || 'Conhecer a loja'} →</a>
+              {marketplace.whatsapp_url ? <a className="social-installer-store-whatsapp" href={marketplace.whatsapp_url} rel="noreferrer" target="_blank">Falar com a loja</a> : null}
+            </article>
           </aside>
-        </section>
+        </div>
       </div>
 
-      <div className="installer-profile-mobile-cta"><Link to={requestPath}>{requestActionLabel}</Link></div>
+      <div className="social-installer-mobile-action"><Link to={requestPath}>{requestActionLabel}</Link></div>
     </main>
   );
 }
