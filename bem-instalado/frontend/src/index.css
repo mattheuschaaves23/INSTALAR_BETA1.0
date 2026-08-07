@@ -29257,3 +29257,48 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
     background: #ffffff;
   }
 }
+
+/* Exceções antigas que ainda usavam amarelo no aplicativo e na assinatura. */
+.dashboard-reference-layout.aqua-panel-theme .ref-panel-mobile-header nav a.ref-panel-avatar {
+  border-color: #b9e1e7;
+  background: #e8f7f9;
+  color: #217c8d;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .ref-panel-mobile-header nav em {
+  background: #3197aa;
+  color: #ffffff;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .subscription-v3-hero::after {
+  background: linear-gradient(112deg, transparent 25%, rgba(49, 151, 170, 0.08) 47%, transparent 68%);
+}
+
+.dashboard-reference-layout.aqua-panel-theme .subscription-v3-kicker i,
+.dashboard-reference-layout.aqua-panel-theme .subscription-v3-hero-points span::before,
+.dashboard-reference-layout.aqua-panel-theme .subscription-v3-pending-toggle i,
+.dashboard-reference-layout.aqua-panel-theme .subscription-v3-footer span::before {
+  background: #3197aa;
+  box-shadow: none;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .subscription-v3-hero h1 span {
+  background: none;
+  color: #217c8d;
+  -webkit-text-fill-color: currentColor;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .subscription-v3-current > i {
+  background: rgba(49, 151, 170, 0.14);
+  box-shadow: 0 0 4rem rgba(49, 151, 170, 0.18);
+}
+
+.dashboard-reference-layout.aqua-panel-theme .subscription-v3-usage-track i {
+  background: linear-gradient(90deg, #217c8d, #78cad5);
+}
+
+.dashboard-reference-layout.aqua-panel-theme .native-update-progress span,
+.dashboard-reference-layout.aqua-panel-theme .native-update-primary {
+  background: linear-gradient(90deg, #217c8d, #78cad5);
+  color: #ffffff;
+}
