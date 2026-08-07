@@ -27686,6 +27686,10 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
+.dashboard-reference-layout .dashboard-neo-heading .dashboard-neo-sponsor {
+  flex: 0 0 13rem;
+}
+
 .dashboard-reference-layout .dashboard-neo-sponsor:hover {
   border-color: #c89843;
   box-shadow: 0 12px 24px rgba(24, 37, 42, 0.1);
@@ -27806,6 +27810,10 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
 @media (max-width: 860px) {
   .dashboard-reference-layout .dashboard-neo-sponsor {
     justify-self: start;
+  }
+
+  .dashboard-reference-layout .dashboard-neo-heading .dashboard-neo-sponsor {
+    flex-basis: min(100%, 13rem);
   }
 }
 

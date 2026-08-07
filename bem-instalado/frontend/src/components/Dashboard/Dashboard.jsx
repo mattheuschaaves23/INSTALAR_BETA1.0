@@ -1365,6 +1365,8 @@ export default function Dashboard() {
               em uma leitura mais clara e organizada.
             </p>
           </div>
+
+          {dashboardAd ? <DashboardSponsor ad={dashboardAd} /> : null}
         </div>
 
         <PlanUsage usageKey="monthly_budgets" />
@@ -1680,7 +1682,6 @@ export default function Dashboard() {
             ) : null}
             </article>
 
-            {dashboardAd ? <DashboardSponsor ad={dashboardAd} /> : null}
           </div>
         </div>
       </div>
