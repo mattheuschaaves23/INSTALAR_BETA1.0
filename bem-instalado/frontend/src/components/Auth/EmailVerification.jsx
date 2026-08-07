@@ -24,9 +24,9 @@ export function EmailVerificationNotice() {
   };
 
   return (
-    <section className="mx-auto mb-5 flex w-full max-w-[1480px] flex-col gap-3 rounded-2xl border border-amber-400/40 bg-amber-100/90 px-4 py-3 text-sm text-stone-900 shadow-sm dark:bg-amber-950/50 dark:text-amber-50 sm:flex-row sm:items-center sm:justify-between">
+    <section className="email-verification-notice">
       <p><strong>Confirme seu e-mail.</strong> Enviamos um link para {user.email}; até confirmar, ações profissionais ficam bloqueadas.</p>
-      <button className="ghost-button !border-amber-700 !text-amber-950 dark:!text-amber-50" disabled={sending} onClick={resend} type="button">
+      <button className="ghost-button" disabled={sending} onClick={resend} type="button">
         {sending ? 'Enviando...' : 'Reenviar link'}
       </button>
     </section>

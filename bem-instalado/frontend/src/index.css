@@ -29302,3 +29302,55 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
   background: linear-gradient(90deg, #217c8d, #78cad5);
   color: #ffffff;
 }
+
+/* Aviso de confirmaÃ§Ã£o segue o painel: informaÃ§Ã£o importante, sem amarelo. */
+.dashboard-reference-layout.aqua-panel-theme .email-verification-notice {
+  width: min(calc(100% - 4.5rem), 1540px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem auto -0.7rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #b9e1e7;
+  border-radius: 0.9rem;
+  background: #effbfc;
+  color: #29434b;
+  box-shadow: 0 4px 14px rgba(35, 55, 62, 0.035);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .email-verification-notice p {
+  margin: 0;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .email-verification-notice strong {
+  color: #217c8d;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .email-verification-notice .ghost-button {
+  flex: 0 0 auto;
+  min-height: 2.4rem;
+  border-color: #8bcbd5;
+  background: #ffffff;
+  color: #217c8d;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .agenda-modern-legend .today-day {
+  border: 1px solid #b9e1e7;
+  background: #e8f7f9;
+}
+
+@media (max-width: 860px) {
+  .dashboard-reference-layout.aqua-panel-theme .email-verification-notice {
+    width: calc(100% - 2rem);
+    align-items: stretch;
+    flex-direction: column;
+    margin: 0.8rem auto -0.3rem;
+  }
+
+  .dashboard-reference-layout.aqua-panel-theme .email-verification-notice .ghost-button {
+    width: 100%;
+  }
+}
