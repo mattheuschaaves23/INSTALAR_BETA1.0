@@ -30434,6 +30434,25 @@ html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
   color: #c9c9c9 !important;
 }
 
+/* Filtros de avaliações: opções neutras escuras e a seleção em dourado. */
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .reviews-filter-tabs button {
+  border-color: #3d3d3d !important;
+  background: #1b1b1b !important;
+  color: #f5f5f5 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .reviews-filter-tabs button:hover {
+  border-color: #9e701b !important;
+  background: #28200f !important;
+  color: #f4c968 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .reviews-filter-tabs button.is-active {
+  border-color: #d6a43d !important;
+  background: #30230b !important;
+  color: #f4c968 !important;
+}
+
 @media (max-width: 860px) {
   html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .ref-panel-mobile-drawer {
     background: #0a0a0a !important;
