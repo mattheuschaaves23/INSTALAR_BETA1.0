@@ -30371,6 +30371,61 @@ html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
   color: #ffffff !important;
 }
 
+/* Calendário: cada estado precisa de uma superfície escura própria. */
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .agenda-modern-weekdays span {
+  color: #d7d7d7 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .agenda-modern-day {
+  border: 1px solid #343434 !important;
+  background: #1b1b1b !important;
+  color: #f5f5f5 !important;
+  opacity: 1;
+  box-shadow: none !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .agenda-modern-day-number {
+  color: #f5f5f5 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .agenda-modern-day:hover {
+  border-color: #9e701b !important;
+  background: #28200f !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .agenda-modern-day[data-outside='true'] {
+  border-color: #292929 !important;
+  background: #111111 !important;
+  opacity: 1;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .agenda-modern-day[data-outside='true'] .agenda-modern-day-number {
+  color: #6f6f6f !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .agenda-modern-day[data-today='true'] {
+  border-color: #a9781f !important;
+  background: #241c0c !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .agenda-modern-day[data-today='true'] .agenda-modern-day-number {
+  color: #f4c968 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .agenda-modern-day[data-selected='true'] {
+  border-color: #d6a43d !important;
+  background: linear-gradient(135deg, #3b2b0d, #241c0c) !important;
+  box-shadow: inset 0 0 0 1px rgba(244, 201, 104, 0.16) !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .agenda-modern-day[data-selected='true'] .agenda-modern-day-number {
+  color: #f4c968 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .agenda-modern-day-marker {
+  background: #d6a43d !important;
+}
+
 @media (max-width: 860px) {
   html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .ref-panel-mobile-drawer {
     background: #0a0a0a !important;
