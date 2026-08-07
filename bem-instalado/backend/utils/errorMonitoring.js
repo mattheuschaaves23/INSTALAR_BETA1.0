@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const pool = require('../config/database');
+const { notifyOperationalAlert } = require('../services/operationalAlerts');
 
 function cleanText(value, maxLength = 1000) {
   return String(value || '').replace(/\s+/g, ' ').trim().slice(0, maxLength);
@@ -57,6 +58,18 @@ async function logApplicationError({
         JSON.stringify(safeMetadata(metadata)),
       ]
     );
+    if (String(severity).toLowerCase() !== 'info') {
+      void notifyOperationalAlert({
+        severity: String(severity || 'error').toLowerCase(),
+        source: cleanText(source, 30) || 'backend',
+        message: cleanText(message, 700),
+        metadata: {
+          route: cleanText(req?.originalUrl || req?.path, 160),
+          method: cleanText(req?.method, 12),
+          status_code: Number(statusCode) || 500,
+        },
+      });
+    }
   } catch (monitoringError) {
     console.error('Falha ao registrar erro da aplicação:', monitoringError.message);
   }

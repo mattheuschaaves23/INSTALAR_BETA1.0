@@ -123,6 +123,7 @@ export default function BudgetForm() {
   const [clients, setClients] = useState([]);
   const [clientId, setClientId] = useState('');
   const [showClientForm, setShowClientForm] = useState(false);
+  const [activeStep, setActiveStep] = useState(1);
   const [pricingMode, setPricingMode] = useState('roll');
   const [pricePerRoll, setPricePerRoll] = useState(0);
   const [pricePerSquareMeter, setPricePerSquareMeter] = useState(10);
@@ -258,11 +259,27 @@ export default function BudgetForm() {
   const canSave = canCalculate && grandTotal > 0 && Number(clientId) > 0;
 
   const steps = [
-    { number: 1, label: 'Calculo', state: createStepState(canCalculate, !canCalculate) },
-    { number: 2, label: 'Resumo', state: createStepState(grandTotal > 0, canCalculate && grandTotal <= 0) },
-    { number: 3, label: 'Cliente', state: createStepState(Boolean(clientId), grandTotal > 0 && !clientId) },
-    { number: 4, label: 'Enviar', state: createStepState(canSave, Boolean(clientId) && !canSave) },
+    { number: 1, label: 'Cliente', state: createStepState(Boolean(clientId), activeStep === 1) },
+    { number: 2, label: 'Cálculo', state: createStepState(canCalculate && grandTotal > 0, activeStep === 2) },
+    { number: 3, label: 'Resumo', state: createStepState(canCalculate && grandTotal > 0 && activeStep > 3, activeStep === 3) },
+    { number: 4, label: 'Enviar', state: createStepState(false, activeStep === 4) },
   ];
+
+  const continueFromClient = () => {
+    if (!Number(clientId)) {
+      toast.error('Escolha o cliente antes de montar o orçamento.');
+      return;
+    }
+    setActiveStep(2);
+  };
+
+  const continueFromCalculation = () => {
+    if (!canCalculate || grandTotal <= 0) {
+      toast.error('Preencha as medidas e os valores para calcular o orçamento.');
+      return;
+    }
+    setActiveStep(3);
+  };
 
   const handleClear = () => {
     setClientId('');
@@ -386,13 +403,10 @@ export default function BudgetForm() {
 
           <div className="budget-modern-topbar-copy">
             <h1>Novo orçamento</h1>
-            <p>Informe as medidas e os valores do serviço.</p>
+            <p>Cliente, cálculo, resumo e envio — uma etapa por vez.</p>
           </div>
 
-          <button className="budget-modern-save-button" type="submit">
-            <BudgetIcon type="save" />
-            <span>Salvar orçamento</span>
-          </button>
+          <span className="budget-modern-progress">Etapa {activeStep} de 4</span>
         </header>
 
         <PlanUsage className="fade-up" usageKey="monthly_budgets" />
@@ -416,14 +430,16 @@ export default function BudgetForm() {
             <section className="budget-modern-calculator-card fade-up" style={{ animationDelay: '0.06s' }}>
               <header className="budget-modern-card-head">
                 <div className="budget-modern-head-icon">
-                  <BudgetIcon type="measure" />
+                  <BudgetIcon type={activeStep === 1 ? 'summary' : activeStep === 4 ? 'save' : 'measure'} />
                 </div>
                 <div>
-                  <h2>Calculadora de instalação</h2>
-                  <p>Informe as medidas, o modo de cobrança e os serviços para calcular.</p>
+                  <h2>{activeStep === 1 ? 'Escolha o cliente' : activeStep === 2 ? 'Monte o orçamento' : activeStep === 4 ? 'Confirme o envio' : 'Revise o orçamento'}</h2>
+                  <p>{activeStep === 1 ? 'Defina para quem este orçamento será criado.' : activeStep === 2 ? 'Informe medidas, valores e serviços para calcular.' : activeStep === 4 ? 'Confira os dados finais antes de salvar o orçamento.' : 'Confira os valores antes de seguir para o envio.'}</p>
                 </div>
               </header>
 
+              {activeStep === 2 ? (
+                <>
               <div className="budget-modern-section">
                 <div className="budget-modern-section-title">
                   <div>
@@ -711,11 +727,23 @@ export default function BudgetForm() {
                 ) : null}
               </div>
 
+              <div className="budget-modern-stage-actions">
+                <button className="budget-modern-secondary-cta" onClick={() => setActiveStep(1)} type="button">
+                  Voltar ao cliente
+                </button>
+                <button className="budget-modern-primary-cta" onClick={continueFromCalculation} type="button">
+                  Revisar resumo
+                </button>
+              </div>
+                </>
+              ) : null}
+
+              {activeStep === 1 ? (
               <div className="budget-modern-section">
                 <div className="budget-modern-section-title">
                   <div>
                     <BudgetIcon type="summary" />
-                    <span>4. Cliente e envio</span>
+                    <span>1. Cliente</span>
                   </div>
                 </div>
 
@@ -754,17 +782,74 @@ export default function BudgetForm() {
                 </div>
 
                 <div className="budget-modern-actions-bar">
-                  <button className="budget-modern-primary-cta" type="submit">
-                    Salvar orçamento
+                  <button className="budget-modern-primary-cta" onClick={continueFromClient} type="button">
+                    Continuar para o cálculo
                   </button>
                   <button className="budget-modern-secondary-cta" onClick={handleClear} type="button">
-                    Limpar calculo
+                    Limpar dados
                   </button>
                 </div>
               </div>
+
+              ) : null}
+
+              {activeStep === 4 ? (
+                <div className="budget-modern-section budget-modern-send-stage">
+                  <div className="budget-modern-section-title">
+                    <div>
+                      <BudgetIcon type="save" />
+                      <span>4. Enviar orçamento</span>
+                    </div>
+                  </div>
+
+                  <p className="budget-modern-send-copy">
+                    O orçamento será salvo como pendente. Em seguida, você poderá baixar o PDF ou enviar no WhatsApp pela lista de orçamentos.
+                  </p>
+
+                  <div className="budget-modern-send-checks">
+                    <div><span>Cliente</span><strong>{selectedClient?.name}</strong></div>
+                    <div><span>Total</span><strong>{formatCurrency(grandTotal)}</strong></div>
+                    <div><span>Pagamento</span><strong>{installmentEnabled ? `${normalizedInstallments}x` : 'À vista'}</strong></div>
+                  </div>
+
+                  <div className="budget-modern-stage-actions">
+                    <button className="budget-modern-secondary-cta" onClick={() => setActiveStep(3)} type="button">
+                      Voltar ao resumo
+                    </button>
+                    <button className="budget-modern-primary-cta" disabled={!canSave} type="submit">
+                      Salvar orçamento
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+
+              {activeStep === 3 ? (
+                <div className="budget-modern-section budget-modern-review-stage">
+                  <div className="budget-modern-section-title">
+                    <div>
+                      <BudgetIcon type="summary" />
+                      <span>3. Resumo</span>
+                    </div>
+                  </div>
+                  <p className="budget-modern-send-copy">
+                    Revise o cliente, os ambientes e os valores no painel ao lado. Se algo mudou, volte para ajustar antes de enviar.
+                  </p>
+                  <div className="budget-modern-calculated-grid">
+                    <article><span>Cliente</span><strong>{selectedClient?.name || '—'}</strong><small>{selectedClient?.phone || selectedClient?.email || 'Contato não informado'}</small></article>
+                    <article><span>Ambientes</span><strong>{environments.length}</strong><small>{totals.area.toFixed(2)} m² no total</small></article>
+                    <article><span>Total</span><strong>{formatCurrency(grandTotal)}</strong><small>{installmentEnabled ? `${normalizedInstallments}x no pagamento` : 'Pagamento à vista'}</small></article>
+                  </div>
+                  <div className="budget-modern-stage-actions">
+                    <button className="budget-modern-secondary-cta" onClick={() => setActiveStep(2)} type="button">
+                      Ajustar cálculo
+                    </button>
+                  </div>
+                </div>
+              ) : null}
             </section>
           </main>
 
+          {activeStep === 3 ? (
           <aside className="budget-modern-summary-panel fade-up" style={{ animationDelay: '0.1s' }}>
             <div className="budget-modern-summary-head">
               <p className="budget-modern-section-label">Resumo do orçamento</p>
@@ -817,14 +902,15 @@ export default function BudgetForm() {
             </div>
 
             <div className="budget-modern-summary-actions">
-              <button className="budget-modern-primary-cta" disabled={!canSave} type="submit">
-                Continuar
+              <button className="budget-modern-primary-cta" disabled={!canSave} onClick={() => setActiveStep(4)} type="button">
+                Continuar para envio
               </button>
-              <button className="budget-modern-secondary-cta" onClick={handleClear} type="button">
-                Limpar calculo
+              <button className="budget-modern-secondary-cta" onClick={() => setActiveStep(2)} type="button">
+                Ajustar cálculo
               </button>
             </div>
           </aside>
+          ) : null}
         </div>
       </form>
       {showClientForm ? (

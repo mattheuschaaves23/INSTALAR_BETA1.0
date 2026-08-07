@@ -1,4 +1,4 @@
-const CACHE_NAME = 'instalapro-papelperto-v3';
+const CACHE_NAME = 'instalapro-papelperto-v4';
 const APP_SHELL = ['/', '/cliente', '/cliente/entrar', '/manifest.webmanifest', '/brand/instalapro-logo.png', '/brand/instalapro-icon.png'];
 
 self.addEventListener('install', (event) => {
@@ -40,5 +40,35 @@ self.addEventListener('fetch', (event) => {
       }
       return response;
     }))
+  );
+});
+
+self.addEventListener('push', (event) => {
+  let payload = {};
+  try {
+    payload = event.data ? event.data.json() : {};
+  } catch (_error) {
+    payload = { body: event.data?.text?.() || '' };
+  }
+
+  const title = payload.title || 'InstalaPro';
+  const options = {
+    body: payload.body || 'Você tem uma atualização na sua conta.',
+    icon: '/brand/instalapro-icon.png',
+    badge: '/brand/instalapro-icon.png',
+    data: { url: payload.data?.url || '/notifications' },
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = new URL(event.notification.data?.url || '/notifications', self.location.origin).href;
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+      const existing = windows.find((client) => client.url.startsWith(self.location.origin));
+      if (existing) return existing.focus().then(() => existing.navigate(target));
+      return clients.openWindow(target);
+    })
   );
 });

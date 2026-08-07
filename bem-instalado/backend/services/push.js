@@ -26,8 +26,29 @@ function getMessaging() {
   }
 }
 
+function getWebPush() {
+  const publicKey = String(process.env.WEB_PUSH_VAPID_PUBLIC_KEY || '').trim();
+  const privateKey = String(process.env.WEB_PUSH_VAPID_PRIVATE_KEY || '').trim();
+  const subject = String(process.env.WEB_PUSH_SUBJECT || '').trim();
+  if (!publicKey || !privateKey || !subject) return null;
+
+  try {
+    // web-push is intentionally optional until the VAPID environment variables
+    // are configured. Native FCM keeps working independently.
+    const webPush = require('web-push');
+    webPush.setVapidDetails(subject, publicKey, privateKey);
+    return webPush;
+  } catch (_error) {
+    return null;
+  }
+}
+
 function isPushConfigured() {
-  return Boolean(firebaseConfig());
+  return Boolean(firebaseConfig() || getWebPush());
+}
+
+function isWebPushConfigured() {
+  return Boolean(getWebPush());
 }
 
 async function registerDevice({ userId, platform, token }) {
@@ -39,6 +60,19 @@ async function registerDevice({ userId, platform, token }) {
     const error = new Error('Dispositivo de notificação inválido.');
     error.code = 'INVALID_PUSH_DEVICE';
     throw error;
+  }
+
+  if (normalizedPlatform === 'web') {
+    try {
+      const subscription = JSON.parse(normalizedToken);
+      if (!String(subscription?.endpoint || '').startsWith('https://') || !subscription?.keys?.p256dh || !subscription?.keys?.auth) {
+        throw new Error('invalid_web_push_subscription');
+      }
+    } catch (_error) {
+      const error = new Error('Assinatura de notificação do navegador inválida.');
+      error.code = 'INVALID_WEB_PUSH_SUBSCRIPTION';
+      throw error;
+    }
   }
 
   const result = await pool.query(
@@ -66,44 +100,70 @@ async function unregisterDevice({ userId, deviceId }) {
   return result.rowCount > 0;
 }
 
-async function sendPushToUser({ userId, title, body, data = {} }) {
-  const messaging = getMessaging();
-  if (!messaging || !userId) return { sent: 0, reason: isPushConfigured() ? 'firebase_unavailable' : 'not_configured' };
-
-  const devices = await pool.query(
-    `SELECT id, token FROM notification_devices WHERE user_id = $1 AND active = TRUE`,
-    [userId]
-  );
-  const tokens = devices.rows.map((device) => device.token);
-  if (!tokens.length) return { sent: 0, reason: 'no_devices' };
-
+async function sendNativePush({ messaging, devices, title, body, data }) {
+  if (!messaging || !devices.length) return { sent: 0, failed: 0, invalidIds: [] };
   const response = await messaging.sendEachForMulticast({
-    tokens,
+    tokens: devices.map((device) => device.token),
     notification: { title: String(title || 'InstalaPro'), body: String(body || '') },
     data: Object.fromEntries(Object.entries(data).map(([key, value]) => [key, String(value)])),
     android: { priority: 'high', notification: { channelId: 'instalapro_alerts' } },
     apns: { payload: { aps: { sound: 'default' } } },
   });
-
-  const invalidTokenIndexes = [];
+  const invalidIds = [];
   response.responses.forEach((item, index) => {
     const code = item.error?.code || '';
     if (code.includes('registration-token-not-registered') || code.includes('invalid-registration-token')) {
-      invalidTokenIndexes.push(index);
+      invalidIds.push(devices[index].id);
     }
   });
-  if (invalidTokenIndexes.length) {
+  return { sent: response.successCount, failed: response.failureCount, invalidIds };
+}
+
+async function sendWebPush({ webPush, devices, title, body, data }) {
+  if (!webPush || !devices.length) return { sent: 0, failed: 0, invalidIds: [] };
+  const payload = JSON.stringify({
+    title: String(title || 'InstalaPro'),
+    body: String(body || ''),
+    data: Object.fromEntries(Object.entries(data).map(([key, value]) => [key, String(value)])),
+  });
+  let sent = 0;
+  let failed = 0;
+  const invalidIds = [];
+
+  for (const device of devices) {
+    try {
+      await webPush.sendNotification(JSON.parse(device.token), payload, { TTL: 60 * 60 });
+      sent += 1;
+    } catch (error) {
+      failed += 1;
+      if ([404, 410].includes(Number(error?.statusCode))) invalidIds.push(device.id);
+    }
+  }
+  return { sent, failed, invalidIds };
+}
+
+async function sendPushToUser({ userId, title, body, data = {} }) {
+  if (!userId) return { sent: 0, reason: 'missing_user' };
+  const [nativeResult, webResult] = await Promise.all([
+    pool.query(`SELECT id, token FROM notification_devices WHERE user_id = $1 AND active = TRUE AND platform IN ('android', 'ios')`, [userId]),
+    pool.query(`SELECT id, token FROM notification_devices WHERE user_id = $1 AND active = TRUE AND platform = 'web'`, [userId]),
+  ]);
+  const native = await sendNativePush({ messaging: getMessaging(), devices: nativeResult.rows, title, body, data });
+  const web = await sendWebPush({ webPush: getWebPush(), devices: webResult.rows, title, body, data });
+  const invalidIds = [...native.invalidIds, ...web.invalidIds];
+  if (invalidIds.length) {
     await pool.query(
-      `UPDATE notification_devices SET active = FALSE, updated_at = NOW()
-       WHERE id = ANY($1::int[])`,
-      [invalidTokenIndexes.map((index) => devices.rows[index].id)]
+      `UPDATE notification_devices SET active = FALSE, updated_at = NOW() WHERE id = ANY($1::int[])`,
+      [invalidIds]
     );
   }
-  return { sent: response.successCount, failed: response.failureCount };
+  const sent = native.sent + web.sent;
+  return { sent, failed: native.failed + web.failed, reason: sent ? undefined : 'not_configured' };
 }
 
 module.exports = {
   isPushConfigured,
+  isWebPushConfigured,
   registerDevice,
   sendPushToUser,
   unregisterDevice,

@@ -9626,6 +9626,51 @@ body {
     rgba(255, 255, 255, 0.02);
 }
 
+.notification-web-push {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--route-line);
+  border-radius: 1rem;
+  background: linear-gradient(115deg, rgba(216, 155, 53, 0.12), rgba(var(--site-panel-rgb), 0.92) 46%);
+}
+
+.notification-web-push p,
+.notification-web-push h2,
+.notification-web-push span {
+  margin: 0;
+}
+
+.notification-web-push p {
+  color: var(--ref-gold);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.notification-web-push h2 {
+  margin-top: 0.25rem;
+  color: var(--ref-text);
+  font-size: 1rem;
+}
+
+.notification-web-push span {
+  display: block;
+  max-width: 52rem;
+  margin-top: 0.3rem;
+  color: var(--route-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.notification-web-push .gold-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .notification-surface {
   display: grid;
   gap: 0;
@@ -12104,6 +12149,23 @@ body {
   color: rgba(255, 245, 230, 0.68);
 }
 
+.budget-modern-progress {
+  min-height: 2.65rem;
+  padding: 0 0.9rem;
+  border: 1px solid rgba(var(--site-accent-rgb), 0.22);
+  border-radius: 999px;
+  color: var(--gold);
+  background: rgba(var(--site-accent-rgb), 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .budget-modern-save-button,
 .budget-modern-primary-cta {
   min-height: 3.1rem;
@@ -12510,9 +12572,56 @@ body {
 }
 
 .budget-modern-actions-bar,
-.budget-modern-summary-actions {
+.budget-modern-summary-actions,
+.budget-modern-stage-actions {
   display: grid;
   gap: 0.75rem;
+}
+
+.budget-modern-stage-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.budget-modern-stage-actions .budget-modern-primary-cta,
+.budget-modern-stage-actions .budget-modern-secondary-cta {
+  width: 100%;
+}
+
+.budget-modern-send-copy {
+  max-width: 50rem;
+  margin: 0;
+  color: rgba(255, 245, 230, 0.72);
+  line-height: 1.65;
+}
+
+.budget-modern-send-checks {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.budget-modern-send-checks > div {
+  min-width: 0;
+  padding: 0.9rem;
+  border: 1px solid rgba(var(--site-accent-rgb), 0.14);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.025);
+  display: grid;
+  gap: 0.25rem;
+}
+
+.budget-modern-send-checks span {
+  color: rgba(255, 245, 230, 0.58);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.budget-modern-send-checks strong {
+  overflow-wrap: anywhere;
+  color: #fff9ef;
+  font-size: 1rem;
 }
 
 .budget-modern-summary-panel {
@@ -12595,6 +12704,11 @@ body {
 
   .budget-modern-topbar-copy p {
     font-size: 0.92rem;
+  }
+
+  .budget-modern-progress {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 
   .budget-modern-stepper {
@@ -12680,7 +12794,12 @@ body {
   }
 
   .budget-modern-actions-bar,
-  .budget-modern-summary-actions {
+  .budget-modern-summary-actions,
+  .budget-modern-stage-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .budget-modern-send-checks {
     grid-template-columns: 1fr;
   }
 
@@ -20879,6 +20998,63 @@ body,
   color: var(--route-muted);
   font-size: 0.88rem;
   line-height: 1.7;
+}
+
+.settings-export-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 70rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(88, 151, 135, 0.26);
+  border-radius: 0.85rem;
+  background: rgba(88, 151, 135, 0.06);
+}
+
+.settings-export-row h3,
+.settings-export-row p {
+  margin: 0;
+}
+
+.settings-export-row h3 {
+  color: var(--ref-text);
+  font-size: 0.9rem;
+}
+
+.settings-export-row p {
+  margin-top: 0.2rem;
+  color: var(--route-muted);
+  font-size: 0.79rem;
+  line-height: 1.45;
+}
+
+.settings-export-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.55rem;
+  padding: 0 0.85rem;
+  border: 1px solid rgba(88, 151, 135, 0.4);
+  border-radius: 0.72rem;
+  color: var(--ref-text);
+  background: rgba(var(--site-panel-rgb), 0.8);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.settings-export-button:hover:not(:disabled) {
+  border-color: rgba(88, 151, 135, 0.8);
+  color: var(--ref-gold);
+}
+
+.settings-export-button:disabled {
+  cursor: wait;
+  opacity: 0.62;
 }
 
 .settings-delete-form {

@@ -1,5 +1,5 @@
 const pool = require('../config/database');
-const { isPushConfigured, registerDevice, unregisterDevice } = require('../services/push');
+const { isPushConfigured, isWebPushConfigured, registerDevice, unregisterDevice } = require('../services/push');
 
 exports.getNotifications = async (req, res) => {
   try {
@@ -59,7 +59,10 @@ exports.markAllAsRead = async (req, res) => {
   }
 };
 
-exports.getDeviceCapabilities = (_req, res) => res.json({ push_configured: isPushConfigured() });
+exports.getDeviceCapabilities = (_req, res) => res.json({
+  push_configured: isPushConfigured(),
+  web_push_configured: isWebPushConfigured(),
+});
 
 exports.registerDevice = async (req, res) => {
   try {

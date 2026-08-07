@@ -1,6 +1,7 @@
 const pool = require('../config/database');
 const { sendMarketplaceEmail } = require('../services/email');
 const { sendPushToUser } = require('../services/push');
+const { notifyOperationalAlert } = require('../services/operationalAlerts');
 
 function text(value, max = 2000) {
   return String(value || '').trim().slice(0, max);
@@ -94,6 +95,11 @@ async function createNotification(db, userId, title, message, type = 'info') {
 async function emailSafely(payload) {
   await sendMarketplaceEmail(payload).catch((error) => {
     console.error('Falha ao enviar e-mail do marketplace:', error.message);
+    void notifyOperationalAlert({
+      severity: 'error',
+      source: 'marketplace-email',
+      message: 'Falha ao enviar e-mail transacional do marketplace.',
+    });
   });
 }
 
@@ -256,6 +262,8 @@ exports.respondToProposal = async (req, res) => {
     }
 
     if (decision === 'accept') {
+      // Shared transaction-level PostgreSQL lock with the legacy budget scheduler.
+      await db.query('SELECT pg_advisory_xact_lock($1)', [proposal.installer_id]);
       const overlap = await db.query(
         `SELECT id FROM service_bookings
          WHERE installer_id = $1
@@ -270,6 +278,30 @@ exports.respondToProposal = async (req, res) => {
         await db.query('UPDATE service_requests SET status = \'selected\', updated_at = NOW() WHERE id = $1', [requestId]);
         await db.query('COMMIT');
         return res.status(409).json({ error: 'Esse horário acabou de ficar indisponível. Peça uma nova opção ao instalador.' });
+      }
+
+      const manualOverlap = await db.query(
+        `SELECT id FROM schedules
+         WHERE user_id = $1
+           AND status = 'scheduled'
+           AND date >= $2
+           AND date < $3
+         FOR UPDATE`,
+        [proposal.installer_id, proposal.scheduled_start, proposal.scheduled_end]
+      );
+      if (manualOverlap.rowCount) {
+        await db.query(
+          `UPDATE service_proposals
+           SET status = 'change_requested', client_response_message = $2, responded_at = NOW(), updated_at = NOW()
+           WHERE id = $1`,
+          [proposal.id, 'O horário foi ocupado na agenda antes da confirmação. Envie uma nova opção.']
+        );
+        await db.query("UPDATE service_requests SET status = 'selected', updated_at = NOW() WHERE id = $1", [requestId]);
+        await db.query('COMMIT');
+        return res.status(409).json({
+          error: 'Esse horário acabou de ficar indisponível. Peça uma nova opção ao instalador.',
+          code: 'BOOKING_TIME_CONFLICT',
+        });
       }
 
       await db.query(

@@ -45,6 +45,7 @@ const publicUploadSingle = (req, res, next) => {
 };
 
 router.get('/installers', publicSearchLimiter, controller.getInstallers);
+router.get('/sitemap.xml', controller.getSitemap);
 router.get('/installer-app-release', publicSearchLimiter, installerAppReleaseController.getInstallerAppRelease);
 router.get('/assets/:assetKey', publicSearchLimiter, assetController.getPublicAsset);
 router.post('/client-errors', optionalAuthMiddleware, clientErrorLimiter, monitoringController.reportClientError);

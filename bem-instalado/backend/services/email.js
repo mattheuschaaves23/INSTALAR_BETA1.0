@@ -34,6 +34,24 @@ function createTransporter() {
   });
 }
 
+async function sendEmailMessage({ to, subject, text, html }) {
+  if (!isEmailEnabled()) {
+    const error = new Error('smtp_not_configured');
+    error.code = 'SMTP_NOT_CONFIGURED';
+    throw error;
+  }
+
+  const recipient = String(to || '').trim();
+  if (!recipient) {
+    const error = new Error('email_recipient_required');
+    error.code = 'EMAIL_RECIPIENT_REQUIRED';
+    throw error;
+  }
+
+  const from = firstEnvValue('SMTP_FROM') || firstEnvValue('SMTP_USER');
+  await createTransporter().sendMail({ from, to: recipient, subject, text, html });
+}
+
 function escapeHtml(value) {
   return String(value || '')
     .replace(/&/g, '&amp;')
@@ -44,32 +62,13 @@ function escapeHtml(value) {
 }
 
 async function sendPasswordResetEmail({ to, resetUrl, expiresInMinutes }) {
-  if (!isEmailEnabled()) {
-    return { sent: false, reason: 'smtp_not_configured' };
-  }
-
-  const from = firstEnvValue('SMTP_FROM') || firstEnvValue('SMTP_USER');
   const appName = firstEnvValue('APP_NAME') || 'InstalaPro';
-  const transporter = createTransporter();
   const message = buildPasswordResetMessage({ appName, resetUrl, expiresInMinutes });
-
-  await transporter.sendMail({
-    from,
-    to,
-    ...message,
-  });
-
-  return { sent: true };
+  return queueTransactionalEmail({ to, message, category: 'password_reset' });
 }
 
 async function sendServiceRequestInterestEmail({ to, clientName, installerName, serviceLabel, trackingUrl }) {
-  if (!isEmailEnabled() || !to) {
-    return { sent: false, reason: 'smtp_not_configured' };
-  }
-
-  const from = firstEnvValue('SMTP_FROM') || firstEnvValue('SMTP_USER');
   const appName = firstEnvValue('APP_NAME') || 'InstalaPro';
-  const transporter = createTransporter();
   const message = buildServiceRequestInterestMessage({
     appName,
     clientName,
@@ -78,31 +77,16 @@ async function sendServiceRequestInterestEmail({ to, clientName, installerName, 
     trackingUrl,
   });
 
-  await transporter.sendMail({
-    from,
-    to,
-    ...message,
-  });
-
-  return { sent: true };
+  return queueTransactionalEmail({ to, message, category: 'service_interest' });
 }
 
 async function sendEmailVerificationEmail({ to, verificationUrl, expiresInMinutes }) {
-  if (!isEmailEnabled() || !to) {
-    return { sent: false, reason: 'smtp_not_configured' };
-  }
-
-  const from = firstEnvValue('SMTP_FROM') || firstEnvValue('SMTP_USER');
   const appName = firstEnvValue('APP_NAME') || 'InstalaPro';
-  const transporter = createTransporter();
-
-  await transporter.sendMail({
-    from,
+  return queueTransactionalEmail({
     to,
-    ...buildEmailVerificationMessage({ appName, verificationUrl, expiresInMinutes }),
+    message: buildEmailVerificationMessage({ appName, verificationUrl, expiresInMinutes }),
+    category: 'email_verification',
   });
-
-  return { sent: true };
 }
 
 async function sendMarketplaceEmail({ to, subject, title, body, actionLabel, actionUrl }) {
@@ -111,13 +95,15 @@ async function sendMarketplaceEmail({ to, subject, title, body, actionLabel, act
   }
 
   const from = firstEnvValue('SMTP_FROM') || firstEnvValue('SMTP_USER');
-  const transporter = createTransporter();
+  const transporter = {
+    sendMail: (message) => queueTransactionalEmail({ to, message, category: 'marketplace' }),
+  };
   const safeTitle = escapeHtml(title || subject || 'Atualização da InstalaPro');
   const safeBody = escapeHtml(body || '').replace(/\n/g, '<br />');
   const safeActionUrl = actionUrl ? escapeHtml(actionUrl) : '';
   const safeActionLabel = escapeHtml(actionLabel || 'Abrir InstalaPro');
 
-  await transporter.sendMail({
+  const delivery = await transporter.sendMail({
     from,
     to,
     subject,
@@ -131,7 +117,18 @@ async function sendMarketplaceEmail({ to, subject, title, body, actionLabel, act
     `,
   });
 
-  return { sent: true };
+  return delivery;
+}
+
+async function queueTransactionalEmail({ to, message, category }) {
+  if (!isEmailEnabled() || !to) {
+    return { sent: false, reason: 'smtp_not_configured' };
+  }
+
+  // Loaded lazily: outboundDelivery uses sendEmailMessage to perform the
+  // actual SMTP call, while this public helper creates the durable record.
+  const { queueEmailDelivery } = require('./outboundDelivery');
+  return queueEmailDelivery({ to, message, category });
 }
 
 function buildPasswordResetMessage({ appName = 'InstalaPro', resetUrl, expiresInMinutes }) {
@@ -233,6 +230,7 @@ module.exports = {
   buildEmailVerificationMessage,
   buildServiceRequestInterestMessage,
   isEmailEnabled,
+  sendEmailMessage,
   sendEmailVerificationEmail,
   sendMarketplaceEmail,
   sendPasswordResetEmail,

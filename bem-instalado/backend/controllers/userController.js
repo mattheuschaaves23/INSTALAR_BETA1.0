@@ -207,6 +207,87 @@ exports.deleteOwnAccount = async (req, res) => {
   }
 };
 
+// LGPD: the export is generated on demand and is never kept as a second copy.
+// Authentication secrets, password hashes, reset tokens and internal security
+// telemetry are deliberately excluded from this response.
+exports.exportOwnData = async (req, res) => {
+  try {
+    const results = await Promise.all([
+      pool.query(
+        `SELECT id, name, email, account_type, email_verified_at, phone, logo,
+          installer_photo, installation_gallery, certificate_file, certificate_name,
+          certification_verified, certification_status, featured_installer, document_type,
+          document_id, emergency_contact, emergency_phone, safety_notes,
+          accepts_service_contract, provides_warranty, warranty_days,
+          default_price_per_roll, default_removal_price, latitude, longitude,
+          service_radius_km, business_name, city, state, service_region, bio,
+          installation_method, service_hours, installation_days, public_profile,
+          years_experience, created_at, updated_at
+         FROM users WHERE id = $1 LIMIT 1`,
+        [req.userId]
+      ),
+      pool.query('SELECT * FROM clients WHERE user_id = $1 ORDER BY created_at DESC', [req.userId]),
+      pool.query('SELECT * FROM budgets WHERE user_id = $1 ORDER BY created_at DESC', [req.userId]),
+      pool.query('SELECT * FROM schedules WHERE user_id = $1 ORDER BY date DESC', [req.userId]),
+      pool.query('SELECT * FROM service_requests WHERE client_user_id = $1 ORDER BY created_at DESC', [req.userId]),
+      pool.query(
+        `SELECT sp.*
+         FROM service_proposals sp
+         JOIN service_requests sr ON sr.id = sp.service_request_id
+         WHERE sr.client_user_id = $1
+         ORDER BY sp.created_at DESC`,
+        [req.userId]
+      ),
+      pool.query(
+        `SELECT sb.*
+         FROM service_bookings sb
+         JOIN service_requests sr ON sr.id = sb.service_request_id
+         WHERE sr.client_user_id = $1
+         ORDER BY sb.scheduled_start DESC`,
+        [req.userId]
+      ),
+      pool.query('SELECT * FROM service_proposals WHERE installer_id = $1 ORDER BY created_at DESC', [req.userId]),
+      pool.query('SELECT * FROM service_bookings WHERE installer_id = $1 ORDER BY scheduled_start DESC', [req.userId]),
+      pool.query('SELECT id, title, message, type, read, created_at FROM notifications WHERE user_id = $1 ORDER BY created_at DESC', [req.userId]),
+      pool.query('SELECT * FROM subscriptions WHERE user_id = $1 ORDER BY created_at DESC', [req.userId]),
+      pool.query('SELECT id, subscription_id, amount, method, status, external_id, provider, provider_payment_id, created_at, updated_at FROM payments WHERE user_id = $1 ORDER BY created_at DESC', [req.userId]),
+    ]);
+
+    const [account, clients, budgets, schedules, requests, clientProposals, clientBookings, proposals, bookings, notifications, subscriptions, payments] = results;
+    const filenameDate = new Date().toISOString().slice(0, 10);
+    const exportPayload = {
+      format: 'InstalaPro data export v1',
+      generated_at: new Date().toISOString(),
+      account: account.rows[0] || null,
+      clients: clients.rows,
+      budgets: budgets.rows,
+      schedules: schedules.rows,
+      service_requests: requests.rows,
+      client_service_proposals: clientProposals.rows,
+      client_service_bookings: clientBookings.rows,
+      service_proposals: proposals.rows,
+      service_bookings: bookings.rows,
+      notifications: notifications.rows,
+      subscriptions: subscriptions.rows,
+      payments: payments.rows,
+      omitted_for_security: [
+        'password hash',
+        'two-factor secret and recovery codes',
+        'session, verification and password-reset tokens',
+        'internal audit and error telemetry',
+      ],
+    };
+
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="instalapro-meus-dados-${filenameDate}.json"`);
+    res.setHeader('Cache-Control', 'no-store, private');
+    return res.json(exportPayload);
+  } catch (error) {
+    console.error('Falha ao exportar dados do titular.', error);
+    return res.status(500).json({ error: 'Não foi possível preparar sua cópia de dados agora.' });
+  }
+};
+
 function buildMotivationalNotes(metrics) {
   const notes = [];
 
@@ -817,7 +898,10 @@ exports.getStoredProfileAsset = async (req, res) => {
   }
 
   try {
-    const found = await streamStoredAsset(pathname, res);
+    const isCertificate = String(pathname).split('/')[2] === 'certificate';
+    const found = await streamStoredAsset(pathname, res, {
+      contentDisposition: isCertificate ? 'attachment' : 'inline',
+    });
     if (!found) return res.status(404).json({ error: 'Arquivo não encontrado.' });
     return undefined;
   } catch (_error) {

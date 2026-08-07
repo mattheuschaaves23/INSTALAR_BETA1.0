@@ -695,7 +695,7 @@ async function registerPasswordAccount(req, res, accountType) {
 
     payload.body.email_verification = {
       required: true,
-      delivery: verificationDelivery.sent ? 'sent' : 'pending_configuration',
+      delivery: verificationDelivery.sent ? 'sent' : verificationDelivery.queued ? 'queued' : 'pending_configuration',
     };
 
     if (accountType === 'installer') {
@@ -1214,7 +1214,10 @@ exports.resendEmailVerification = async (req, res) => {
       entityId: user.id,
       req,
     });
-    return res.json({ success: true, delivery: delivery.sent ? 'sent' : 'pending_configuration' });
+    return res.json({
+      success: true,
+      delivery: delivery.sent ? 'sent' : delivery.queued ? 'queued' : 'pending_configuration',
+    });
   } catch (_error) {
     return res.status(500).json({ error: 'Não foi possível reenviar a confirmação agora.' });
   }

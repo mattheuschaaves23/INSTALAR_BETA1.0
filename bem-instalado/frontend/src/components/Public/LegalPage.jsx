@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import BrandWordmark from '../Layout/BrandWordmark';
 
-const UPDATED_AT = '27 de julho de 2026';
+const UPDATED_AT = '6 de agosto de 2026';
 
 const privacySections = [
   ['1. Quais dados usamos', 'Coletamos os dados informados no cadastro e no pedido, como nome, telefone, e-mail, cidade, endereço aproximado ou completo, fotos do ambiente e preferências do serviço. Para instaladores, também tratamos dados profissionais, documentos de verificação, certificado e portfólio.'],
@@ -21,6 +21,7 @@ const termsSections = [
   ['5. Responsabilidades', 'Cada parte responde pelas informações que fornece e pelos compromissos que assume. O profissional é responsável pela execução, segurança, tributos, licenças e garantia prometida; o cliente, pelo acesso ao local e pagamento combinado.'],
   ['6. Cancelamento e indisponibilidade', 'Pedidos podem ser encerrados pelo cliente ou pela plataforma em caso de abuso. Recursos podem ficar temporariamente indisponíveis para manutenção ou falhas de fornecedores, com esforço razoável para restabelecimento.'],
   ['7. Alterações e contato', 'Estes termos podem ser atualizados para refletir mudanças legais ou do produto. A versão e a data ficam registradas nesta página. Dúvidas e solicitações devem ser encaminhadas pelo suporte da plataforma.'],
+  ['8. Cancelamento, reembolso e disputa', 'O cancelamento, eventual reembolso, visita improdutiva, atraso e garantia devem constar na proposta aceita pelo cliente antes do agendamento. Havendo divergência, cliente e instalador devem primeiro registrar a situação pelo suporte com fotos, conversas e comprovantes. A plataforma pode pausar a mediação, preservar evidências e restringir contas enquanto analisa abuso, sem substituir os direitos previstos em lei.'],
 ];
 
 export default function LegalPage({ type }) {
@@ -44,7 +45,7 @@ export default function LegalPage({ type }) {
         <p className="legal-page-eyebrow">TRANSPARÊNCIA E SEGURANÇA</p>
         <h1>{title}</h1>
         <p className="legal-page-intro">{intro}</p>
-        <p className="legal-page-version">Versão 2026-07-27 · atualizada em {UPDATED_AT}</p>
+        <p className="legal-page-version">Versão 2026-08-06 · atualizada em {UPDATED_AT}</p>
 
         <div className="legal-page-sections">
           {sections.map(([sectionTitle, body]) => (

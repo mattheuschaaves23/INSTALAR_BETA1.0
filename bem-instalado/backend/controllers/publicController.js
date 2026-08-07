@@ -40,6 +40,59 @@ function normalizeExternalUrl(value) {
   return `https://${normalized}`;
 }
 
+function xmlEscape(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function publicSiteUrl(req) {
+  const configured = String(process.env.FRONTEND_URL || process.env.APP_URL || '').trim().replace(/\/+$/, '');
+  if (configured) return configured;
+  const protocol = String(req.headers['x-forwarded-proto'] || req.protocol || 'https').split(',')[0];
+  const host = String(req.headers['x-forwarded-host'] || req.get('host') || '').split(',')[0];
+  return host ? `${protocol}://${host}` : 'https://instalar-sigma.vercel.app';
+}
+
+exports.getSitemap = async (req, res) => {
+  try {
+    const baseUrl = publicSiteUrl(req);
+    const { rows } = await pool.query(
+      `SELECT id, updated_at
+       FROM users
+       WHERE COALESCE(account_type, 'installer') = 'installer'
+         AND COALESCE(public_profile, false) = true
+         AND COALESCE(certification_verified, false) = true
+         AND deleted_at IS NULL
+       ORDER BY updated_at DESC NULLS LAST, id ASC`
+    );
+    const fixedPages = [
+      ['/', 'weekly', '1.0'],
+      ['/papelperto', 'weekly', '0.9'],
+      ['/privacidade', 'yearly', '0.3'],
+      ['/termos', 'yearly', '0.3'],
+    ];
+    const entries = [
+      ...fixedPages.map(([path, changefreq, priority]) => (
+        `<url><loc>${xmlEscape(`${baseUrl}${path}`)}</loc><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`
+      )),
+      ...rows.map((installer) => {
+        const lastmod = installer.updated_at ? `<lastmod>${new Date(installer.updated_at).toISOString().slice(0, 10)}</lastmod>` : '';
+        return `<url><loc>${xmlEscape(`${baseUrl}/installers/${installer.id}`)}</loc>${lastmod}<changefreq>weekly</changefreq><priority>0.7</priority></url>`;
+      }),
+    ];
+
+    res.set('Content-Type', 'application/xml; charset=utf-8');
+    res.set('Cache-Control', 'public, max-age=300, s-maxage=3600');
+    return res.send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${entries.join('')}</urlset>`);
+  } catch (_error) {
+    return res.status(503).type('text/plain').send('Sitemap indisponível temporariamente.');
+  }
+};
+
 async function getRecommendedStores(limit = 12, activeOnly = true) {
   const values = [];
   let whereClause = '';

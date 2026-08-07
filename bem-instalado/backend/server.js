@@ -24,8 +24,11 @@ const publicRoutes = require('./routes/publicRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const supportRoutes = require('./routes/supportRoutes');
 const opportunityRoutes = require('./routes/opportunityRoutes');
+const operationsRoutes = require('./routes/operationsRoutes');
 const { logApplicationError } = require('./utils/errorMonitoring');
 const { requireCsrfForCookieSession } = require('./middleware/csrfMiddleware');
+const { hasOperationsAccess } = require('./middleware/operationsMiddleware');
+const { deliverySummary } = require('./services/outboundDelivery');
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
@@ -153,21 +156,25 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '64kb' }));
 app.use(requireCsrfForCookieSession);
 
-app.get('/api/health', async (_req, res) => {
+app.get('/api/health', async (req, res) => {
   res.set('Cache-Control', 'no-store');
   try {
     await pool.query('SELECT 1');
-    res.json({
+    const result = {
       ok: true,
-      database: 'connected',
-      service: 'bem-instalado-backend',
-      date: new Date().toISOString(),
-      mode: isProduction ? 'production' : 'development',
-      gitCommit,
-      gitBranch,
-    });
-  } catch (error) {
-    res.status(503).json({ ok: false, database: 'unavailable', service: 'bem-instalado-backend' });
+      checked_at: new Date().toISOString(),
+    };
+    if (hasOperationsAccess(req)) {
+      result.database = 'connected';
+      result.service = 'bem-instalado-backend';
+      result.mode = isProduction ? 'production' : 'development';
+      result.gitCommit = gitCommit;
+      result.gitBranch = gitBranch;
+      result.deliveries = await deliverySummary();
+    }
+    res.json(result);
+  } catch (_error) {
+    res.status(503).json({ ok: false, checked_at: new Date().toISOString() });
   }
 });
 
@@ -183,6 +190,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/opportunities', opportunityRoutes);
+app.use('/api/operations', operationsRoutes);
 
 app.use((error, req, res, _next) => {
   const statusCode = Number(error.statusCode || error.status || 500);

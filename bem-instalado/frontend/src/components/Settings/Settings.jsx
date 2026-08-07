@@ -60,6 +60,7 @@ function SettingsIcon({ type }) {
     card: <><rect x="4" y="6.5" width="16" height="11" rx="2" /><path d="M4 10h16" /></>,
     bell: <><path d="M18 10.8a6 6 0 0 0-12 0c0 5-2 5.7-2 5.7h16s-2-.7-2-5.7" /><path d="M10 20a2.4 2.4 0 0 0 4 0" /></>,
     help: <><circle cx="12" cy="12" r="8.5" /><path d="M9.8 9.4a2.4 2.4 0 1 1 3.6 2.1c-.9.5-1.4 1.1-1.4 2.2" /><path d="M12 17.2h.01" /></>,
+    download: <><path d="M12 4v10" /><path d="m8.5 10.5 3.5 3.5 3.5-3.5" /><path d="M5 19h14" /></>,
     trash: <><path d="M4.5 7h15" /><path d="M9 7V4.8h6V7" /><path d="m7 7 .7 12h8.6L17 7" /><path d="M10 10.5v5M14 10.5v5" /></>,
   };
 
@@ -95,6 +96,7 @@ export default function Settings() {
   const [savedAt, setSavedAt] = useState(() => new Date());
   const [deletePhrase, setDeletePhrase] = useState('');
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [isExportingData, setIsExportingData] = useState(false);
 
   const currentPreset = useMemo(
     () => ACCENT_PRESETS.find((preset) => preset.value === preferences.accentColor),
@@ -167,6 +169,26 @@ export default function Settings() {
     } catch (error) {
       toast.error(error.response?.data?.error || 'Não foi possível excluir a conta agora.');
       setIsDeletingAccount(false);
+    }
+  };
+
+  const handleDataExport = async () => {
+    try {
+      setIsExportingData(true);
+      const response = await api.get('/users/data-export', { responseType: 'blob' });
+      const blobUrl = window.URL.createObjectURL(new Blob([response.data], { type: 'application/json' }));
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `instalapro-meus-dados-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+      toast.success('Sua cópia de dados foi baixada.');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Não foi possível preparar a cópia agora.');
+    } finally {
+      setIsExportingData(false);
     }
   };
 
@@ -334,6 +356,17 @@ export default function Settings() {
               <p>Privacidade</p>
               <h2>Exclusão da conta</h2>
             </div>
+          </div>
+
+          <div className="settings-export-row">
+            <div>
+              <h3>Uma cópia dos seus dados</h3>
+              <p>Baixe as informações da sua conta, pedidos, propostas, agenda e pagamentos em JSON.</p>
+            </div>
+            <button className="settings-export-button" disabled={isExportingData} onClick={handleDataExport} type="button">
+              <SettingsIcon type="download" />
+              {isExportingData ? 'Preparando...' : 'Baixar meus dados'}
+            </button>
           </div>
 
           {user?.is_admin ? (

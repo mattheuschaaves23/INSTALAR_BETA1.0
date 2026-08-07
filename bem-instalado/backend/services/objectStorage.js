@@ -95,7 +95,7 @@ function protectedAssetUrl(pathname) {
   return `/api/users/uploads/file/${encodeAssetKey(pathname)}`;
 }
 
-async function streamStoredAsset(pathname, res, { cacheControl = 'private, max-age=300' } = {}) {
+async function streamStoredAsset(pathname, res, { cacheControl = 'private, max-age=300', contentDisposition = 'inline' } = {}) {
   const { get } = require('@vercel/blob');
   const result = await get(pathname, { access: 'private' });
 
@@ -103,6 +103,7 @@ async function streamStoredAsset(pathname, res, { cacheControl = 'private, max-a
   res.set('Content-Type', result.blob?.contentType || result.headers?.get?.('content-type') || 'application/octet-stream');
   res.set('Cache-Control', cacheControl);
   res.set('X-Content-Type-Options', 'nosniff');
+  res.set('Content-Disposition', contentDisposition);
   Readable.fromWeb(result.stream).pipe(res);
   return true;
 }

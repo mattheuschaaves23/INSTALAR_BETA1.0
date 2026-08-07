@@ -14,7 +14,7 @@ const {
   upgradeRequired,
 } = require('../services/planAccess');
 
-const CURRENT_TERMS_VERSION = '2026-07-22';
+const CURRENT_TERMS_VERSION = '2026-08-06';
 
 function normalizeText(value, maxLength = 160) {
   return String(value || '').trim().slice(0, maxLength);

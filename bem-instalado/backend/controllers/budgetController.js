@@ -504,6 +504,8 @@ exports.approveBudget = async (req, res) => {
     let schedule = null;
 
     if (parsedScheduleDate) {
+      // Shared transaction-level PostgreSQL lock with marketplace acceptances.
+      await db.query('SELECT pg_advisory_xact_lock($1)', [req.userId]);
       const clientResult = await db.query(
         `
           SELECT
@@ -532,6 +534,34 @@ exports.approveBudget = async (req, res) => {
         `,
         [budget.id, req.userId]
       );
+
+      const existingScheduleId = existingScheduleResult.rows[0]?.id || null;
+      const conflict = await db.query(
+        `SELECT id
+         FROM schedules
+         WHERE user_id = $1
+           AND status = 'scheduled'
+           AND date = $2
+           AND ($3::int IS NULL OR id <> $3)
+         UNION ALL
+         SELECT id
+         FROM service_bookings
+         WHERE installer_id = $1
+           AND status IN ('scheduled', 'in_progress')
+           AND scheduled_start <= $2
+           AND scheduled_end > $2
+         LIMIT 1`,
+        [req.userId, parsedScheduleDate.dbTimestamp, existingScheduleId]
+      );
+
+      if (conflict.rowCount) {
+        await db.query('ROLLBACK');
+        transactionStarted = false;
+        return res.status(409).json({
+          error: 'Esse horário já está ocupado na agenda. Escolha outro horário para aprovar o orçamento.',
+          code: 'SCHEDULE_TIME_CONFLICT',
+        });
+      }
 
       if (existingScheduleResult.rows[0]) {
         const scheduleResult = await db.query(
