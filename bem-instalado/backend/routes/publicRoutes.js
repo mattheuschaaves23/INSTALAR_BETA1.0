@@ -54,7 +54,7 @@ router.get('/recommended-stores', publicSearchLimiter, controller.getRecommended
 router.get('/dashboard-ads', publicSearchLimiter, controller.getDashboardAds);
 router.get('/location/reverse', publicSearchLimiter, controller.reverseLocation);
 router.get('/location/search', publicSearchLimiter, controller.searchLocation);
-router.get('/installers/:id', publicSearchLimiter, controller.getInstallerProfile);
+router.get('/installers/:id', optionalAuthMiddleware, publicSearchLimiter, controller.getInstallerProfile);
 router.post('/service-requests', optionalAuthMiddleware, serviceRequestLimiter, serviceRequestController.createPublicServiceRequest);
 router.get('/service-requests/mine', authMiddleware, publicSearchLimiter, serviceRequestController.getMyServiceRequests);
 router.post('/service-requests/:id/claim', authMiddleware, serviceRequestLimiter, serviceRequestController.claimServiceRequest);

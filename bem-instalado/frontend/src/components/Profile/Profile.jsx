@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -487,6 +488,16 @@ export default function Profile() {
   return (
     <section className="page-shell space-y-7">
       <PageIntro
+        actions={activeProfileTab === 'profile' && form.id ? (
+          <Link
+            className="ghost-button"
+            rel="noreferrer"
+            target="_blank"
+            to={`/installers/${form.id}`}
+          >
+            Ver como cliente
+          </Link>
+        ) : null}
         description={activeProfileTab === 'security'
           ? 'Proteção da conta e informações que ajudam o cliente a confiar no seu perfil.'
           : 'Dados públicos, portfólio, região atendida, horários e valores.'}

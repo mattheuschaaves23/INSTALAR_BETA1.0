@@ -684,6 +684,7 @@ exports.searchLocation = async (req, res) => {
 exports.getInstallerProfile = async (req, res) => {
   try {
     const installerId = Number(req.params.id);
+    const ownInstallerPreview = req.user?.account_type === 'installer' && Number(req.userId) === installerId;
 
     if (!installerId) {
       return res.status(400).json({ error: 'Instalador inválido.' });
@@ -754,10 +755,15 @@ exports.getInstallerProfile = async (req, res) => {
           ) schedule_stats ON schedule_stats.user_id = u.id
           WHERE u.id = $1
             AND COALESCE(u.account_type, 'installer') = 'installer'
-          AND COALESCE(u.public_profile, false) = true
-          AND COALESCE(u.certification_verified, false) = true
+            AND (
+              (
+                COALESCE(u.public_profile, false) = true
+                AND COALESCE(u.certification_verified, false) = true
+              )
+              OR $2::boolean = TRUE
+            )
         `,
-        [installerId]
+        [installerId, ownInstallerPreview]
       ),
       pool.query(
         `
