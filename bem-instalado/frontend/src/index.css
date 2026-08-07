@@ -11503,7 +11503,6 @@ body {
 }
 
 .agenda-modern-icon-button,
-.agenda-modern-chip-button,
 .agenda-modern-primary-button,
 .agenda-modern-summary-link,
 .agenda-modern-menu-button,
@@ -11528,17 +11527,6 @@ body {
   color: #fff5de;
 }
 
-.agenda-modern-chip-button {
-  min-height: 3rem;
-  padding: 0 1rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.025);
-  color: #fff6e1;
-  font-weight: 600;
-}
-
 .agenda-modern-primary-button,
 .agenda-modern-summary-link {
   min-height: 3.3rem;
@@ -11559,7 +11547,6 @@ body {
 }
 
 .agenda-modern-icon-button:hover,
-.agenda-modern-chip-button:hover,
 .agenda-modern-primary-button:hover,
 .agenda-modern-summary-link:hover,
 .agenda-modern-menu-button:hover,
@@ -11987,10 +11974,6 @@ body {
   .agenda-modern-calendar-controls {
     width: 100%;
     justify-content: space-between;
-  }
-
-  .agenda-modern-chip-button {
-    flex: 1;
   }
 
   .agenda-modern-legend {

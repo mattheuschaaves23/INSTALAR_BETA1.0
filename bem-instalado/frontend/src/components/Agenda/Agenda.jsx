@@ -433,9 +433,6 @@ export default function Agenda() {
               <button className="agenda-modern-icon-button" onClick={() => setViewDate((current) => addMonths(current, -1))} type="button">
                 <AgendaIcon type="chevron-left" />
               </button>
-              <button className="agenda-modern-chip-button" onClick={handleJumpToToday} type="button">
-                Hoje
-              </button>
               <button className="agenda-modern-icon-button" onClick={() => setViewDate((current) => addMonths(current, 1))} type="button">
                 <AgendaIcon type="chevron-right" />
               </button>
