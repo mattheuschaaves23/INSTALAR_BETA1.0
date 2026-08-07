@@ -15,20 +15,18 @@ const emptyReviewForm = {
   rating: 5,
   comment: '',
 };
+
 const defaultMarketplace = {
   title: 'Loja Oficial InstalaPro',
   description:
-    'A loja oficial InstalaPro Home Decor reúne papéis de parede para vários estilos, com operação em Florianópolis e atendimento para todo o Brasil.',
+    'Materiais para todos os estilos, com atendimento especializado para você encontrar o acabamento ideal.',
   url: 'https://www.beminstalado.com.br',
   cta_label: 'Visitar loja oficial',
-  whatsapp_url: 'https://api.whatsapp.com/send?phone=5548999816000',
-  contact_phone: '(48) 99981-6000',
-  contact_email: 'beminstaladohd@gmail.com',
   highlights: ['Papel de parede', 'Infantil e ambientes', 'Pagamento via Pix'],
 };
 
 function getInitials(name) {
-  return (name || 'IL')
+  return (name || 'IP')
     .split(' ')
     .filter(Boolean)
     .slice(0, 2)
@@ -40,32 +38,25 @@ function RatingStars({ value }) {
   const rounded = Math.round(Number(value || 0));
 
   return (
-    <div className="flex items-center gap-1">
+    <span aria-label={`${rounded} de 5 estrelas`} className="installer-profile-rating-stars">
       {Array.from({ length: 5 }).map((_, index) => (
-        <span
-          className={`h-2.5 w-2.5 rounded-full border border-[var(--gold)] ${
-            index < rounded ? 'bg-[var(--gold)]' : 'bg-transparent'
-          }`}
-          key={index}
-        />
+        <i className={index < rounded ? 'is-filled' : ''} key={index}>★</i>
       ))}
-    </div>
+    </span>
   );
 }
 
 function groupAvailabilitySlots(slots = []) {
   return slots.reduce((accumulator, slot) => {
-    const dateKey = slot.slot_date;
-
-    if (!dateKey) {
+    if (!slot.slot_date) {
       return accumulator;
     }
 
-    if (!accumulator[dateKey]) {
-      accumulator[dateKey] = [];
+    if (!accumulator[slot.slot_date]) {
+      accumulator[slot.slot_date] = [];
     }
 
-    accumulator[dateKey].push(slot);
+    accumulator[slot.slot_date].push(slot);
     return accumulator;
   }, {});
 }
@@ -158,431 +149,254 @@ export default function InstallerProfile() {
   };
 
   if (!payload) {
-    return (
-      <DecoratingWallLoader phrase="Preparando cada detalhe deste profissional." />
-    );
+    return <DecoratingWallLoader phrase="Preparando o perfil deste profissional." />;
   }
 
   const { installer, reviews = [], marketplace: apiMarketplace } = payload;
   const marketplace = apiMarketplace || defaultMarketplace;
   const groupedSlots = groupAvailabilitySlots(installer.availability_slots || []);
-  const groupedSlotEntries = Object.entries(groupedSlots).sort(([left], [right]) =>
-    left.localeCompare(right)
-  );
+  const groupedSlotEntries = Object.entries(groupedSlots).sort(([left], [right]) => left.localeCompare(right));
   const isOwnInstallerProfile = Boolean(user && Number(user.id) === Number(installer.id));
   const serviceRequestId = Number(new URLSearchParams(location.search).get('pedido')) || null;
+  const locationLabel =
+    [installer.city, installer.state].filter(Boolean).join(' · ') ||
+    installer.service_region ||
+    'Região de atendimento a confirmar';
+  const hasReviews = Number(installer.review_count || 0) > 0;
+  const warrantyLabel = installer.safety?.provides_warranty
+    ? `${installer.safety.warranty_days || 0} dias de garantia`
+    : 'Garantia a combinar';
+  const requestPath = serviceRequestId ? '/cliente/pedido' : '/cliente';
+  const requestActionLabel = serviceRequestId ? 'Voltar aos interessados' : 'Publicar meu pedido';
 
   return (
-    <div className="auth-scene min-h-screen overflow-x-hidden px-4 py-8 md:px-6 lg:px-8">
+    <main className="installer-public-page">
       <PageMetadata
         canonicalPath={`/installers/${installer.id}`}
         description={`${installer.display_name || installer.name} é instalador(a) de papel de parede${installer.city ? ` em ${installer.city}` : ''}. Veja perfil, avaliações e disponibilidade na InstalaPro.`}
         title={`${installer.display_name || installer.name} | Instalador de papel de parede`}
       />
-      <div className="page-shell mx-auto flex w-full max-w-6xl flex-col gap-7">
-        <section className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_360px]">
-          <div className="lux-panel fade-up overflow-hidden p-7 sm:p-9 lg:p-12">
-            <div className="relative z-10 min-w-0">
-              <div className="flex flex-col gap-5 md:flex-row md:items-start">
-                {installer.installer_photo ? (
-                  <img
-                    alt={`Foto de ${installer.display_name}`}
-                    className="h-24 w-24 rounded-full border border-[var(--line)] object-cover"
-                    src={installer.installer_photo}
-                  />
-                ) : installer.logo ? (
-                  <img
-                    alt={`Logo de ${installer.display_name}`}
-                    className="h-24 w-24 rounded-[28px] border border-[var(--line)] object-cover"
-                    src={installer.logo}
-                  />
-                ) : (
-                  <div className="flex h-24 w-24 items-center justify-center rounded-[28px] border border-[var(--line)] bg-[var(--gold-soft)] text-3xl font-bold text-[var(--gold-strong)]">
-                    {getInitials(installer.display_name)}
-                  </div>
-                )}
 
-                <div className="min-w-0">
-                  <p className="eyebrow">Perfil do instalador</p>
-                  <h1 className="hero-title mt-4 max-w-4xl">{installer.display_name}</h1>
-                  <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-[var(--muted)]">
-                    <RatingStars value={installer.average_rating} />
-                    <span>{Number(installer.average_rating || 0).toFixed(1)} de nota</span>
-                    <span>{installer.review_count} avaliações</span>
-                    <span>{installer.unique_clients_served || 0} clientes atendidos</span>
-                    <span>{installer.completed_jobs || 0} instalações concluídas</span>
-                    {installer.safety?.document_masked ? (
-                      <span>Documento confirmado ({installer.safety.document_masked})</span>
-                    ) : null}
-                  </div>
-                  <p className="page-copy mt-5 max-w-3xl">
-                    {installer.bio || 'Este instalador ainda está montando a apresentação pública do perfil.'}
-                  </p>
-                </div>
-              </div>
+      <header className="installer-profile-nav">
+        <Link className="installer-profile-nav-back" to={serviceRequestId ? '/cliente/pedido' : '/cliente'}>
+          ← {serviceRequestId ? 'Voltar aos interessados' : 'Encontrar instaladores'}
+        </Link>
+        <Link aria-label="Ir para a página inicial" className="installer-profile-nav-brand" to="/">
+          Instala<span>Pro</span>
+        </Link>
+        <a className="installer-profile-nav-link" href="#avaliacoes-instalador">Avaliações</a>
+      </header>
 
-              <div className="mt-8 grid gap-4 md:grid-cols-2">
-                <article className="lux-panel-soft rounded-[24px] p-5">
-                  <p className="eyebrow">Região</p>
-                  <p className="mt-3 text-lg font-semibold text-[var(--text)]">
-                    {[installer.city, installer.state].filter(Boolean).join(' - ') ||
-                      installer.service_region ||
-                      'Não informada'}
-                  </p>
-                  <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-                    Área de atendimento: {installer.service_region || 'Não informada'}
-                  </p>
-                </article>
-
-                <article className="lux-panel-soft rounded-[24px] p-5">
-                  <p className="eyebrow">Agenda e disponibilidade</p>
-                  <p className="mt-3 text-lg font-semibold text-[var(--text)]">
-                    {installer.service_hours || 'Horários não informados'}
-                  </p>
-                  <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-                    Dias de instalação: {formatInstallationDays(installer.installation_days)}
-                  </p>
-                </article>
-
-                <article className="lux-panel-soft rounded-[24px] p-5">
-                  <p className="eyebrow">Método</p>
-                  <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-                    {installer.installation_method ||
-                      'O instalador ainda não descreveu o método de trabalho.'}
-                  </p>
-                </article>
-
-                <article className="lux-panel-soft rounded-[24px] p-5">
-                  <p className="eyebrow">Custos base</p>
-                  <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-                    Visita: {formatCurrency(installer.base_service_cost)}
-                  </p>
-                  <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-                    Deslocamento: {formatCurrency(installer.travel_fee)}
-                  </p>
-                  <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-                    Preço por rolo: {formatCurrency(installer.default_price_per_roll)}
-                  </p>
-                  <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-                    Remoção: {formatCurrency(installer.default_removal_price)}
-                  </p>
-                </article>
-
-              <article className="lux-panel-soft rounded-[24px] p-5 md:col-span-2">
-                <p className="eyebrow">Segurança e confiança</p>
-                <div className="mt-3 grid gap-2 text-sm text-[var(--muted)] md:grid-cols-2">
-                    <p>
-                      Documento:{' '}
-                      {installer.safety?.document_type
-                        ? installer.safety.document_type.toUpperCase()
-                        : 'Não informado'}{' '}
-                      {installer.safety?.document_masked ? `(${installer.safety.document_masked})` : ''}
-                    </p>
-                    <p>
-                      Contrato:{' '}
-                      {installer.safety?.accepts_service_contract ? 'fornece contrato' : 'não informado'}
-                    </p>
-                    <p>
-                      Garantia:{' '}
-                      {installer.safety?.provides_warranty
-                        ? `${installer.safety.warranty_days || 0} dias`
-                        : 'não informado'}
-                    </p>
-                    <p>
-                      Contato de emergência: {installer.safety?.emergency_contact || 'não informado'}
-                      {installer.safety?.emergency_phone ? ` - ${installer.safety.emergency_phone}` : ''}
-                    </p>
-                  </div>
-                  {installer.safety?.safety_notes ? (
-                  <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{installer.safety.safety_notes}</p>
-                ) : null}
-              </article>
-
-              <article className="lux-panel-soft rounded-[24px] p-5 md:col-span-2">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="eyebrow">Portfólio visual</p>
-                  <div className="flex flex-wrap gap-2">
-                    {installer.featured_installer ? (
-                      <span className="status-pill" data-tone="success">
-                        Instalador em destaque
-                      </span>
-                    ) : null}
-                    {installer.certificate_verified ? (
-                      <span className="status-pill" data-tone="success">
-                        Certificado verificado
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
-
-                {Array.isArray(installer.installation_gallery) && installer.installation_gallery.length > 0 ? (
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {installer.installation_gallery.slice(0, 9).map((photo, index) => (
-                      <img
-                        alt={`Instalação ${index + 1} de ${installer.display_name}`}
-                        className="h-40 w-full rounded-[14px] border border-[var(--line)] object-cover"
-                        decoding="async"
-                        key={`${index}-${photo.slice(0, 24)}`}
-                        loading="lazy"
-                        src={photo}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
-                    Este instalador ainda não adicionou fotos de instalações.
-                  </p>
-                )}
-
-                {installer.certificate_file ? (
-                  <div className="mt-4 rounded-[16px] border border-[var(--line)] bg-[rgba(255,255,255,0.02)] p-4">
-                    <p className="text-sm font-semibold text-[var(--text)]">
-                      Certificado: {installer.certificate_name || 'Arquivo enviado'}
-                    </p>
-                    <a
-                      className="gold-button mt-3 w-full justify-center sm:w-auto"
-                      href={installer.certificate_file}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      Ver certificado
-                    </a>
-                  </div>
-                ) : null}
-              </article>
+      <div className="installer-profile-shell">
+        <section className="installer-profile-hero">
+          <div className="installer-profile-hero-glow" aria-hidden="true" />
+          <div className="installer-profile-hero-intro">
+            <div className="installer-profile-avatar-wrap">
+              {installer.installer_photo ? (
+                <img alt={`Foto de ${installer.display_name}`} className="installer-profile-avatar" src={installer.installer_photo} />
+              ) : installer.logo ? (
+                <img alt={`Logo de ${installer.display_name}`} className="installer-profile-avatar" src={installer.logo} />
+              ) : (
+                <div className="installer-profile-avatar installer-profile-avatar--initials">{getInitials(installer.display_name)}</div>
+              )}
+              {installer.certificate_verified || installer.safety?.document_masked ? <span className="installer-profile-verified">✓</span> : null}
             </div>
 
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link className="gold-button" to={serviceRequestId ? '/cliente/pedido' : '/cliente'}>
-                  {serviceRequestId ? 'Voltar aos interessados' : 'Publicar meu pedido'}
-                </Link>
-                <a className="ghost-button" href="#avaliacoes-instalador">
-                  Ver avaliações
-                </a>
-                {!isOwnInstallerProfile ? (
-                  <a
-                    className="ghost-button"
-                    href="#avaliar-instalador"
-                    onClick={(event) =>
-                      requireClientLogin(
-                        event,
-                        `/installers/${installer.id}#avaliar-instalador`,
-                        'Entre para avaliar o instalador escolhido.'
-                      )
-                    }
-                  >
-                    Avaliar este instalador
-                  </a>
-                ) : null}
-                {!serviceRequestId ? <Link className="ghost-button" to="/cliente">Voltar</Link> : null}
+            <div className="installer-profile-hero-copy">
+              <p className="installer-profile-kicker">Instalador parceiro</p>
+              <h1>{installer.display_name}</h1>
+              <p className="installer-profile-location">{locationLabel}</p>
+              <div className="installer-profile-rating-line">
+                <RatingStars value={installer.average_rating} />
+                <strong>{hasReviews ? Number(installer.average_rating || 0).toFixed(1) : 'Novo perfil'}</strong>
+                <span>{hasReviews ? `${installer.review_count} avaliações` : 'Pronto para atender'}</span>
               </div>
             </div>
           </div>
 
-          <aside className="grid gap-6">
-            <section className="lux-panel fade-up p-6" style={{ animationDelay: '0.08s' }}>
-              <p className="eyebrow">Datas disponíveis</p>
-              <h2 className="mt-3 text-2xl font-semibold text-[var(--text)]">Horários vagos do mês</h2>
-              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-                Veja abaixo os horários liberados pelo instalador para atendimento.
-              </p>
+          <div className="installer-profile-hero-body">
+            <p>{installer.bio || 'Profissional especializado em instalações cuidadosas, com atendimento organizado do orçamento à finalização.'}</p>
+            <div className="installer-profile-trust-tags">
+              {installer.safety?.document_masked ? <span>Documento verificado</span> : <span>Dados profissionais cadastrados</span>}
+              {installer.safety?.accepts_service_contract ? <span>Contrato de serviço</span> : null}
+              {installer.safety?.provides_warranty ? <span>{warrantyLabel}</span> : null}
+              {installer.featured_installer ? <span>Em destaque</span> : null}
+            </div>
+          </div>
 
-              <div className="mt-5 grid gap-3">
+          <div className="installer-profile-hero-actions">
+            <Link className="installer-profile-primary-action" to={requestPath}>{requestActionLabel}</Link>
+            <a className="installer-profile-secondary-action" href="#disponibilidade">Ver disponibilidade</a>
+          </div>
+
+          <div className="installer-profile-hero-stats" aria-label="Resumo do profissional">
+            <article><strong>{installer.completed_jobs || 0}</strong><span>instalações concluídas</span></article>
+            <article><strong>{installer.unique_clients_served || 0}</strong><span>clientes atendidos</span></article>
+            <article><strong>{installer.review_count || 0}</strong><span>avaliações recebidas</span></article>
+          </div>
+        </section>
+
+        <section className="installer-profile-layout">
+          <div className="installer-profile-main-column">
+            <section className="installer-profile-section installer-profile-about">
+              <div className="installer-profile-section-heading">
+                <p>Como funciona</p>
+                <h2>Atendimento pensado para sua instalação</h2>
+              </div>
+              <div className="installer-profile-detail-grid">
+                <article>
+                  <span>Região atendida</span>
+                  <strong>{locationLabel}</strong>
+                  <p>{installer.service_region || 'A área exata é confirmada antes do orçamento.'}</p>
+                </article>
+                <article>
+                  <span>Horários</span>
+                  <strong>{installer.service_hours || 'A combinar'}</strong>
+                  <p>Dias de instalação: {formatInstallationDays(installer.installation_days)}</p>
+                </article>
+                <article>
+                  <span>Forma de trabalho</span>
+                  <p>{installer.installation_method || 'Cada ambiente é analisado antes da instalação para orientar o melhor acabamento.'}</p>
+                </article>
+              </div>
+            </section>
+
+            <section className="installer-profile-section installer-profile-pricing">
+              <div className="installer-profile-section-heading">
+                <p>Referência de valores</p>
+                <h2>Custos apresentados com transparência</h2>
+              </div>
+              <div className="installer-profile-price-grid">
+                <article><span>Visita técnica</span><strong>{formatCurrency(installer.base_service_cost)}</strong></article>
+                <article><span>Deslocamento</span><strong>{formatCurrency(installer.travel_fee)}</strong></article>
+                <article><span>Instalação por rolo</span><strong>{formatCurrency(installer.default_price_per_roll)}</strong></article>
+                <article><span>Remoção</span><strong>{formatCurrency(installer.default_removal_price)}</strong></article>
+              </div>
+              <p className="installer-profile-section-note">Os valores servem como referência. O orçamento final considera ambiente, medida, material e condições do local.</p>
+            </section>
+
+            <section className="installer-profile-section installer-profile-portfolio">
+              <div className="installer-profile-section-heading installer-profile-section-heading--inline">
+                <div><p>Portfólio</p><h2>Instalações realizadas</h2></div>
+                {installer.certificate_file ? (
+                  <a className="installer-profile-text-link" href={installer.certificate_file} rel="noreferrer" target="_blank">Ver certificado</a>
+                ) : null}
+              </div>
+              {Array.isArray(installer.installation_gallery) && installer.installation_gallery.length > 0 ? (
+                <div className="installer-profile-gallery">
+                  {installer.installation_gallery.slice(0, 8).map((photo, index) => (
+                    <img
+                      alt={`Instalação ${index + 1} de ${installer.display_name}`}
+                      decoding="async"
+                      key={`${index}-${photo.slice(0, 24)}`}
+                      loading="lazy"
+                      src={photo}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="installer-profile-portfolio-empty">
+                  <strong>Portfólio em atualização</strong>
+                  <p>As fotos dos trabalhos deste instalador aparecerão aqui assim que forem publicadas.</p>
+                </div>
+              )}
+            </section>
+          </div>
+
+          <aside className="installer-profile-sidebar">
+            <section className="installer-profile-availability" id="disponibilidade">
+              <p className="installer-profile-kicker">Disponibilidade</p>
+              <h2>Próximos horários livres</h2>
+              <p className="installer-profile-availability-copy">Consulte as datas informadas pelo profissional antes de enviar o pedido.</p>
+              <div className="installer-profile-slots">
                 {groupedSlotEntries.length ? (
-                  groupedSlotEntries.map(([date, slots]) => (
-                    <article
-                      className="rounded-[20px] border border-[var(--line)] bg-[rgba(255,255,255,0.03)] p-4"
-                      key={date}
-                    >
-                      <p className="text-sm font-semibold text-[var(--gold-strong)]">{formatLongDate(`${date}T12:00:00`)}</p>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {slots.map((slot) => (
-                          <span className="status-pill" data-tone="scheduled" key={slot.id}>
-                            {slot.start_time} - {slot.end_time}
-                          </span>
-                        ))}
-                      </div>
+                  groupedSlotEntries.slice(0, 4).map(([date, slots]) => (
+                    <article key={date}>
+                      <strong>{formatLongDate(`${date}T12:00:00`)}</strong>
+                      <div>{slots.map((slot) => <span key={slot.id}>{slot.start_time} – {slot.end_time}</span>)}</div>
                     </article>
                   ))
                 ) : installer.available_dates?.length ? (
-                  <div className="flex flex-wrap gap-2">
-                    {installer.available_dates.map((date) => (
-                      <span className="status-pill" data-tone="scheduled" key={date}>
-                        {formatLongDate(date)}
-                      </span>
-                    ))}
-                  </div>
+                  installer.available_dates.slice(0, 4).map((date) => <span className="installer-profile-date-chip" key={date}>{formatLongDate(date)}</span>)
                 ) : (
-                  <div className="empty-state w-full">
-                    Este instalador ainda não informou horários livres.
-                  </div>
+                  <div className="installer-profile-no-slots">Os horários ainda não foram informados. Você pode enviar o pedido para combinar a melhor data.</div>
                 )}
               </div>
+              <Link className="installer-profile-sidebar-action" to={requestPath}>{requestActionLabel}</Link>
             </section>
 
-            <section className="lux-panel fade-up p-6" id="avaliar-instalador" style={{ animationDelay: '0.1s' }}>
-              <p className="eyebrow">Avaliar instalador</p>
-              <h2 className="mt-3 text-2xl font-semibold text-[var(--text)]">Deixe sua avaliação</h2>
-              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-                A avaliação fica disponível depois que você conclui um pedido com este profissional.
-              </p>
-
-              {!user ? (
-                <div className="empty-state mt-4 !p-4 text-sm">
-                  <p>Entre depois de escolher este instalador para enviar sua avaliação.</p>
-                  <Link
-                    className="gold-button mt-4 w-full justify-center"
-                    to={getClientLoginPath(`/installers/${installer.id}#avaliar-instalador`)}
-                  >
-                    Entrar para avaliar
-                  </Link>
-                </div>
-              ) : isOwnInstallerProfile ? (
-                <div className="empty-state mt-4 !p-4 text-sm">
-                  Você está visualizando o seu próprio perfil. Autoavaliações são bloqueadas por segurança.
-                </div>
-              ) : (
-              <form className="mt-5 space-y-4" onSubmit={handleReviewSubmit}>
-                <label className="block">
-                  <span className="field-label">Seu nome</span>
-                  <input
-                    className="field-input"
-                    name="reviewer_name"
-                    onChange={handleReviewChange}
-                    placeholder="Como você quer aparecer"
-                    required
-                    value={reviewForm.reviewer_name}
-                  />
-                </label>
-
-                <label className="block">
-                  <span className="field-label">Sua região</span>
-                  <input
-                    className="field-input"
-                    name="reviewer_region"
-                    onChange={handleReviewChange}
-                    placeholder="Cidade ou bairro"
-                    value={reviewForm.reviewer_region}
-                  />
-                </label>
-
-                <label className="block">
-                  <span className="field-label">Nota</span>
-                  <select
-                    className="field-select"
-                    name="rating"
-                    onChange={handleReviewChange}
-                    value={reviewForm.rating}
-                  >
-                    <option value={5}>5 estrelas</option>
-                    <option value={4}>4 estrelas</option>
-                    <option value={3}>3 estrelas</option>
-                    <option value={2}>2 estrelas</option>
-                    <option value={1}>1 estrela</option>
-                  </select>
-                </label>
-
-                <label className="block">
-                  <span className="field-label">Comentário</span>
-                  <textarea
-                    className="field-textarea"
-                    name="comment"
-                    onChange={handleReviewChange}
-                    placeholder="Conte como foi sua experiência"
-                    rows="4"
-                    value={reviewForm.comment}
-                  />
-                </label>
-
-                <button className="gold-button w-full" disabled={sendingReview} type="submit">
-                  {sendingReview ? 'Enviando avaliação...' : 'Enviar avaliação'}
-                </button>
-              </form>
-              )}
-            </section>
-
-            <section className="lux-panel-soft fade-up rounded-[28px] p-6" style={{ animationDelay: '0.12s' }}>
-              <p className="eyebrow">Loja recomendada</p>
-              <h2 className="mt-3 text-2xl font-semibold text-[var(--text)]">{marketplace?.title}</h2>
-              <p className="mt-4 text-sm leading-7 text-[var(--muted)]">{marketplace?.description}</p>
-              <div className="mt-3 text-xs uppercase tracking-[0.14em] text-[var(--gold-strong)]">
-                beminstalado.com.br
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                {(marketplace?.highlights || []).map((highlight) => (
-                  <span className="status-pill" data-tone="scheduled" key={highlight}>
-                    {highlight}
-                  </span>
-                ))}
-              </div>
-
-              <div className="mt-4 grid gap-2">
-                <a
-                  className="gold-button w-full justify-center"
-                  href={marketplace?.url || 'https://www.beminstalado.com.br'}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  {marketplace?.cta_label || 'Visitar loja oficial'}
-                </a>
-                {marketplace?.whatsapp_url ? (
-                  <a
-                    className="ghost-button w-full justify-center"
-                    href={marketplace.whatsapp_url}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    Falar com a loja no WhatsApp
-                  </a>
-                ) : null}
-              </div>
-
-              <p className="mt-3 text-sm text-[var(--muted)]">
-                {marketplace?.contact_phone ? `Contato: ${marketplace.contact_phone}` : ''}
-                {marketplace?.contact_phone && marketplace?.contact_email ? ' • ' : ''}
-                {marketplace?.contact_email || ''}
-              </p>
+            <section className="installer-profile-security-card">
+              <p>Confiança InstalaPro</p>
+              <ul>
+                <li>{installer.safety?.document_masked ? 'Documento cadastrado e conferido' : 'Dados profissionais cadastrados'}</li>
+                <li>{installer.safety?.accepts_service_contract ? 'Pode formalizar o atendimento em contrato' : 'Detalhes combinados antes da execução'}</li>
+                <li>{warrantyLabel}</li>
+              </ul>
             </section>
           </aside>
         </section>
 
-        <section className="lux-panel fade-up p-6" id="avaliacoes-instalador" style={{ animationDelay: '0.14s' }}>
-          <p className="eyebrow">Avaliações recentes</p>
-          <h2 className="mt-3 text-2xl font-semibold text-[var(--text)]">O que os clientes dizem</h2>
-
-          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {reviews.length ? (
-              reviews.map((review, index) => (
-                <article
-                  className="lux-panel-soft rounded-[24px] p-5"
-                  key={`${review.reviewer_name}-${index}-${review.created_at}`}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="font-semibold text-[var(--text)]">{review.reviewer_name}</p>
-                    <span className="status-pill" data-tone="success">
-                      {review.rating}/5
-                    </span>
-                  </div>
-                  <p className="mt-2 text-sm text-[var(--gold-strong)]">
-                    {review.reviewer_region || 'Região não informada'}
-                  </p>
-                  <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-                    {review.comment || 'Avaliação enviada sem comentário adicional.'}
-                  </p>
-                  <p className="mt-4 text-xs uppercase tracking-[0.16em] text-[var(--muted)]">
-                    {formatShortDate(review.created_at)}
-                  </p>
-                </article>
-              ))
-            ) : (
-              <div className="empty-state md:col-span-2 xl:col-span-3">
-                Este instalador ainda não recebeu avaliações públicas.
-              </div>
-            )}
+        <section className="installer-profile-section installer-profile-reviews" id="avaliacoes-instalador">
+          <div className="installer-profile-section-heading installer-profile-section-heading--inline">
+            <div><p>Avaliações</p><h2>O que os clientes contam</h2></div>
+            {!isOwnInstallerProfile ? (
+              <a
+                className="installer-profile-text-link"
+                href="#avaliar-instalador"
+                onClick={(event) => requireClientLogin(event, `/installers/${installer.id}#avaliar-instalador`, 'Entre para avaliar este profissional.')}
+              >
+                Avaliar profissional
+              </a>
+            ) : null}
           </div>
+          {reviews.length ? (
+            <div className="installer-profile-review-grid">
+              {reviews.map((review, index) => (
+                <article key={`${review.reviewer_name}-${index}-${review.created_at}`}>
+                  <div className="installer-profile-review-top"><strong>{review.reviewer_name}</strong><span>{review.rating}/5</span></div>
+                  <p className="installer-profile-review-region">{review.reviewer_region || 'Região não informada'}</p>
+                  <p>{review.comment || 'Avaliação enviada sem comentário adicional.'}</p>
+                  <time>{formatShortDate(review.created_at)}</time>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="installer-profile-review-empty">Ainda não há avaliações públicas. Os primeiros clientes poderão deixar um relato após a conclusão do serviço.</div>
+          )}
+        </section>
+
+        <section className="installer-profile-bottom-grid">
+          <section className="installer-profile-section installer-profile-review-form" id="avaliar-instalador">
+            <div className="installer-profile-section-heading"><p>Avaliar</p><h2>Conte como foi sua experiência</h2></div>
+            {!user ? (
+              <div className="installer-profile-form-lock">
+                <p>As avaliações são liberadas para clientes que concluíram um pedido na plataforma.</p>
+                <Link className="installer-profile-primary-action" to={getClientLoginPath(`/installers/${installer.id}#avaliar-instalador`)}>Entrar para avaliar</Link>
+              </div>
+            ) : isOwnInstallerProfile ? (
+              <div className="installer-profile-form-lock"><p>Você está vendo seu próprio perfil. Por segurança, não é possível enviar uma autoavaliação.</p></div>
+            ) : (
+              <form className="installer-profile-form" onSubmit={handleReviewSubmit}>
+                <label><span>Seu nome</span><input name="reviewer_name" onChange={handleReviewChange} placeholder="Como você quer aparecer" required value={reviewForm.reviewer_name} /></label>
+                <label><span>Sua região</span><input name="reviewer_region" onChange={handleReviewChange} placeholder="Cidade ou bairro" value={reviewForm.reviewer_region} /></label>
+                <label><span>Nota</span><select name="rating" onChange={handleReviewChange} value={reviewForm.rating}><option value={5}>5 estrelas</option><option value={4}>4 estrelas</option><option value={3}>3 estrelas</option><option value={2}>2 estrelas</option><option value={1}>1 estrela</option></select></label>
+                <label className="installer-profile-form-comment"><span>Comentário</span><textarea name="comment" onChange={handleReviewChange} placeholder="Conte como foi sua experiência" rows="4" value={reviewForm.comment} /></label>
+                <button className="installer-profile-primary-action" disabled={sendingReview} type="submit">{sendingReview ? 'Enviando avaliação...' : 'Enviar avaliação'}</button>
+              </form>
+            )}
+          </section>
+
+          <aside className="installer-profile-marketplace">
+            <p>Materiais recomendados</p>
+            <h2>{marketplace?.title}</h2>
+            <span>{marketplace?.description}</span>
+            <div>{(marketplace?.highlights || []).slice(0, 3).map((highlight) => <i key={highlight}>{highlight}</i>)}</div>
+            <a href={marketplace?.url || 'https://www.beminstalado.com.br'} rel="noreferrer" target="_blank">{marketplace?.cta_label || 'Visitar loja oficial'} →</a>
+          </aside>
         </section>
       </div>
-    </div>
+
+      <div className="installer-profile-mobile-cta"><Link to={requestPath}>{requestActionLabel}</Link></div>
+    </main>
   );
 }

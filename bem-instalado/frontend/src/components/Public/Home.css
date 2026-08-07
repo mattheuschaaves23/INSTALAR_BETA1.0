@@ -78,6 +78,1005 @@
   font-size: 0.94rem;
 }
 
+/* Perfil público do instalador ------------------------------------------------ */
+.installer-public-page {
+  --profile-canvas: #f3f0ea;
+  --profile-card: rgba(255, 255, 255, 0.92);
+  --profile-card-soft: #f9f7f3;
+  --profile-ink: #1f1d19;
+  --profile-muted: #716c63;
+  --profile-line: #e1d9cc;
+  --profile-accent: #b97a16;
+  --profile-accent-strong: #8d5910;
+  --profile-accent-soft: #f7ead0;
+  min-height: 100vh;
+  padding: 1.15rem 1rem 5.8rem;
+  background:
+    radial-gradient(circle at 7% 2%, rgba(211, 164, 75, 0.17), transparent 19rem),
+    radial-gradient(circle at 94% 13%, rgba(170, 130, 71, 0.11), transparent 22rem),
+    var(--profile-canvas);
+  color: var(--profile-ink);
+}
+
+html[data-site-theme='dark'] .installer-public-page {
+  --profile-canvas: #090909;
+  --profile-card: rgba(20, 20, 20, 0.96);
+  --profile-card-soft: #171717;
+  --profile-ink: #f7f4ee;
+  --profile-muted: #bbb5ab;
+  --profile-line: #39352d;
+  --profile-accent: #dfad49;
+  --profile-accent-strong: #f1c66e;
+  --profile-accent-soft: #2c220f;
+  background:
+    radial-gradient(circle at 5% 0%, rgba(183, 125, 26, 0.17), transparent 19rem),
+    radial-gradient(circle at 96% 20%, rgba(181, 129, 37, 0.1), transparent 23rem),
+    var(--profile-canvas);
+}
+
+.installer-profile-nav,
+.installer-profile-shell {
+  width: min(1180px, 100%);
+  margin-inline: auto;
+}
+
+.installer-profile-nav {
+  min-height: 3.8rem;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.installer-profile-nav a {
+  text-decoration: none;
+}
+
+.installer-profile-nav-back,
+.installer-profile-nav-link {
+  color: var(--profile-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.installer-profile-nav-back:hover,
+.installer-profile-nav-link:hover {
+  color: var(--profile-accent-strong);
+}
+
+.installer-profile-nav-link {
+  justify-self: end;
+}
+
+.installer-profile-nav-brand {
+  color: var(--profile-ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.06em;
+}
+
+.installer-profile-nav-brand span {
+  color: var(--profile-accent);
+}
+
+.installer-profile-shell {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.installer-profile-hero,
+.installer-profile-section,
+.installer-profile-availability,
+.installer-profile-security-card,
+.installer-profile-marketplace {
+  border: 1px solid var(--profile-line);
+  background: var(--profile-card);
+  box-shadow: 0 18px 42px rgba(52, 42, 27, 0.07);
+}
+
+html[data-site-theme='dark'] .installer-profile-hero,
+html[data-site-theme='dark'] .installer-profile-section,
+html[data-site-theme='dark'] .installer-profile-availability,
+html[data-site-theme='dark'] .installer-profile-security-card,
+html[data-site-theme='dark'] .installer-profile-marketplace {
+  box-shadow: 0 20px 46px rgba(0, 0, 0, 0.28);
+}
+
+.installer-profile-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 15.5rem;
+  gap: 1.75rem 3rem;
+  overflow: hidden;
+  padding: clamp(1.5rem, 4vw, 3.1rem);
+  border-radius: 1.7rem;
+}
+
+.installer-profile-hero::before {
+  content: '';
+  position: absolute;
+  inset: auto -4rem -7rem auto;
+  width: 19rem;
+  height: 19rem;
+  border: 1px solid color-mix(in srgb, var(--profile-accent) 30%, transparent);
+  border-radius: 999px;
+  opacity: 0.75;
+}
+
+.installer-profile-hero-glow {
+  position: absolute;
+  top: -8rem;
+  right: 8rem;
+  width: 16rem;
+  height: 16rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(214, 164, 70, 0.18), transparent 68%);
+  pointer-events: none;
+}
+
+.installer-profile-hero-intro,
+.installer-profile-hero-body,
+.installer-profile-hero-actions,
+.installer-profile-hero-stats {
+  position: relative;
+  z-index: 1;
+}
+
+.installer-profile-hero-intro {
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+}
+
+.installer-profile-avatar-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.installer-profile-avatar {
+  width: 5.75rem;
+  height: 5.75rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--profile-line);
+  border-radius: 1.35rem;
+  background: var(--profile-card-soft);
+  color: var(--profile-accent-strong);
+  object-fit: cover;
+  font-size: 1.55rem;
+  font-weight: 800;
+}
+
+.installer-profile-avatar--initials {
+  background: linear-gradient(135deg, var(--profile-accent-soft), var(--profile-card-soft));
+}
+
+.installer-profile-verified {
+  position: absolute;
+  right: -0.25rem;
+  bottom: -0.25rem;
+  width: 1.55rem;
+  height: 1.55rem;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--profile-card);
+  border-radius: 999px;
+  background: var(--profile-accent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.installer-profile-kicker,
+.installer-profile-section-heading > p,
+.installer-profile-marketplace > p,
+.installer-profile-security-card > p {
+  margin: 0;
+  color: var(--profile-accent-strong);
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.installer-profile-hero-copy h1 {
+  max-width: 40rem;
+  margin: 0.25rem 0 0;
+  color: var(--profile-ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2.25rem, 5vw, 4.4rem);
+  font-weight: 500;
+  letter-spacing: -0.055em;
+  line-height: 0.95;
+}
+
+.installer-profile-location {
+  margin: 0.55rem 0 0;
+  color: var(--profile-muted);
+  font-size: 0.95rem;
+}
+
+.installer-profile-rating-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+  color: var(--profile-muted);
+  font-size: 0.83rem;
+}
+
+.installer-profile-rating-line strong {
+  color: var(--profile-ink);
+  font-size: 0.92rem;
+}
+
+.installer-profile-rating-stars {
+  display: inline-flex;
+  gap: 0.13rem;
+}
+
+.installer-profile-rating-stars i {
+  color: color-mix(in srgb, var(--profile-accent) 34%, var(--profile-line));
+  font-size: 0.9rem;
+  font-style: normal;
+}
+
+.installer-profile-rating-stars i.is-filled {
+  color: var(--profile-accent);
+}
+
+.installer-profile-hero-body {
+  grid-column: 1;
+  max-width: 43rem;
+}
+
+.installer-profile-hero-body > p {
+  margin: 0;
+  color: var(--profile-muted);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.installer-profile-trust-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+.installer-profile-trust-tags span,
+.installer-profile-date-chip,
+.installer-profile-marketplace i {
+  padding: 0.36rem 0.58rem;
+  border: 1px solid color-mix(in srgb, var(--profile-accent) 32%, var(--profile-line));
+  border-radius: 999px;
+  background: var(--profile-accent-soft);
+  color: var(--profile-accent-strong);
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 750;
+}
+
+.installer-profile-hero-actions {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.installer-profile-primary-action,
+.installer-profile-secondary-action,
+.installer-profile-sidebar-action {
+  min-height: 3.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.78rem 1rem;
+  border-radius: 0.8rem;
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.installer-profile-primary-action,
+.installer-profile-sidebar-action {
+  border: 1px solid var(--profile-accent-strong);
+  background: linear-gradient(135deg, var(--profile-accent-strong), var(--profile-accent));
+  box-shadow: 0 12px 24px rgba(154, 100, 17, 0.22);
+  color: #fff;
+}
+
+.installer-profile-secondary-action {
+  border: 1px solid var(--profile-line);
+  background: var(--profile-card-soft);
+  color: var(--profile-ink);
+}
+
+.installer-profile-primary-action:hover,
+.installer-profile-sidebar-action:hover,
+.installer-profile-secondary-action:hover {
+  transform: translateY(-2px);
+}
+
+.installer-profile-primary-action:hover,
+.installer-profile-sidebar-action:hover {
+  box-shadow: 0 16px 28px rgba(154, 100, 17, 0.3);
+}
+
+.installer-profile-hero-stats {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--profile-line);
+}
+
+.installer-profile-hero-stats article {
+  display: grid;
+  gap: 0.22rem;
+  padding: 0 1rem;
+  border-left: 1px solid var(--profile-line);
+}
+
+.installer-profile-hero-stats article:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.installer-profile-hero-stats strong {
+  color: var(--profile-ink);
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.installer-profile-hero-stats span {
+  color: var(--profile-muted);
+  font-size: 0.76rem;
+}
+
+.installer-profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20.5rem;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.installer-profile-main-column,
+.installer-profile-sidebar {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.installer-profile-section {
+  padding: clamp(1.3rem, 3vw, 2rem);
+  border-radius: 1.3rem;
+}
+
+.installer-profile-section-heading h2,
+.installer-profile-availability h2,
+.installer-profile-marketplace h2 {
+  margin: 0.35rem 0 0;
+  color: var(--profile-ink);
+  font-size: clamp(1.25rem, 2vw, 1.7rem);
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+}
+
+.installer-profile-section-heading--inline {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.installer-profile-text-link {
+  color: var(--profile-accent-strong);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.installer-profile-text-link:hover {
+  color: var(--profile-accent);
+}
+
+.installer-profile-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.35rem;
+}
+
+.installer-profile-detail-grid article {
+  min-height: 8.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.42rem;
+  padding: 1rem;
+  border: 1px solid var(--profile-line);
+  border-radius: 1rem;
+  background: var(--profile-card-soft);
+}
+
+.installer-profile-detail-grid article:last-child {
+  grid-column: 1 / -1;
+  min-height: 0;
+}
+
+.installer-profile-detail-grid span,
+.installer-profile-price-grid span,
+.installer-profile-form label > span {
+  color: var(--profile-muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.installer-profile-detail-grid strong,
+.installer-profile-price-grid strong {
+  color: var(--profile-ink);
+  font-size: 0.98rem;
+}
+
+.installer-profile-detail-grid p,
+.installer-profile-section-note {
+  margin: 0;
+  color: var(--profile-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.installer-profile-price-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 1.35rem;
+  border: 1px solid var(--profile-line);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.installer-profile-price-grid article {
+  display: grid;
+  gap: 0.45rem;
+  min-height: 5.8rem;
+  align-content: center;
+  padding: 0.9rem;
+  border-left: 1px solid var(--profile-line);
+  background: var(--profile-card-soft);
+}
+
+.installer-profile-price-grid article:first-child {
+  border-left: 0;
+}
+
+.installer-profile-section-note {
+  margin-top: 0.9rem;
+}
+
+.installer-profile-gallery {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: 9.5rem;
+  gap: 0.65rem;
+  margin-top: 1.3rem;
+}
+
+.installer-profile-gallery img {
+  width: 100%;
+  height: 100%;
+  border-radius: 0.8rem;
+  object-fit: cover;
+}
+
+.installer-profile-gallery img:first-child {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.installer-profile-portfolio-empty,
+.installer-profile-review-empty,
+.installer-profile-form-lock,
+.installer-profile-no-slots {
+  border: 1px dashed color-mix(in srgb, var(--profile-muted) 46%, var(--profile-line));
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--profile-card-soft) 82%, transparent);
+  color: var(--profile-muted);
+}
+
+.installer-profile-portfolio-empty {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 1.25rem;
+  padding: 1.4rem;
+}
+
+.installer-profile-portfolio-empty strong {
+  color: var(--profile-ink);
+}
+
+.installer-profile-portfolio-empty p {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.installer-profile-sidebar {
+  position: sticky;
+  top: 1rem;
+}
+
+.installer-profile-availability,
+.installer-profile-security-card,
+.installer-profile-marketplace {
+  padding: 1.35rem;
+  border-radius: 1.3rem;
+}
+
+.installer-profile-availability-copy {
+  margin: 0.75rem 0 0;
+  color: var(--profile-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.installer-profile-slots {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1.1rem;
+}
+
+.installer-profile-slots article {
+  padding: 0.8rem;
+  border: 1px solid var(--profile-line);
+  border-radius: 0.8rem;
+  background: var(--profile-card-soft);
+}
+
+.installer-profile-slots article strong {
+  display: block;
+  color: var(--profile-ink);
+  font-size: 0.78rem;
+}
+
+.installer-profile-slots article div,
+.installer-profile-slots > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+}
+
+.installer-profile-slots article span {
+  padding: 0.25rem 0.43rem;
+  border-radius: 0.42rem;
+  background: var(--profile-accent-soft);
+  color: var(--profile-accent-strong);
+  font-size: 0.71rem;
+  font-weight: 750;
+}
+
+.installer-profile-no-slots {
+  padding: 1rem;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.installer-profile-sidebar-action {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.installer-profile-security-card ul {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.installer-profile-security-card li {
+  position: relative;
+  padding-left: 1rem;
+  color: var(--profile-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.installer-profile-security-card li::before {
+  content: '';
+  position: absolute;
+  top: 0.42rem;
+  left: 0;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: var(--profile-accent);
+}
+
+.installer-profile-reviews {
+  margin-top: 0;
+}
+
+.installer-profile-review-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.35rem;
+}
+
+.installer-profile-review-grid article {
+  padding: 1rem;
+  border: 1px solid var(--profile-line);
+  border-radius: 1rem;
+  background: var(--profile-card-soft);
+}
+
+.installer-profile-review-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.installer-profile-review-top strong {
+  color: var(--profile-ink);
+  font-size: 0.9rem;
+}
+
+.installer-profile-review-top span {
+  padding: 0.23rem 0.43rem;
+  border-radius: 0.4rem;
+  background: var(--profile-accent-soft);
+  color: var(--profile-accent-strong);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.installer-profile-review-grid p {
+  margin: 0.65rem 0 0;
+  color: var(--profile-muted);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.installer-profile-review-grid .installer-profile-review-region {
+  margin-top: 0.42rem;
+  color: var(--profile-accent-strong);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.installer-profile-review-grid time {
+  display: block;
+  margin-top: 0.8rem;
+  color: var(--profile-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.installer-profile-review-empty {
+  margin-top: 1.25rem;
+  padding: 1.2rem;
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.installer-profile-bottom-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20.5rem;
+  gap: 1.25rem;
+}
+
+.installer-profile-form-lock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding: 1rem;
+}
+
+.installer-profile-form-lock p {
+  max-width: 32rem;
+  margin: 0;
+  font-size: 0.83rem;
+  line-height: 1.5;
+}
+
+.installer-profile-form-lock .installer-profile-primary-action {
+  flex: 0 0 auto;
+}
+
+.installer-profile-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+}
+
+.installer-profile-form label {
+  display: grid;
+  gap: 0.42rem;
+}
+
+.installer-profile-form .installer-profile-form-comment {
+  grid-column: 1 / -1;
+}
+
+.installer-profile-form input,
+.installer-profile-form textarea,
+.installer-profile-form select {
+  width: 100%;
+  border: 1px solid var(--profile-line);
+  border-radius: 0.7rem;
+  background: var(--profile-card-soft);
+  color: var(--profile-ink);
+  font: inherit;
+  font-size: 0.86rem;
+  outline: none;
+}
+
+.installer-profile-form input,
+.installer-profile-form select {
+  height: 2.8rem;
+  padding: 0 0.8rem;
+}
+
+.installer-profile-form textarea {
+  min-height: 6.2rem;
+  padding: 0.75rem 0.8rem;
+  resize: vertical;
+}
+
+.installer-profile-form input::placeholder,
+.installer-profile-form textarea::placeholder {
+  color: color-mix(in srgb, var(--profile-muted) 78%, transparent);
+}
+
+.installer-profile-form input:focus,
+.installer-profile-form textarea:focus,
+.installer-profile-form select:focus {
+  border-color: var(--profile-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--profile-accent) 17%, transparent);
+}
+
+.installer-profile-form button {
+  border: 0;
+  cursor: pointer;
+}
+
+.installer-profile-form button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.installer-profile-marketplace {
+  align-self: stretch;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--profile-accent-soft) 72%, var(--profile-card)), var(--profile-card));
+}
+
+.installer-profile-marketplace h2 {
+  font-size: 1.18rem;
+}
+
+.installer-profile-marketplace > span {
+  display: block;
+  margin-top: 0.75rem;
+  color: var(--profile-muted);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.installer-profile-marketplace > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.38rem;
+  margin-top: 1rem;
+}
+
+.installer-profile-marketplace > a {
+  display: inline-flex;
+  margin-top: 1.1rem;
+  color: var(--profile-accent-strong);
+  font-size: 0.83rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.installer-profile-mobile-cta {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .installer-profile-hero,
+  .installer-profile-layout,
+  .installer-profile-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .installer-profile-hero-body,
+  .installer-profile-hero-actions {
+    grid-column: 1;
+  }
+
+  .installer-profile-hero-actions {
+    grid-row: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .installer-profile-sidebar {
+    position: static;
+    grid-template-columns: minmax(0, 1.4fr) minmax(15rem, 0.6fr);
+  }
+
+  .installer-profile-review-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .installer-public-page {
+    padding: 0.7rem 0.7rem 6.3rem;
+  }
+
+  .installer-profile-nav {
+    min-height: 3.3rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .installer-profile-nav-brand {
+    font-size: 1.15rem;
+  }
+
+  .installer-profile-nav-link {
+    display: none;
+  }
+
+  .installer-profile-nav-back {
+    font-size: 0.72rem;
+  }
+
+  .installer-profile-hero,
+  .installer-profile-section,
+  .installer-profile-availability,
+  .installer-profile-security-card,
+  .installer-profile-marketplace {
+    border-radius: 1.1rem;
+  }
+
+  .installer-profile-hero {
+    gap: 1.3rem;
+    padding: 1.25rem;
+  }
+
+  .installer-profile-hero-intro {
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .installer-profile-avatar {
+    width: 4.25rem;
+    height: 4.25rem;
+    border-radius: 1rem;
+    font-size: 1.1rem;
+  }
+
+  .installer-profile-hero-copy h1 {
+    font-size: clamp(2rem, 11vw, 3rem);
+  }
+
+  .installer-profile-location {
+    font-size: 0.82rem;
+  }
+
+  .installer-profile-rating-line {
+    gap: 0.35rem;
+    font-size: 0.74rem;
+  }
+
+  .installer-profile-hero-body > p {
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+
+  .installer-profile-hero-actions {
+    display: none;
+  }
+
+  .installer-profile-hero-stats {
+    gap: 0.5rem;
+  }
+
+  .installer-profile-hero-stats article {
+    padding: 0 0.45rem;
+  }
+
+  .installer-profile-hero-stats strong {
+    font-size: 1.05rem;
+  }
+
+  .installer-profile-hero-stats span {
+    font-size: 0.64rem;
+    line-height: 1.35;
+  }
+
+  .installer-profile-detail-grid,
+  .installer-profile-price-grid,
+  .installer-profile-review-grid,
+  .installer-profile-sidebar,
+  .installer-profile-form {
+    grid-template-columns: 1fr;
+  }
+
+  .installer-profile-detail-grid article:last-child {
+    grid-column: auto;
+  }
+
+  .installer-profile-price-grid article,
+  .installer-profile-price-grid article:first-child {
+    min-height: 0;
+    border-top: 1px solid var(--profile-line);
+    border-left: 0;
+  }
+
+  .installer-profile-price-grid article:first-child {
+    border-top: 0;
+  }
+
+  .installer-profile-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 7.2rem;
+  }
+
+  .installer-profile-form .installer-profile-form-comment {
+    grid-column: auto;
+  }
+
+  .installer-profile-form-lock {
+    align-items: stretch;
+  }
+
+  .installer-profile-form-lock .installer-profile-primary-action {
+    width: 100%;
+  }
+
+  .installer-profile-mobile-cta {
+    position: fixed;
+    z-index: 30;
+    right: 0.8rem;
+    bottom: calc(0.8rem + env(safe-area-inset-bottom, 0px));
+    left: 0.8rem;
+    display: block;
+    padding: 0.5rem;
+    border: 1px solid var(--profile-line);
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--profile-card) 94%, transparent);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(14px);
+  }
+
+  .installer-profile-mobile-cta a {
+    min-height: 3.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.72rem;
+    background: linear-gradient(135deg, var(--profile-accent-strong), var(--profile-accent));
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 850;
+    text-decoration: none;
+  }
+}
+
 .client-app-top-actions {
   display: flex;
   align-items: center;
