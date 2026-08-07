@@ -132,6 +132,33 @@ async function getRecommendedStores(limit = 12, activeOnly = true) {
   }));
 }
 
+async function getDashboardAds(limit = 12) {
+  const { rows } = await pool.query(
+    `
+      SELECT
+        id,
+        title,
+        description,
+        media_type,
+        media_url,
+        link_url,
+        cta_label,
+        sort_order
+      FROM dashboard_ads
+      WHERE is_active = TRUE
+      ORDER BY sort_order ASC, updated_at DESC, created_at DESC
+      LIMIT $1
+    `,
+    [Math.min(Math.max(Number(limit) || 12, 1), 30)]
+  );
+
+  return rows.map((ad) => ({
+    ...ad,
+    media_url: normalizeExternalUrl(ad.media_url),
+    link_url: normalizeExternalUrl(ad.link_url),
+  }));
+}
+
 function maskDocument(value) {
   const normalized = String(value || '').replace(/\D/g, '');
 
@@ -588,6 +615,15 @@ exports.getRecommendedStores = async (_req, res) => {
     return res.json({ stores });
   } catch (_error) {
     return res.status(500).json({ error: 'Erro ao carregar lojas recomendadas.' });
+  }
+};
+
+exports.getDashboardAds = async (_req, res) => {
+  try {
+    const ads = await getDashboardAds(20);
+    return res.json({ ads });
+  } catch (_error) {
+    return res.status(500).json({ error: 'Erro ao carregar propagandas do dashboard.' });
   }
 };
 

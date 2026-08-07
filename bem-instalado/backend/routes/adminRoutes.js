@@ -16,10 +16,12 @@ router.get('/installer-verifications', controller.listInstallerVerifications);
 router.get('/payments', controller.listPayments);
 router.get('/service-requests', controller.listServiceRequests);
 router.get('/recommended-stores', controller.listRecommendedStores);
+router.get('/dashboard-ads', controller.listDashboardAds);
 router.get('/system/errors', controller.listApplicationErrors);
 router.patch('/system/errors/:id/resolve', controller.resolveApplicationError);
 router.post('/announcements', controller.broadcastAnnouncement);
 router.post('/recommended-stores', controller.createRecommendedStore);
+router.post('/dashboard-ads', controller.createDashboardAd);
 router.patch('/users/:id/subscription', controller.updateUserSubscription);
 router.patch('/users/:id/public-profile', controller.updateUserPublicProfile);
 router.patch('/users/:id/trust', controller.updateUserTrust);
@@ -27,8 +29,10 @@ router.post('/installer-verifications/:id/decision', controller.decideInstallerV
 router.patch('/users/:id/admin', controller.updateUserAdmin);
 router.patch('/users/:id/restore', controller.restoreUser);
 router.patch('/recommended-stores/:id', controller.updateRecommendedStore);
+router.patch('/dashboard-ads/:id', controller.updateDashboardAd);
 router.delete('/users/:id', controller.deleteUser);
 router.delete('/recommended-stores/:id', controller.deleteRecommendedStore);
+router.delete('/dashboard-ads/:id', controller.deleteDashboardAd);
 router.patch('/payments/:id/status', controller.updatePaymentStatus);
 router.patch('/service-requests/:id/status', controller.updateServiceRequestStatus);
 

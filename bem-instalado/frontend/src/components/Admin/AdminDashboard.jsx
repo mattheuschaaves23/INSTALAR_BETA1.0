@@ -36,6 +36,23 @@ const initialStoreForm = {
   is_active: true,
 };
 
+const initialDashboardAdForm = {
+  title: '',
+  description: '',
+  media_type: 'image',
+  media_url: '',
+  link_url: '',
+  cta_label: 'Conhecer',
+  sort_order: 0,
+  is_active: true,
+};
+
+const dashboardAdTypeLabels = {
+  image: 'Imagem',
+  video: 'Vídeo',
+  text: 'Texto',
+};
+
 const USERS_PER_PAGE = 6;
 const PAYMENTS_PER_PAGE = 6;
 const REQUESTS_PER_PAGE = 8;
@@ -63,6 +80,7 @@ function AdminPanelIcon({ type }) {
     payments: <><circle cx="12" cy="12" r="8.5" /><path d="M14.8 9.4c0-1.2-1-2.1-2.6-2.1-1.6 0-2.7.8-2.7 2.1 0 2.7 5.5 1.6 5.5 4.2 0 1.2-1 2.1-2.8 2.1-1.7 0-2.8-.9-2.9-2.2" /><path d="M12 6v12" /></>,
     requests: <><path d="M6 4h12v16H6z" /><path d="M9 8h6M9 12h6M9 16h3" /></>,
     stores: <><path d="M5 9.2 6.2 4h11.6L19 9.2" /><path d="M5 9.2h14v9.3a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 18.5Z" /><path d="M8.4 13h7.2" /></>,
+    advertising: <><rect x="3.8" y="5" width="16.4" height="14" rx="2" /><path d="m7.2 15 3.2-3.2 2.5 2.5 2.1-2.1 2.2 2.2" /><circle cx="15.8" cy="9.1" r="1.25" /></>,
     announcements: <><path d="M5 10.5v3a2 2 0 0 0 2 2h2.2l4.8 3.2v-13L9.2 8H7a2 2 0 0 0-2 2.5Z" /><path d="M17 9.2c.8.6 1.3 1.5 1.3 2.6s-.5 2-1.3 2.6" /></>,
   };
 
@@ -94,6 +112,7 @@ function PageIntro({ title, description, stats = [] }) {
 export default function AdminDashboard() {
   const confirm = useConfirm();
   const storeFormRef = useRef(null);
+  const dashboardAdFormRef = useRef(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [overview, setOverview] = useState(initialOverview);
   const [users, setUsers] = useState([]);
@@ -101,13 +120,16 @@ export default function AdminDashboard() {
   const [payments, setPayments] = useState([]);
   const [serviceRequests, setServiceRequests] = useState([]);
   const [recommendedStores, setRecommendedStores] = useState([]);
+  const [dashboardAds, setDashboardAds] = useState([]);
   const [applicationErrors, setApplicationErrors] = useState([]);
   const [userFilters, setUserFilters] = useState(initialUserFilters);
   const [paymentFilters, setPaymentFilters] = useState(initialPaymentFilters);
   const [requestFilters, setRequestFilters] = useState(initialRequestFilters);
   const [announcement, setAnnouncement] = useState(initialAnnouncement);
   const [storeForm, setStoreForm] = useState(initialStoreForm);
+  const [dashboardAdForm, setDashboardAdForm] = useState(initialDashboardAdForm);
   const [editingStoreId, setEditingStoreId] = useState(null);
+  const [editingDashboardAdId, setEditingDashboardAdId] = useState(null);
   const [usersPage, setUsersPage] = useState(1);
   const [paymentsPage, setPaymentsPage] = useState(1);
   const [requestsPage, setRequestsPage] = useState(1);
@@ -124,6 +146,8 @@ export default function AdminDashboard() {
   const [sendingAnnouncement, setSendingAnnouncement] = useState(false);
   const [loadingStores, setLoadingStores] = useState(false);
   const [savingStore, setSavingStore] = useState(false);
+  const [loadingDashboardAds, setLoadingDashboardAds] = useState(false);
+  const [savingDashboardAd, setSavingDashboardAd] = useState(false);
 
   const loadOverview = useCallback(async () => {
     const response = await api.get('/admin/overview');
@@ -191,6 +215,17 @@ export default function AdminDashboard() {
     }
   }, []);
 
+  const loadDashboardAds = useCallback(async () => {
+    setLoadingDashboardAds(true);
+
+    try {
+      const response = await api.get('/admin/dashboard-ads');
+      setDashboardAds(response.data?.ads || []);
+    } finally {
+      setLoadingDashboardAds(false);
+    }
+  }, []);
+
   const loadServiceRequests = useCallback(async (nextFilters = initialRequestFilters, page = 1) => {
     setLoadingRequests(true);
     try {
@@ -213,12 +248,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     setLoading(true);
 
-    Promise.all([loadOverview(), loadUsers(), loadVerifications(), loadPayments(), loadServiceRequests(), loadRecommendedStores(), loadApplicationErrors()])
+    Promise.all([loadOverview(), loadUsers(), loadVerifications(), loadPayments(), loadServiceRequests(), loadRecommendedStores(), loadDashboardAds(), loadApplicationErrors()])
       .catch((error) => {
         toast.error(error.response?.data?.error || 'Não foi possível carregar o painel administrativo.');
       })
       .finally(() => setLoading(false));
-  }, [loadApplicationErrors, loadOverview, loadPayments, loadRecommendedStores, loadServiceRequests, loadUsers, loadVerifications]);
+  }, [loadApplicationErrors, loadDashboardAds, loadOverview, loadPayments, loadRecommendedStores, loadServiceRequests, loadUsers, loadVerifications]);
 
   const resolveApplicationError = async (errorId) => {
     try {
@@ -694,6 +729,131 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDashboardAdFormChange = (event) => {
+    const { name, value, type, checked } = event.target;
+
+    setDashboardAdForm((current) => ({
+      ...current,
+      [name]: type === 'checkbox' ? checked : name === 'sort_order' ? Number(value) : value,
+    }));
+  };
+
+  const resetDashboardAdForm = () => {
+    setDashboardAdForm(initialDashboardAdForm);
+    setEditingDashboardAdId(null);
+  };
+
+  const startDashboardAdEdit = (ad) => {
+    setEditingDashboardAdId(ad.id);
+    setDashboardAdForm({
+      title: ad.title || '',
+      description: ad.description || '',
+      media_type: ad.media_type || 'image',
+      media_url: ad.media_url || '',
+      link_url: ad.link_url || '',
+      cta_label: ad.cta_label || 'Conhecer',
+      sort_order: Number(ad.sort_order || 0),
+      is_active: Boolean(ad.is_active),
+    });
+
+    window.requestAnimationFrame(() => {
+      dashboardAdFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    toast.success(`Editando propaganda: ${ad.title}`);
+  };
+
+  const handleDashboardAdSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!dashboardAdForm.title.trim()) {
+      toast.error('Informe o título da propaganda.');
+      return;
+    }
+
+    if (dashboardAdForm.media_type !== 'text' && !dashboardAdForm.media_url.trim()) {
+      toast.error('Informe a URL da imagem ou do vídeo.');
+      return;
+    }
+
+    setSavingDashboardAd(true);
+
+    try {
+      const payload = {
+        title: dashboardAdForm.title.trim(),
+        description: dashboardAdForm.description.trim(),
+        media_type: dashboardAdForm.media_type,
+        media_url: dashboardAdForm.media_url.trim(),
+        link_url: dashboardAdForm.link_url.trim(),
+        cta_label: dashboardAdForm.cta_label.trim() || 'Conhecer',
+        sort_order: Number(dashboardAdForm.sort_order || 0),
+        is_active: Boolean(dashboardAdForm.is_active),
+      };
+
+      if (editingDashboardAdId) {
+        await api.patch(`/admin/dashboard-ads/${editingDashboardAdId}`, payload);
+        toast.success('Propaganda atualizada.');
+      } else {
+        await api.post('/admin/dashboard-ads', payload);
+        toast.success('Propaganda criada.');
+      }
+
+      await loadDashboardAds();
+      resetDashboardAdForm();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Não foi possível salvar a propaganda.');
+    } finally {
+      setSavingDashboardAd(false);
+    }
+  };
+
+  const handleToggleDashboardAdStatus = async (ad) => {
+    const nextStatus = !ad.is_active;
+    const confirmed = await confirm(
+      `Confirma ${nextStatus ? 'ativar' : 'desativar'} a propaganda ${ad.title}?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setSavingDashboardAd(true);
+
+    try {
+      await api.patch(`/admin/dashboard-ads/${ad.id}`, { is_active: nextStatus });
+      toast.success(nextStatus ? 'Propaganda ativada no dashboard.' : 'Propaganda removida do dashboard.');
+      await loadDashboardAds();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Não foi possível atualizar a propaganda.');
+    } finally {
+      setSavingDashboardAd(false);
+    }
+  };
+
+  const handleDeleteDashboardAd = async (ad) => {
+    const confirmed = await confirm(`Tem certeza que deseja excluir a propaganda ${ad.title}?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    setSavingDashboardAd(true);
+
+    try {
+      await api.delete(`/admin/dashboard-ads/${ad.id}`);
+      toast.success('Propaganda removida.');
+      await loadDashboardAds();
+
+      if (editingDashboardAdId === ad.id) {
+        resetDashboardAdForm();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Não foi possível excluir a propaganda.');
+    } finally {
+      setSavingDashboardAd(false);
+    }
+  };
+
   const metrics = overview.metrics || {};
   const totalUsersPages = usersPagination.total_pages || 1;
   const normalizedUsersPage = Math.min(usersPage, totalUsersPages);
@@ -702,14 +862,15 @@ export default function AdminDashboard() {
   const totalPaymentsPages = paymentsPagination.total_pages || 1;
   const normalizedPaymentsPage = Math.min(paymentsPage, totalPaymentsPages);
   const paginatedPayments = payments;
-  const adminSection = searchParams.get('section') || 'overview';
+  const requestedAdminSection = searchParams.get('section') || 'overview';
+  const adminSection = requestedAdminSection === 'stores' ? 'advertising' : requestedAdminSection;
   const adminSections = [
     { key: 'overview', label: 'Visão geral', detail: 'Métricas e atividade recente' },
     { key: 'requests', label: 'Pedidos', detail: 'Solicitações e interessados' },
     { key: 'verifications', label: 'Aprovações', detail: 'Certificados aguardando revisão e publicação' },
     { key: 'users', label: 'Usuários', detail: 'Perfis, permissões e confiança' },
     { key: 'payments', label: 'Pagamentos', detail: 'Cobrança, pendências e status' },
-    { key: 'stores', label: 'Lojas da página inicial', detail: 'Escolha e ordene o carrossel público' },
+    { key: 'advertising', label: 'Propaganda', detail: 'Landing page e anúncios quadrados do dashboard' },
     { key: 'announcements', label: 'Comunicados', detail: 'Mensagens globais da plataforma' },
     { key: 'monitoring', label: 'Monitoramento', detail: 'Erros reais do site e da API' },
   ];
@@ -1069,7 +1230,7 @@ export default function AdminDashboard() {
           ) : null}
         </section>
 
-        <aside className={`${['users', 'verifications', 'stores', 'announcements', 'monitoring'].includes(activeAdminSection.key) ? 'grid gap-6' : 'hidden'}`}>
+        <aside className={`${['users', 'verifications', 'advertising', 'announcements', 'monitoring'].includes(activeAdminSection.key) ? 'grid gap-6' : 'hidden'}`}>
           {activeAdminSection.key === 'verifications' ? (
           <section className="admin-content-panel lux-panel fade-up p-6" style={{ animationDelay: '0.1s' }}>
             <div className="flex flex-wrap items-start justify-between gap-4">
@@ -1305,10 +1466,13 @@ export default function AdminDashboard() {
           </section>
           ) : null}
 
-          {activeAdminSection.key === 'stores' ? (
+          {activeAdminSection.key === 'advertising' ? (
           <section className="admin-content-panel admin-store-panel lux-panel fade-up p-6" style={{ animationDelay: '0.12s' }}>
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="eyebrow">Lojas da página inicial</p>
+              <div>
+                <p className="eyebrow">Landing page</p>
+                <h2 className="mt-2 text-xl font-semibold text-[var(--text)]">Lojas recomendadas</h2>
+              </div>
               {editingStoreId ? (
                 <button className="ghost-button !min-h-0 !px-3 !py-2 text-xs" onClick={resetStoreForm} type="button">
                   Cancelar edição
@@ -1317,7 +1481,7 @@ export default function AdminDashboard() {
             </div>
 
             <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-              Você escolhe quais lojas aparecem na landing page. Somente lojas ativas são exibidas, seguindo a ordem definida abaixo.
+              Esta vitrine é exclusiva da landing page. Somente lojas ativas aparecem no carrossel público, seguindo a ordem definida abaixo.
             </p>
 
             <form className="admin-form-surface mt-5 grid gap-3" onSubmit={handleStoreSubmit} ref={storeFormRef}>
@@ -1469,6 +1633,204 @@ export default function AdminDashboard() {
                       Excluir
                     </button>
                   </div>
+                    </article>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </section>
+          ) : null}
+
+          {activeAdminSection.key === 'advertising' ? (
+          <section className="admin-content-panel admin-store-panel lux-panel fade-up p-6" style={{ animationDelay: '0.14s' }}>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="eyebrow">Dashboard do instalador</p>
+                <h2 className="mt-2 text-xl font-semibold text-[var(--text)]">Propagandas quadradas</h2>
+              </div>
+              {editingDashboardAdId ? (
+                <button className="ghost-button !min-h-0 !px-3 !py-2 text-xs" onClick={resetDashboardAdForm} type="button">
+                  Cancelar edição
+                </button>
+              ) : null}
+            </div>
+
+            <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
+              Esta área é separada da landing page. Cadastre imagem, vídeo ou texto para o quadrado patrocinado do dashboard. Anúncios ativos alternam pela ordem definida abaixo.
+            </p>
+
+            <form className="admin-form-surface mt-5 grid gap-3" onSubmit={handleDashboardAdSubmit} ref={dashboardAdFormRef}>
+              <input
+                autoFocus={Boolean(editingDashboardAdId)}
+                className="field-input"
+                name="title"
+                onChange={handleDashboardAdFormChange}
+                placeholder="Título da propaganda"
+                value={dashboardAdForm.title}
+              />
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <select
+                  className="field-select"
+                  name="media_type"
+                  onChange={handleDashboardAdFormChange}
+                  value={dashboardAdForm.media_type}
+                >
+                  <option value="image">Imagem</option>
+                  <option value="video">Vídeo</option>
+                  <option value="text">Somente texto</option>
+                </select>
+
+                <input
+                  className="field-input"
+                  name="media_url"
+                  onChange={handleDashboardAdFormChange}
+                  placeholder={dashboardAdForm.media_type === 'video' ? 'URL direta do vídeo MP4/WebM' : dashboardAdForm.media_type === 'image' ? 'URL da imagem' : 'Mídia opcional para texto'}
+                  value={dashboardAdForm.media_url}
+                />
+              </div>
+
+              {dashboardAdForm.media_type === 'video' ? (
+                <p className="-mt-1 text-xs text-[var(--muted)]">Use uma URL direta de arquivo MP4 ou WebM. Links de páginas do YouTube não são arquivos de vídeo.</p>
+              ) : null}
+
+              <textarea
+                className="field-textarea"
+                name="description"
+                onChange={handleDashboardAdFormChange}
+                placeholder="Mensagem curta (opcional)"
+                rows={3}
+                value={dashboardAdForm.description}
+              />
+
+              <input
+                className="field-input"
+                name="link_url"
+                onChange={handleDashboardAdFormChange}
+                placeholder="URL de destino ao clicar (opcional)"
+                value={dashboardAdForm.link_url}
+              />
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <input
+                  className="field-input"
+                  name="cta_label"
+                  onChange={handleDashboardAdFormChange}
+                  placeholder="Texto do link (ex: Conhecer)"
+                  value={dashboardAdForm.cta_label}
+                />
+
+                <input
+                  className="field-input"
+                  min={-99}
+                  name="sort_order"
+                  onChange={handleDashboardAdFormChange}
+                  placeholder="Ordem do rodízio"
+                  type="number"
+                  value={dashboardAdForm.sort_order}
+                />
+              </div>
+
+              <label className="flex items-center gap-2 text-sm text-[var(--muted)]">
+                <input
+                  checked={dashboardAdForm.is_active}
+                  name="is_active"
+                  onChange={handleDashboardAdFormChange}
+                  type="checkbox"
+                />
+                Mostrar no quadrado do dashboard
+              </label>
+
+              <button className="gold-button w-full" disabled={savingDashboardAd} type="submit">
+                {savingDashboardAd
+                  ? 'Salvando...'
+                  : editingDashboardAdId
+                    ? 'Atualizar propaganda'
+                    : 'Adicionar propaganda'}
+              </button>
+            </form>
+
+            <div className="mt-5 grid gap-3">
+              {loadingDashboardAds ? <div className="empty-state">Carregando propagandas...</div> : null}
+
+              {!loadingDashboardAds && dashboardAds.length === 0 ? (
+                <div className="empty-state">Nenhuma propaganda do dashboard cadastrada ainda.</div>
+              ) : null}
+
+              {!loadingDashboardAds && dashboardAds.length > 0 ? (
+                <div className="list-surface admin-store-surface">
+                  {dashboardAds.map((ad) => (
+                    <article
+                      className={`admin-store-card list-row admin-store-row ${
+                        editingDashboardAdId === ad.id ? 'admin-store-card-editing' : ''
+                      }`}
+                      key={ad.id}
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-[var(--text)]">{ad.title}</p>
+                          <p className="text-xs text-[var(--muted)]">
+                            Tipo: {dashboardAdTypeLabels[ad.media_type] || ad.media_type} · Ordem do rodízio: {ad.sort_order}
+                          </p>
+                        </div>
+
+                        <span className="status-pill" data-tone={ad.is_active ? 'paid' : 'canceled'}>
+                          {ad.is_active ? 'Ativa' : 'Inativa'}
+                        </span>
+                      </div>
+
+                      {editingDashboardAdId === ad.id ? (
+                        <p className="admin-store-editing-note mt-2">Modo edição ativo</p>
+                      ) : null}
+
+                      {ad.media_url ? (
+                        <div className="admin-store-preview admin-dashboard-ad-preview mt-3">
+                          {ad.media_type === 'video' ? (
+                            <video controls preload="metadata" src={ad.media_url} />
+                          ) : (
+                            <img alt={`Preview da propaganda ${ad.title}`} loading="lazy" src={ad.media_url} />
+                          )}
+                        </div>
+                      ) : null}
+
+                      {ad.description ? (
+                        <p className="admin-store-description mt-3 text-sm text-[var(--muted)]">{ad.description}</p>
+                      ) : null}
+
+                      <div className="admin-store-meta mt-3 grid gap-1 text-xs text-[var(--muted)]">
+                        <p>Mídia: {ad.media_url || 'Somente texto'}</p>
+                        <p>Link: {ad.link_url || 'Sem link'}</p>
+                        <p>CTA: {ad.cta_label || 'Conhecer'}</p>
+                      </div>
+
+                      <div className="admin-store-actions mt-4 grid gap-2 sm:grid-cols-3">
+                        <button
+                          className="ghost-button w-full !min-h-0 !px-3 !py-2 text-xs"
+                          disabled={savingDashboardAd}
+                          onClick={() => startDashboardAdEdit(ad)}
+                          type="button"
+                        >
+                          Editar
+                        </button>
+
+                        <button
+                          className="ghost-button w-full !min-h-0 !px-3 !py-2 text-xs"
+                          disabled={savingDashboardAd}
+                          onClick={() => handleToggleDashboardAdStatus(ad)}
+                          type="button"
+                        >
+                          {ad.is_active ? 'Desativar' : 'Ativar'}
+                        </button>
+
+                        <button
+                          className="danger-button w-full !min-h-0 !px-3 !py-2 text-xs"
+                          disabled={savingDashboardAd}
+                          onClick={() => handleDeleteDashboardAd(ad)}
+                          type="button"
+                        >
+                          Excluir
+                        </button>
+                      </div>
                     </article>
                   ))}
                 </div>

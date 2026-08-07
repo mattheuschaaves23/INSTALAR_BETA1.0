@@ -2805,13 +2805,22 @@ body {
   padding: 0.45rem;
 }
 
-.admin-store-preview img {
+.admin-store-preview :is(img, video) {
   width: 100%;
   height: 100%;
   object-fit: contain;
   object-position: center;
   border-radius: 10px;
   background: rgba(0, 0, 0, 0.22);
+}
+
+.admin-dashboard-ad-preview {
+  width: min(100%, 13rem) !important;
+  aspect-ratio: 1;
+}
+
+.admin-dashboard-ad-preview :is(img, video) {
+  object-fit: cover;
 }
 
 .admin-store-meta {
@@ -27650,7 +27659,7 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
   fill: rgba(187, 132, 39, 0.14);
 }
 
-/* Espaço patrocinado: compacto, identificado e gerenciado em Lojas recomendadas. */
+/* Espaço patrocinado: compacto e gerenciado na área Propaganda do ADM. */
 .dashboard-reference-layout .dashboard-neo-bottom-side {
   display: grid;
   align-content: start;
@@ -27689,6 +27698,8 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
 }
 
 .dashboard-reference-layout .dashboard-neo-sponsor-label {
+  position: relative;
+  z-index: 1;
   color: #8c601b;
   font-size: 0.62rem;
   font-weight: 800;
@@ -27709,11 +27720,15 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
   color: #9b6816;
 }
 
-.dashboard-reference-layout .dashboard-neo-sponsor-brand img {
-  width: 100%;
-  height: 100%;
+.dashboard-reference-layout .dashboard-neo-sponsor-media {
   position: absolute;
   inset: 0;
+  background: #172126;
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor-media :is(img, video) {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
@@ -27722,7 +27737,18 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
   font-weight: 800;
 }
 
-.dashboard-reference-layout .dashboard-neo-sponsor > strong {
+.dashboard-reference-layout .dashboard-neo-sponsor-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.42rem;
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor-content > strong {
   display: -webkit-box;
   overflow: hidden;
   color: #26343a;
@@ -27733,7 +27759,7 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
   -webkit-line-clamp: 2;
 }
 
-.dashboard-reference-layout .dashboard-neo-sponsor > p {
+.dashboard-reference-layout .dashboard-neo-sponsor-content > p {
   display: -webkit-box;
   overflow: hidden;
   margin: 0;
@@ -27749,6 +27775,32 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
   color: #8c601b;
   font-size: 0.76rem;
   font-weight: 800;
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor.has-media {
+  border-color: rgba(23, 33, 38, 0.26);
+  background: #172126;
+  color: #ffffff;
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor.has-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(11, 18, 21, 0.05) 20%, rgba(11, 18, 21, 0.9) 100%);
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor.has-media .dashboard-neo-sponsor-label,
+.dashboard-reference-layout .dashboard-neo-sponsor.has-media .dashboard-neo-sponsor-cta {
+  color: #f6dba2;
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor.has-media .dashboard-neo-sponsor-content > strong {
+  color: #ffffff;
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor.has-media .dashboard-neo-sponsor-content > p {
+  color: rgba(255, 255, 255, 0.84);
 }
 
 @media (max-width: 860px) {

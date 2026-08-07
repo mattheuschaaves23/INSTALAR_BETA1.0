@@ -51,6 +51,7 @@ router.get('/assets/:assetKey', publicSearchLimiter, assetController.getPublicAs
 router.post('/client-errors', optionalAuthMiddleware, clientErrorLimiter, monitoringController.reportClientError);
 router.post('/service-request-uploads', serviceRequestLimiter, publicUploadSingle, serviceRequestController.uploadPublicRequestPhoto);
 router.get('/recommended-stores', publicSearchLimiter, controller.getRecommendedStores);
+router.get('/dashboard-ads', publicSearchLimiter, controller.getDashboardAds);
 router.get('/location/reverse', publicSearchLimiter, controller.reverseLocation);
 router.get('/location/search', publicSearchLimiter, controller.searchLocation);
 router.get('/installers/:id', publicSearchLimiter, controller.getInstallerProfile);

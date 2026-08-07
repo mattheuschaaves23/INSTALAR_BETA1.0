@@ -571,6 +571,53 @@ function buildStatusSegments(budgets) {
   return { total, items, gradient };
 }
 
+function DashboardSponsor({ ad }) {
+  const hasVideo = ad.media_type === 'video' && ad.media_url;
+  const hasImage = ad.media_type === 'image' && ad.media_url;
+  const hasMedia = Boolean(hasVideo || hasImage);
+  const className = `dashboard-neo-sponsor${hasMedia ? ' has-media' : ''}`;
+  const content = (
+    <>
+      {hasMedia ? (
+        <div className="dashboard-neo-sponsor-media" aria-hidden="true">
+          {hasVideo ? (
+            <video autoPlay loop muted playsInline preload="metadata" src={ad.media_url} />
+          ) : (
+            <img alt="" loading="lazy" src={ad.media_url} />
+          )}
+        </div>
+      ) : (
+        <div className="dashboard-neo-sponsor-brand" aria-hidden="true">
+          <span className="dashboard-neo-sponsor-monogram">
+            {ad.title?.slice(0, 1)?.toUpperCase() || 'I'}
+          </span>
+        </div>
+      )}
+
+      <span className="dashboard-neo-sponsor-label">Patrocinado</span>
+      <div className="dashboard-neo-sponsor-content">
+        <strong>{ad.title}</strong>
+        {ad.description ? <p>{ad.description}</p> : null}
+        {ad.link_url ? (
+          <span className="dashboard-neo-sponsor-cta">
+            {ad.cta_label || 'Conhecer'} <span aria-hidden="true">→</span>
+          </span>
+        ) : null}
+      </div>
+    </>
+  );
+
+  if (ad.link_url) {
+    return (
+      <a className={className} href={ad.link_url} rel="noopener noreferrer" target="_blank">
+        {content}
+      </a>
+    );
+  }
+
+  return <article className={className}>{content}</article>;
+}
+
 export default function Dashboard() {
   const { logout, user } = useAuth();
   const { isPro } = useSubscription();
@@ -597,7 +644,8 @@ export default function Dashboard() {
   });
   const [budgets, setBudgets] = useState([]);
   const [clients, setClients] = useState([]);
-  const [sponsoredStores, setSponsoredStores] = useState([]);
+  const [dashboardAds, setDashboardAds] = useState([]);
+  const [dashboardAdIndex, setDashboardAdIndex] = useState(0);
   const [search, setSearch] = useState('');
   const [chartView, setChartView] = useState('monthly');
   const [chartDate, setChartDate] = useState(() => new Date());
@@ -681,23 +729,37 @@ export default function Dashboard() {
   useEffect(() => {
     let active = true;
 
-    api.get('/public/recommended-stores')
+    api.get('/public/dashboard-ads')
       .then((response) => {
         if (!active) return;
 
-        const stores = Array.isArray(response.data?.stores)
-          ? response.data.stores.filter((store) => store?.is_active !== false && store?.link_url)
+        const ads = Array.isArray(response.data?.ads)
+          ? response.data.ads.filter((ad) => ad?.title && ['image', 'video', 'text'].includes(ad?.media_type))
           : [];
-        setSponsoredStores(stores);
+        setDashboardAds(ads);
       })
       .catch(() => {
-        if (active) setSponsoredStores([]);
+        if (active) setDashboardAds([]);
       });
 
     return () => {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    setDashboardAdIndex(0);
+
+    if (dashboardAds.length < 2) {
+      return undefined;
+    }
+
+    const rotation = window.setInterval(() => {
+      setDashboardAdIndex((current) => (current + 1) % dashboardAds.length);
+    }, 12000);
+
+    return () => window.clearInterval(rotation);
+  }, [dashboardAds.length]);
 
   useEffect(() => {
     document.body.style.overflow = mobileDrawerOpen ? 'hidden' : '';
@@ -957,7 +1019,7 @@ export default function Dashboard() {
   const installationsThisWeek = Number(metrics.installations_this_week || 0);
   const completedThisWeek = Number(metrics.completed_this_week || 0);
   const rankingItems = ranking.slice(0, 4);
-  const sponsoredStore = sponsoredStores[0] || null;
+  const dashboardAd = dashboardAds.length ? dashboardAds[dashboardAdIndex % dashboardAds.length] : null;
 
   const useLegacyDashboard = process.env.REACT_APP_DASHBOARD_VARIANT === 'legacy';
 
@@ -1618,36 +1680,7 @@ export default function Dashboard() {
             ) : null}
             </article>
 
-            {sponsoredStore ? (
-              <a
-                className="dashboard-neo-sponsor"
-                href={sponsoredStore.link_url}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                <span className="dashboard-neo-sponsor-label">Patrocinado</span>
-                <div className="dashboard-neo-sponsor-brand">
-                  <span className="dashboard-neo-sponsor-monogram" aria-hidden="true">
-                    {sponsoredStore.name?.slice(0, 1)?.toUpperCase() || 'I'}
-                  </span>
-                  {sponsoredStore.image_url ? (
-                    <img
-                      alt=""
-                      loading="lazy"
-                      onError={(event) => {
-                        event.currentTarget.remove();
-                      }}
-                      src={sponsoredStore.image_url}
-                    />
-                  ) : null}
-                </div>
-                <strong>{sponsoredStore.name}</strong>
-                <p>{sponsoredStore.description || 'Conheça esta empresa parceira.'}</p>
-                <span className="dashboard-neo-sponsor-cta">
-                  {sponsoredStore.cta_label || 'Conhecer'} <span aria-hidden="true">→</span>
-                </span>
-              </a>
-            ) : null}
+            {dashboardAd ? <DashboardSponsor ad={dashboardAd} /> : null}
           </div>
         </div>
       </div>

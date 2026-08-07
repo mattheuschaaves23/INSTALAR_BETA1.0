@@ -3,6 +3,7 @@ const { expireOpenServiceRequests } = require('../utils/serviceRequestLifecycle'
 const { sendMarketplaceEmail } = require('../services/email');
 const { sendPushToUser } = require('../services/push');
 const ADMIN_MUTATION_LOCK_ID = 19772402;
+const DASHBOARD_AD_TYPES = new Set(['image', 'video', 'text']);
 
 function parseLimit(value, fallback = 20) {
   const parsed = Number(value);
@@ -1374,6 +1375,259 @@ exports.deleteRecommendedStore = async (req, res) => {
     return res.json({ success: true, store: rows[0] });
   } catch (_error) {
     return res.status(500).json({ error: 'Erro ao excluir loja recomendada.' });
+  }
+};
+
+exports.listDashboardAds = async (_req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `
+        SELECT
+          id,
+          title,
+          description,
+          media_type,
+          media_url,
+          link_url,
+          cta_label,
+          is_active,
+          sort_order,
+          created_at,
+          updated_at
+        FROM dashboard_ads
+        ORDER BY sort_order ASC, updated_at DESC, created_at DESC
+      `
+    );
+
+    return res.json({ ads: rows });
+  } catch (_error) {
+    return res.status(500).json({ error: 'Erro ao listar propagandas do dashboard.' });
+  }
+};
+
+exports.createDashboardAd = async (req, res) => {
+  try {
+    const title = String(req.body.title || '').trim().slice(0, 160);
+    const description = String(req.body.description || '').trim().slice(0, 500) || null;
+    const mediaType = String(req.body.media_type || 'image').trim().toLowerCase();
+    const rawMediaUrl = String(req.body.media_url || '').trim();
+    const rawLinkUrl = String(req.body.link_url || '').trim();
+    const mediaUrl = normalizeHttpUrl(rawMediaUrl) || null;
+    const linkUrl = normalizeHttpUrl(rawLinkUrl) || null;
+    const ctaLabel = String(req.body.cta_label || '').trim().slice(0, 80) || 'Conhecer';
+    const sortOrder = parseInteger(req.body.sort_order, 0);
+    const parsedIsActive = req.body.is_active === undefined ? true : parseBoolean(req.body.is_active);
+
+    if (!title) {
+      return res.status(400).json({ error: 'Informe o título da propaganda.' });
+    }
+
+    if (!DASHBOARD_AD_TYPES.has(mediaType)) {
+      return res.status(400).json({ error: 'Tipo de propaganda inválido.' });
+    }
+
+    if ((rawMediaUrl && !mediaUrl) || (rawLinkUrl && !linkUrl)) {
+      return res.status(400).json({ error: 'Use apenas URLs válidas com http ou https.' });
+    }
+
+    if (mediaType !== 'text' && !mediaUrl) {
+      return res.status(400).json({ error: 'Informe a URL da imagem ou do vídeo.' });
+    }
+
+    if (parsedIsActive === null) {
+      return res.status(400).json({ error: 'Informe is_active como true ou false.' });
+    }
+
+    const { rows } = await pool.query(
+      `
+        INSERT INTO dashboard_ads (
+          title,
+          description,
+          media_type,
+          media_url,
+          link_url,
+          cta_label,
+          is_active,
+          sort_order,
+          updated_at
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+        RETURNING
+          id,
+          title,
+          description,
+          media_type,
+          media_url,
+          link_url,
+          cta_label,
+          is_active,
+          sort_order,
+          created_at,
+          updated_at
+      `,
+      [title, description, mediaType, mediaUrl, linkUrl, ctaLabel, parsedIsActive, sortOrder]
+    );
+
+    return res.status(201).json({ ad: rows[0] });
+  } catch (_error) {
+    return res.status(500).json({ error: 'Erro ao criar propaganda do dashboard.' });
+  }
+};
+
+exports.updateDashboardAd = async (req, res) => {
+  try {
+    const adId = Number(req.params.id);
+
+    if (!Number.isInteger(adId) || adId <= 0) {
+      return res.status(400).json({ error: 'Propaganda inválida.' });
+    }
+
+    const currentResult = await pool.query(
+      'SELECT id, media_type, media_url FROM dashboard_ads WHERE id = $1',
+      [adId]
+    );
+    const currentAd = currentResult.rows[0];
+
+    if (!currentAd) {
+      return res.status(404).json({ error: 'Propaganda não encontrada.' });
+    }
+
+    const updates = [];
+    const values = [];
+    let index = 1;
+    let nextMediaType = currentAd.media_type;
+    let nextMediaUrl = currentAd.media_url;
+
+    if (req.body.title !== undefined) {
+      const title = String(req.body.title || '').trim().slice(0, 160);
+      if (!title) {
+        return res.status(400).json({ error: 'Informe um título válido para a propaganda.' });
+      }
+      updates.push(`title = $${index}`);
+      values.push(title);
+      index += 1;
+    }
+
+    if (req.body.description !== undefined) {
+      updates.push(`description = $${index}`);
+      values.push(String(req.body.description || '').trim().slice(0, 500) || null);
+      index += 1;
+    }
+
+    if (req.body.media_type !== undefined) {
+      const mediaType = String(req.body.media_type || '').trim().toLowerCase();
+      if (!DASHBOARD_AD_TYPES.has(mediaType)) {
+        return res.status(400).json({ error: 'Tipo de propaganda inválido.' });
+      }
+      nextMediaType = mediaType;
+      updates.push(`media_type = $${index}`);
+      values.push(mediaType);
+      index += 1;
+    }
+
+    if (req.body.media_url !== undefined) {
+      const rawMediaUrl = String(req.body.media_url || '').trim();
+      const mediaUrl = normalizeHttpUrl(rawMediaUrl);
+      if (rawMediaUrl && !mediaUrl) {
+        return res.status(400).json({ error: 'Informe uma URL de mídia válida com http ou https.' });
+      }
+      nextMediaUrl = mediaUrl || null;
+      updates.push(`media_url = $${index}`);
+      values.push(nextMediaUrl);
+      index += 1;
+    }
+
+    if (nextMediaType !== 'text' && !nextMediaUrl) {
+      return res.status(400).json({ error: 'Imagem e vídeo precisam de uma URL de mídia.' });
+    }
+
+    if (req.body.link_url !== undefined) {
+      const rawLinkUrl = String(req.body.link_url || '').trim();
+      const linkUrl = normalizeHttpUrl(rawLinkUrl);
+      if (rawLinkUrl && !linkUrl) {
+        return res.status(400).json({ error: 'Informe uma URL de destino válida com http ou https.' });
+      }
+      updates.push(`link_url = $${index}`);
+      values.push(linkUrl || null);
+      index += 1;
+    }
+
+    if (req.body.cta_label !== undefined) {
+      updates.push(`cta_label = $${index}`);
+      values.push(String(req.body.cta_label || '').trim().slice(0, 80) || 'Conhecer');
+      index += 1;
+    }
+
+    if (req.body.sort_order !== undefined) {
+      updates.push(`sort_order = $${index}`);
+      values.push(parseInteger(req.body.sort_order, 0));
+      index += 1;
+    }
+
+    if (req.body.is_active !== undefined) {
+      const parsedIsActive = parseBoolean(req.body.is_active);
+      if (parsedIsActive === null) {
+        return res.status(400).json({ error: 'Informe is_active como true ou false.' });
+      }
+      updates.push(`is_active = $${index}`);
+      values.push(parsedIsActive);
+      index += 1;
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'Nenhum campo válido foi enviado para atualização.' });
+    }
+
+    updates.push('updated_at = NOW()');
+    values.push(adId);
+
+    const { rows } = await pool.query(
+      `
+        UPDATE dashboard_ads
+        SET ${updates.join(', ')}
+        WHERE id = $${index}
+        RETURNING
+          id,
+          title,
+          description,
+          media_type,
+          media_url,
+          link_url,
+          cta_label,
+          is_active,
+          sort_order,
+          created_at,
+          updated_at
+      `,
+      values
+    );
+
+    return res.json({ ad: rows[0] });
+  } catch (_error) {
+    return res.status(500).json({ error: 'Erro ao atualizar propaganda do dashboard.' });
+  }
+};
+
+exports.deleteDashboardAd = async (req, res) => {
+  try {
+    const adId = Number(req.params.id);
+
+    if (!Number.isInteger(adId) || adId <= 0) {
+      return res.status(400).json({ error: 'Propaganda inválida.' });
+    }
+
+    const { rows } = await pool.query(
+      `DELETE FROM dashboard_ads WHERE id = $1 RETURNING id, title`,
+      [adId]
+    );
+
+    if (!rows[0]) {
+      return res.status(404).json({ error: 'Propaganda não encontrada.' });
+    }
+
+    return res.json({ success: true, ad: rows[0] });
+  } catch (_error) {
+    return res.status(500).json({ error: 'Erro ao excluir propaganda do dashboard.' });
   }
 };
 
