@@ -30453,6 +30453,40 @@ html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .revie
   color: #f4c968 !important;
 }
 
+/* Indicadores de resumo: cartões grafite, rótulo cinza e valor branco. */
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .page-intro-stat,
+  .ref-panel-metric-card,
+  .agenda-modern-hero-metrics article,
+  .client-intake-stat-grid article,
+  .reviews-dashboard-metric
+) {
+  border-color: #373126 !important;
+  background: #1b1b1b !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .page-intro-stat,
+  .ref-panel-metric-card,
+  .agenda-modern-hero-metrics article,
+  .client-intake-stat-grid article,
+  .reviews-dashboard-metric
+) > :is(span, p, small) {
+  color: #bcbcbc !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .page-intro-stat,
+  .ref-panel-metric-card,
+  .agenda-modern-hero-metrics article,
+  .client-intake-stat-grid article,
+  .reviews-dashboard-metric
+) > strong {
+  color: #ffffff !important;
+}
+
 @media (max-width: 860px) {
   html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .ref-panel-mobile-drawer {
     background: #0a0a0a !important;
