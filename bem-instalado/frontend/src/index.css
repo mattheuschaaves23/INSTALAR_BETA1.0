@@ -28865,17 +28865,48 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
 /* Linguagem visual aqua: padrão para cada rota do painel do instalador. */
 .dashboard-reference-layout.installer-workspace.aqua-panel-theme {
   --site-bg: #f6f8f9;
+  --site-bg-rgb: 246, 248, 249;
+  --site-panel: #ffffff;
+  --site-panel-soft: #f8fafb;
+  --site-panel-elevated: #ffffff;
+  --site-panel-rgb: 255, 255, 255;
+  --site-panel-soft-rgb: 248, 250, 251;
+  --site-panel-elevated-rgb: 255, 255, 255;
+  --bg: #f6f8f9;
+  --bg-soft: #f8fafb;
+  --surface: rgba(255, 255, 255, 0.96);
+  --surface-strong: #ffffff;
+  --surface-soft: #f8fafb;
   --site-accent: #3197aa;
   --site-accent-rgb: 49, 151, 170;
   --site-accent-strong: #55b5c4;
   --site-accent-deep: #217c8d;
+  --site-accent-contrast: #ffffff;
   --site-accent-soft: #e8f7f9;
+  --site-accent-line: rgba(49, 151, 170, 0.5);
+  --site-accent-line-strong: rgba(49, 151, 170, 0.72);
+  --gold: #3197aa;
+  --gold-strong: #217c8d;
+  --gold-soft: #e8f7f9;
   --ref-gold: #3197aa;
   --ref-gold-strong: #217c8d;
+  --ref-text: #25333c;
+  --ref-muted: #66757d;
+  --ref-line: #e4ecee;
+  --route-panel: #ffffff;
+  --route-panel-soft: #f8fafb;
+  --route-line: #e4ecee;
   --route-line-gold: rgba(49, 151, 170, 0.42);
+  --route-muted: #66757d;
   --panel-gold: #3197aa;
   --panel-gold-strong: #217c8d;
   --panel-gold-soft: #e8f7f9;
+  --panel-canvas: #f6f8f9;
+  --panel-surface: #ffffff;
+  --panel-surface-soft: #f8fafb;
+  --panel-surface-muted: #f4f7f8;
+  --panel-border: #e4ecee;
+  --panel-shadow: 0 7px 20px rgba(35, 55, 62, 0.045);
   --panel-ink: #25333c;
   --panel-muted: #66757d;
   --dashboard-aqua: #3197aa;
@@ -28884,6 +28915,10 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
   --dashboard-aqua-line: #b9e1e7;
   --dashboard-aqua-ink: #25333c;
   --dashboard-aqua-muted: #66757d;
+  --line: #e4ecee;
+  --text: #25333c;
+  --muted: #66757d;
+  --shadow: 0 10px 28px rgba(35, 55, 62, 0.055);
   background: #f6f8f9 !important;
   color: #25333c;
 }
@@ -28899,10 +28934,31 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
   .panel-flat-language .reviews-dashboard-shell,
   .panel-flat-language .settings-page,
   .budget-modern-shell,
-  .dashboard-neo-shell
+  .dashboard-neo-shell,
+  .reviews-dashboard-shell,
+  .admin-modern-shell,
+  .installer-app-page
 ) {
   background: #f6f8f9 !important;
   color: #25333c;
+}
+
+/* Cada rota começa na mesma base clara usada pelo Dashboard. */
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .page-shell,
+  .agenda-modern-shell,
+  .client-intake-shell,
+  .budget-modern-shell,
+  .opportunities-page,
+  .reviews-dashboard-shell,
+  .settings-page,
+  .support-installer-shell,
+  .subscription-v3,
+  .installer-app-page,
+  .admin-modern-shell
+) {
+  min-width: 0;
+  background: #f6f8f9 !important;
 }
 
 /* Navegação, cabeçalho e controles compartilhados. */
@@ -29352,5 +29408,115 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
 
   .dashboard-reference-layout.aqua-panel-theme .email-verification-notice .ghost-button {
     width: 100%;
+  }
+}
+
+/* Cabeçalhos e áreas de trabalho recebem a mesma superfície do Dashboard. */
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .page-intro-main,
+  .budget-modern-topbar,
+  .agenda-modern-hero,
+  .client-intake-topbar,
+  .reviews-dashboard-hero,
+  .subscription-v3-hero,
+  .installer-app-page-header,
+  .admin-modern-hero
+) {
+  padding: 1.35rem !important;
+  border: 1px solid #e6edef !important;
+  border-radius: 1rem !important;
+  background: #ffffff !important;
+  box-shadow: 0 7px 20px rgba(35, 55, 62, 0.045) !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .page-intro-main,
+  .budget-modern-topbar,
+  .agenda-modern-hero,
+  .client-intake-topbar,
+  .reviews-dashboard-hero,
+  .subscription-v3-hero,
+  .installer-app-page-header,
+  .admin-modern-hero
+)::before,
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .page-intro-main,
+  .budget-modern-topbar,
+  .agenda-modern-hero,
+  .client-intake-topbar,
+  .reviews-dashboard-hero,
+  .subscription-v3-hero,
+  .installer-app-page-header,
+  .admin-modern-hero
+)::after {
+  display: none !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .notification-web-push,
+  .reviews-dashboard-list-panel,
+  .support-list-panel,
+  .support-chat-panel,
+  .support-ideas-panel,
+  .admin-modern-shell .admin-content-panel,
+  .admin-modern-shell .admin-activity-column,
+  .admin-modern-shell .summary-strip-item
+) {
+  border: 1px solid #e6edef !important;
+  border-radius: 1rem !important;
+  background: #ffffff !important;
+  box-shadow: 0 7px 20px rgba(35, 55, 62, 0.045) !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .admin-section-nav {
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0.35rem;
+  border: 1px solid #e6edef;
+  border-radius: 0.9rem;
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(35, 55, 62, 0.035);
+}
+
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .admin-section-tab {
+  min-height: 2.7rem;
+  border-radius: 0.6rem;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .admin-content-panel {
+  margin-top: 1rem;
+  padding: 1.2rem !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .summary-strip,
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .admin-activity-grid {
+  gap: 0.75rem;
+  border: 0;
+  background: transparent;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .summary-strip-item,
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .admin-activity-column {
+  min-height: 0;
+  padding: 1rem;
+}
+
+@media (max-width: 860px) {
+  .dashboard-reference-layout.aqua-panel-theme :is(
+    .page-intro-main,
+    .budget-modern-topbar,
+    .agenda-modern-hero,
+    .client-intake-topbar,
+    .reviews-dashboard-hero,
+    .subscription-v3-hero,
+    .installer-app-page-header,
+    .admin-modern-hero
+  ) {
+    padding: 1rem !important;
+    border-radius: 0.9rem !important;
+  }
+
+  .dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .admin-content-panel {
+    padding: 1rem !important;
   }
 }
