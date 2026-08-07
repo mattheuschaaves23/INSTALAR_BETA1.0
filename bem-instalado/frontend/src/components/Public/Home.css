@@ -2247,15 +2247,30 @@
 
 .client-app-search-submit,
 .client-app-primary-link {
-  background: linear-gradient(135deg, var(--site-accent-strong), var(--site-accent));
-  color: #120d07;
-  box-shadow: 0 18px 32px rgba(var(--site-accent-rgb), 0.22);
+  border-color: rgba(var(--site-accent-deep-rgb), 0.9);
+  background: linear-gradient(135deg, var(--site-accent-deep), var(--site-accent));
+  color: var(--site-accent-contrast);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  box-shadow: 0 14px 28px rgba(var(--site-accent-rgb), 0.3);
 }
 
 .client-app-search-submit:hover,
-.client-app-primary-link:hover,
+.client-app-primary-link:hover {
+  border-color: var(--site-accent-deep);
+  box-shadow: 0 18px 34px rgba(var(--site-accent-rgb), 0.38);
+  filter: saturate(1.08) brightness(0.98);
+  transform: translateY(-1px);
+}
+
 .client-app-ghost-button:hover {
   transform: translateY(-1px);
+}
+
+.client-app-search-submit:focus-visible,
+.client-app-primary-link:focus-visible {
+  outline: 3px solid rgba(var(--site-accent-rgb), 0.42);
+  outline-offset: 3px;
 }
 
 .client-app-ghost-button {

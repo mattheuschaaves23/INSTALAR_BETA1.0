@@ -84,7 +84,16 @@ export default function MarketplaceProposal({ requestId, requestStatus, onUpdate
   };
 
   if (!expanded) {
-    return <button className="ghost-button" disabled={loading} onClick={load} type="button">{loading ? 'Abrindo...' : requestStatus === 'selected' ? 'Enviar proposta' : 'Ver proposta e serviço'}</button>;
+    return (
+      <button
+        className={requestStatus === 'selected' ? 'gold-button' : 'ghost-button'}
+        disabled={loading}
+        onClick={load}
+        type="button"
+      >
+        {loading ? 'Abrindo...' : requestStatus === 'selected' ? 'Enviar proposta' : 'Ver proposta e serviço'}
+      </button>
+    );
   }
 
   const editable = !proposal || ['sent', 'change_requested', 'rejected', 'canceled'].includes(proposal.status);
