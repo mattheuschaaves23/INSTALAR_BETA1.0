@@ -28861,3 +28861,399 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
     border-radius: 1rem;
   }
 }
+
+/* Linguagem visual aqua: padrão para cada rota do painel do instalador. */
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme {
+  --site-bg: #f6f8f9;
+  --site-accent: #3197aa;
+  --site-accent-rgb: 49, 151, 170;
+  --site-accent-strong: #55b5c4;
+  --site-accent-deep: #217c8d;
+  --site-accent-soft: #e8f7f9;
+  --ref-gold: #3197aa;
+  --ref-gold-strong: #217c8d;
+  --route-line-gold: rgba(49, 151, 170, 0.42);
+  --panel-gold: #3197aa;
+  --panel-gold-strong: #217c8d;
+  --panel-gold-soft: #e8f7f9;
+  --panel-ink: #25333c;
+  --panel-muted: #66757d;
+  --dashboard-aqua: #3197aa;
+  --dashboard-aqua-deep: #217c8d;
+  --dashboard-aqua-soft: #e8f7f9;
+  --dashboard-aqua-line: #b9e1e7;
+  --dashboard-aqua-ink: #25333c;
+  --dashboard-aqua-muted: #66757d;
+  background: #f6f8f9 !important;
+  color: #25333c;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .ref-panel-shell,
+  .ref-panel-main,
+  .panel-flat-language,
+  .panel-flat-language .page-shell,
+  .panel-flat-language .agenda-modern-shell,
+  .panel-flat-language .client-intake-shell,
+  .panel-flat-language .opportunities-page,
+  .panel-flat-language .reviews-dashboard-shell,
+  .panel-flat-language .settings-page,
+  .budget-modern-shell,
+  .dashboard-neo-shell
+) {
+  background: #f6f8f9 !important;
+  color: #25333c;
+}
+
+/* Navegação, cabeçalho e controles compartilhados. */
+.dashboard-reference-layout.aqua-panel-theme .ref-panel-sidebar {
+  border-right-color: #e7edef;
+  background: #ffffff !important;
+  box-shadow: 10px 0 26px rgba(35, 55, 62, 0.035);
+}
+
+.dashboard-reference-layout.aqua-panel-theme .ref-panel-brand {
+  border-color: #edf1f2;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .ref-panel-brand button,
+  .ref-panel-nav-link,
+  .ref-panel-logout
+) {
+  color: #607078;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .ref-panel-user {
+  border-color: #e8eef0;
+  background: #fbfcfc;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .ref-panel-user strong,
+  .ref-panel-account strong
+) {
+  color: #25333c;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .ref-panel-user small,
+  .ref-panel-nav-block p
+) {
+  color: #8a989f;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .ref-panel-user .ref-panel-avatar::after {
+  border-color: #ffffff;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .ref-panel-nav-link:hover,
+  .ref-panel-logout:hover
+) {
+  color: #217c8d;
+  background: #f0fafb;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .ref-panel-nav-link.is-active {
+  color: #217c8d;
+  background: linear-gradient(90deg, #e3f6f8, #f3fbfc);
+}
+
+.dashboard-reference-layout.aqua-panel-theme .ref-panel-nav-link.is-active::before {
+  background: #3197aa;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .ref-panel-nav-link em {
+  background: #3197aa;
+  color: #ffffff;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .ref-panel-topbar,
+  .ref-panel-mobile-header,
+  .ref-panel-bottom-nav
+) {
+  border-color: #e8edef;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .ref-panel-search,
+  .ref-panel-date,
+  .ref-panel-bell,
+  .ref-panel-account
+) {
+  border-color: #e4ecee;
+  background: #ffffff;
+  color: #607078;
+}
+
+/* Títulos, cartões, campos e ações reutilizados nas rotas. */
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .eyebrow,
+  .agenda-modern-eyebrow,
+  .agenda-modern-section-label,
+  .client-intake-kicker,
+  .budget-modern-section-label,
+  .dashboard-neo-kicker,
+  .subscription-v3-kicker,
+  .installer-app-download-kicker
+) {
+  color: #217c8d !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .page-title,
+  .metric-value,
+  .agenda-modern-hero h1,
+  .budget-modern-topbar-copy h1,
+  .client-intake-form-head h2,
+  .reviews-dashboard-hero h1,
+  .subscription-hero h1,
+  .subscription-v3-hero h1,
+  .installer-app-page-header h1,
+  .installer-app-download-copy h2
+) {
+  color: #25333c !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .lux-panel,
+  .lux-panel-soft,
+  .list-surface,
+  .notification-surface,
+  .agenda-modern-hero,
+  .agenda-modern-calendar-card,
+  .agenda-modern-day-panel,
+  .agenda-modern-summary-card,
+  .client-intake-form-shell,
+  .client-intake-side-card,
+  .client-intake-mobile-list,
+  .opportunity-row,
+  .marketplace-proposal,
+  .budget-modern-calculator-card,
+  .budget-modern-summary-panel,
+  .reviews-dashboard-hero,
+  .reviews-dashboard-metric,
+  .reviews-dashboard-panel,
+  .subscription-hero,
+  .subscription-card,
+  .settings-panel,
+  .support-shell,
+  .support-message,
+  .installer-app-download,
+  .subscription-v3-hero,
+  .subscription-v3-current,
+  .subscription-v3-plan,
+  .subscription-v3-usage,
+  .subscription-v3-pro-active,
+  .subscription-v3-pending,
+  .installer-app-page-header,
+  .installer-app-download--page,
+  .installer-app-page-notes article
+) {
+  border-color: #e6edef !important;
+  background: #ffffff !important;
+  box-shadow: 0 7px 20px rgba(35, 55, 62, 0.045) !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .field-input,
+  .field-select,
+  .field-textarea,
+  .budget-modern-field input,
+  .budget-modern-field select,
+  .budget-modern-field textarea,
+  .client-intake-field input,
+  .client-intake-field select,
+  .client-intake-field textarea
+) {
+  border-color: #dce7e9;
+  background: #ffffff;
+  color: #25333c;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .field-input,
+  .field-select,
+  .field-textarea,
+  .budget-modern-field input,
+  .budget-modern-field select,
+  .budget-modern-field textarea,
+  .client-intake-field input,
+  .client-intake-field select,
+  .client-intake-field textarea
+):focus {
+  border-color: #3197aa;
+  box-shadow: 0 0 0 3px rgba(49, 151, 170, 0.12);
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .gold-button,
+  .budget-modern-primary-cta,
+  .budget-modern-save-button,
+  .agenda-modern-primary-button,
+  .client-intake-primary,
+  .dashboard-neo-primary,
+  .subscription-v3-primary,
+  .installer-app-download-button,
+  .client-intake-save
+) {
+  border-color: #217c8d !important;
+  background: #3197aa !important;
+  color: #ffffff !important;
+  box-shadow: 0 7px 16px rgba(49, 151, 170, 0.16) !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .gold-button:hover,
+  .budget-modern-primary-cta:hover,
+  .budget-modern-save-button:hover,
+  .agenda-modern-primary-button:hover,
+  .client-intake-primary:hover,
+  .dashboard-neo-primary:hover,
+  .subscription-v3-primary:hover,
+  .installer-app-download-button:hover,
+  .client-intake-save:hover
+) {
+  border-color: #176b7a !important;
+  background: #217c8d !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .agenda-modern-day[data-selected='true'],
+  .budget-modern-total-box,
+  .reviews-dashboard-score-card,
+  .subscription-v3-current,
+  .support-conversation-item-active,
+  .support-message-admin
+) {
+  border-color: #b9e1e7 !important;
+  background: #effbfc !important;
+  color: #25333c !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .agenda-modern-day-marker,
+  .agenda-modern-legend .has-events,
+  .subscription-v3-usage-track span
+) {
+  background: #3197aa !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .agenda-modern-day[data-selected='true'] .agenda-modern-day-number,
+  .budget-modern-total-box strong,
+  .reviews-dashboard-score-card strong,
+  .subscription-v3-current :is(span, strong, small)
+) {
+  color: #217c8d !important;
+}
+
+/* Ícones e estados de seleção: a mesma cor, sem blocos pesados. */
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .dashboard-neo-card-top > span,
+  .dashboard-neo-metric-icon,
+  .dashboard-neo-icon,
+  .opportunity-icon,
+  .budget-modern-step-bubble,
+  .budget-modern-head-icon,
+  .reviews-list-avatar,
+  .reviews-dashboard-metric > span
+) {
+  border-color: #d5eff2 !important;
+  background: #eaf8fa !important;
+  color: #3197aa !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .opportunity-filter-tabs button.is-active,
+  .budget-modern-mode-switch button.is-active,
+  .budget-modern-client-choice-button.is-active,
+  .reviews-filter-tabs button.is-active,
+  .settings-segment button.is-selected,
+  .settings-segment button.is-active
+) {
+  border-color: #b9e1e7 !important;
+  background: #e8f7f9 !important;
+  color: #217c8d !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .settings-segment button.is-active {
+  background: #3197aa !important;
+  color: #ffffff !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .budget-modern-stepper,
+  .budget-modern-section,
+  .budget-modern-environment,
+  .budget-modern-payment-box,
+  .budget-modern-client-box,
+  .settings-live-preview,
+  .settings-control-block,
+  .settings-save-state,
+  .settings-shortcuts a,
+  .support-message-list,
+  .support-conversation-list,
+  .subscription-v3-usage-item,
+  .subscription-v3-payment-methods,
+  .subscription-v3-pending-body
+) {
+  border-color: #e5edef !important;
+  background: #f9fbfb !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme :is(
+  .subscription-v3-kicker,
+  .installer-app-download-kicker,
+  .subscription-v3-current-badge,
+  .subscription-v3-pro-badge
+) {
+  border-color: #b9e1e7 !important;
+  background: #e8f7f9 !important;
+  color: #217c8d !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .subscription-v3-plan.is-current {
+  border-color: #8cced8 !important;
+  box-shadow: 0 12px 28px rgba(49, 151, 170, 0.12) !important;
+}
+
+/* Área administrativa e gestão de propagandas seguem a mesma superfície. */
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-hero,
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .lux-panel,
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-empty,
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .admin-activity-column,
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .summary-strip-item,
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .admin-content-panel {
+  border-color: #e6edef !important;
+  background: #ffffff !important;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .admin-section-tab.is-active {
+  border-color: #3197aa;
+  background: linear-gradient(180deg, transparent 10%, rgba(49, 151, 170, 0.1));
+  color: #217c8d;
+}
+
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .admin-section-tab:hover,
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .list-row:hover {
+  background: rgba(49, 151, 170, 0.055);
+}
+
+.dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .admin-form-surface {
+  border-left-color: #3197aa;
+  background: linear-gradient(90deg, rgba(49, 151, 170, 0.07), transparent 85%);
+}
+
+.dashboard-reference-layout.aqua-panel-theme .admin-row-actions > summary::after {
+  color: #3197aa;
+}
+
+@media (max-width: 860px) {
+  .dashboard-reference-layout.aqua-panel-theme .ref-panel-mobile-drawer {
+    background: #ffffff;
+  }
+}

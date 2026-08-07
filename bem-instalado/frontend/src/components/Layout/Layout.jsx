@@ -34,7 +34,7 @@ export default function Layout() {
 
   if (isInstallerPanelRoute) {
     return (
-      <div className="app-layout dashboard-reference-layout installer-workspace">
+      <div className="app-layout dashboard-reference-layout installer-workspace aqua-panel-theme">
         <InstallerPanelShell>
           <EmailVerificationNotice />
           <Outlet />
