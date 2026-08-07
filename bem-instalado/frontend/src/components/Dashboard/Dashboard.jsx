@@ -714,7 +714,6 @@ export default function Dashboard() {
 
   const { metrics, ranking } = data;
   const firstName = user?.name?.split(' ')[0] || 'Instalador';
-  const periodRangeLabel = `01/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()} - ${String(endOfMonth(today).getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
   const clientsWithEmail = clients.filter((client) => Boolean(client.email)).length;
   const budgetsThisMonth = useMemo(() => {
     const monthStart = startOfMonth(today);
@@ -1294,35 +1293,6 @@ export default function Dashboard() {
 
   return (
     <section className="dashboard-neo-shell">
-      <div className="dashboard-neo-toolbar fade-up">
-        <label className="dashboard-neo-search">
-          <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" viewBox="0 0 24 24" width="20">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m20 20-3.5-3.5" />
-          </svg>
-          <input
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Buscar no sistema..."
-            type="text"
-            value={search}
-          />
-        </label>
-
-        <div className="dashboard-neo-toolbar-actions">
-          <div className="dashboard-neo-range">
-            <svg aria-hidden="true" fill="none" height="18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" viewBox="0 0 24 24" width="18">
-              <rect height="15" rx="2" width="18" x="3" y="5" />
-              <path d="M8 3v4M16 3v4M3 10h18" />
-            </svg>
-            <span>{periodRangeLabel}</span>
-          </div>
-
-          <Link className="dashboard-neo-primary" to="/budgets/new">
-            Novo orçamento
-          </Link>
-        </div>
-      </div>
-
       <div className="dashboard-neo-frame fade-up" style={{ animationDelay: '0.06s' }}>
         <div className="dashboard-neo-heading">
           <div>
@@ -1332,24 +1302,6 @@ export default function Dashboard() {
               Bem-vindo de volta, {firstName}. Acompanhe receita, propostas, clientes e agenda
               em uma leitura mais clara e organizada.
             </p>
-            <div className="dashboard-neo-mobile-range">
-              <div className="dashboard-neo-range dashboard-neo-range--mobile">
-                <svg aria-hidden="true" fill="none" height="18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" viewBox="0 0 24 24" width="18">
-                  <rect height="15" rx="2" width="18" x="3" y="5" />
-                  <path d="M8 3v4M16 3v4M3 10h18" />
-                </svg>
-                <span>{periodRangeLabel}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="dashboard-neo-heading-actions">
-            <Link className="dashboard-neo-ghost" to="/agenda">
-              Ver agenda
-            </Link>
-            <Link className="dashboard-neo-ghost" to="/clients">
-              Ver clientes
-            </Link>
           </div>
         </div>
 
