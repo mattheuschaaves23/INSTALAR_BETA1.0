@@ -15,7 +15,7 @@ const densityOptions = [
 
 const themeOptions = [
   { value: 'light', label: 'Branco', detail: 'Tema principal' },
-  { value: 'dark', label: 'Preto', detail: 'Tema secundário' },
+  { value: 'dark', label: 'Preto', detail: 'Versão escura' },
 ];
 
 const motionOptions = [

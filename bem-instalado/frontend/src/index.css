@@ -29623,3 +29623,341 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
   outline: 3px solid rgba(49, 151, 170, 0.42);
   outline-offset: 3px;
 }
+
+/* Versão escura do painel: mantém o mesmo sistema aqua, com superfícies em grafite. */
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme {
+  --site-bg: #080d0f;
+  --site-bg-rgb: 8, 13, 15;
+  --site-panel: #121a1d;
+  --site-panel-soft: #172126;
+  --site-panel-elevated: #1c292e;
+  --site-panel-rgb: 18, 26, 29;
+  --site-panel-soft-rgb: 23, 33, 38;
+  --site-panel-elevated-rgb: 28, 41, 46;
+  --bg: #080d0f;
+  --bg-soft: #10181b;
+  --surface: rgba(18, 26, 29, 0.96);
+  --surface-strong: #172126;
+  --surface-soft: #10181b;
+  --site-accent: #3197aa;
+  --site-accent-rgb: 49, 151, 170;
+  --site-accent-strong: #72cfdb;
+  --site-accent-strong-rgb: 114, 207, 219;
+  --site-accent-deep: #1d7484;
+  --site-accent-deep-rgb: 29, 116, 132;
+  --site-accent-contrast: #ffffff;
+  --site-accent-soft: #102d34;
+  --site-accent-line: rgba(114, 207, 219, 0.44);
+  --site-accent-line-strong: rgba(114, 207, 219, 0.68);
+  --gold: #5dc2d0;
+  --gold-strong: #8be0e9;
+  --gold-soft: #102d34;
+  --ref-gold: #5dc2d0;
+  --ref-gold-strong: #8be0e9;
+  --ref-text: #edf6f7;
+  --ref-muted: #9cafb4;
+  --ref-line: #2a3b41;
+  --route-panel: #121a1d;
+  --route-panel-soft: #172126;
+  --route-line: #2a3b41;
+  --route-line-gold: rgba(114, 207, 219, 0.35);
+  --route-muted: #9cafb4;
+  --panel-gold: #5dc2d0;
+  --panel-gold-strong: #8be0e9;
+  --panel-gold-soft: #102d34;
+  --panel-canvas: #080d0f;
+  --panel-surface: #121a1d;
+  --panel-surface-soft: #172126;
+  --panel-surface-muted: #1c292e;
+  --panel-border: #2a3b41;
+  --panel-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+  --panel-ink: #edf6f7;
+  --panel-muted: #9cafb4;
+  --dashboard-aqua: #5dc2d0;
+  --dashboard-aqua-deep: #8be0e9;
+  --dashboard-aqua-soft: #102d34;
+  --dashboard-aqua-line: #2d5861;
+  --dashboard-aqua-ink: #edf6f7;
+  --dashboard-aqua-muted: #9cafb4;
+  --line: #2a3b41;
+  --text: #edf6f7;
+  --muted: #9cafb4;
+  background: #080d0f !important;
+  color: #edf6f7;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .ref-panel-shell,
+  .ref-panel-main,
+  .ref-panel-content,
+  .ref-panel-route-content,
+  .page-shell,
+  .agenda-modern-shell,
+  .budget-modern-shell,
+  .client-intake-shell,
+  .opportunities-page,
+  .reviews-dashboard-shell,
+  .installer-app-page,
+  .admin-modern-shell
+) {
+  background: #080d0f !important;
+  color: #edf6f7;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .ref-panel-sidebar,
+  .ref-panel-mobile-drawer
+) {
+  border-color: #2a3b41 !important;
+  background: #0d1518 !important;
+  box-shadow: 14px 0 38px rgba(0, 0, 0, 0.28);
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .ref-panel-topbar,
+  .ref-panel-mobile-header,
+  .ref-panel-bottom-nav
+) {
+  border-color: #2a3b41 !important;
+  background: rgba(13, 21, 24, 0.96) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .ref-panel-search,
+  .ref-panel-date,
+  .ref-panel-bell,
+  .ref-panel-account
+) {
+  border-color: #2a3b41 !important;
+  background: #121a1d !important;
+  color: #c1d1d5 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .ref-panel-user strong,
+  .ref-panel-account strong,
+  .page-title,
+  .metric-value,
+  .agenda-modern-hero h1,
+  .budget-modern-topbar-copy h1,
+  .client-intake-form-head h2,
+  .reviews-dashboard-hero h1,
+  .subscription-hero h1,
+  .subscription-v3-hero h1,
+  .installer-app-page-header h1,
+  .installer-app-download-copy h2
+) {
+  color: #edf6f7 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .ref-panel-user small,
+  .ref-panel-nav-block p,
+  .page-copy,
+  .budget-modern-topbar-copy p,
+  .agenda-modern-day-copy,
+  .subscription-v3-hero-copy > p
+) {
+  color: #9cafb4 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .ref-panel-nav-link:hover,
+  .ref-panel-logout:hover
+) {
+  color: #8be0e9 !important;
+  background: #13282d !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .ref-panel-nav-link.is-active {
+  color: #8be0e9 !important;
+  background: linear-gradient(90deg, #123139, #102126) !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .lux-panel,
+  .lux-panel-soft,
+  .list-surface,
+  .notification-surface,
+  .agenda-modern-hero,
+  .agenda-modern-calendar-card,
+  .agenda-modern-day-panel,
+  .agenda-modern-summary-card,
+  .client-intake-form-shell,
+  .client-intake-side-card,
+  .client-intake-mobile-list,
+  .opportunity-row,
+  .marketplace-proposal,
+  .budget-modern-calculator-card,
+  .budget-modern-summary-panel,
+  .reviews-dashboard-hero,
+  .reviews-dashboard-metric,
+  .reviews-dashboard-panel,
+  .subscription-hero,
+  .subscription-card,
+  .settings-panel,
+  .support-shell,
+  .support-message,
+  .installer-app-download,
+  .subscription-v3-hero,
+  .subscription-v3-current,
+  .subscription-v3-plan,
+  .subscription-v3-usage,
+  .subscription-v3-pro-active,
+  .subscription-v3-pending,
+  .installer-app-page-header,
+  .installer-app-download--page,
+  .installer-app-page-notes article,
+  .notification-web-push,
+  .reviews-dashboard-list-panel,
+  .support-list-panel,
+  .support-chat-panel,
+  .support-ideas-panel,
+  .admin-modern-shell .admin-content-panel,
+  .admin-modern-shell .admin-activity-column,
+  .admin-modern-shell .summary-strip-item
+) {
+  border-color: #2a3b41 !important;
+  background: #121a1d !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22) !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .field-input,
+  .field-select,
+  .field-textarea,
+  .budget-modern-field input,
+  .budget-modern-field select,
+  .budget-modern-field textarea,
+  .client-intake-field input,
+  .client-intake-field select,
+  .client-intake-field textarea
+) {
+  border-color: #34484e !important;
+  background: #0d1518 !important;
+  color: #edf6f7 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .budget-modern-stepper,
+  .budget-modern-section,
+  .budget-modern-environment,
+  .budget-modern-payment-box,
+  .budget-modern-client-box,
+  .settings-live-preview,
+  .settings-control-block,
+  .settings-save-state,
+  .settings-shortcuts a,
+  .support-message-list,
+  .support-conversation-list,
+  .subscription-v3-usage-item,
+  .subscription-v3-payment-methods,
+  .subscription-v3-pending-body
+) {
+  border-color: #2a3b41 !important;
+  background: #10181b !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .agenda-modern-day[data-selected='true'],
+  .budget-modern-total-box,
+  .reviews-dashboard-score-card,
+  .support-conversation-item-active,
+  .support-message-admin
+) {
+  border-color: #2c6570 !important;
+  background: #102b31 !important;
+  color: #edf6f7 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .dashboard-neo-card-top > span,
+  .dashboard-neo-metric-icon,
+  .dashboard-neo-icon,
+  .opportunity-icon,
+  .budget-modern-step-bubble,
+  .budget-modern-head-icon,
+  .reviews-list-avatar,
+  .reviews-dashboard-metric > span
+) {
+  border-color: #2c5660 !important;
+  background: #13282d !important;
+  color: #8be0e9 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .opportunity-filter-tabs button.is-active,
+  .budget-modern-mode-switch button.is-active,
+  .budget-modern-client-choice-button.is-active,
+  .reviews-filter-tabs button.is-active,
+  .settings-segment button.is-selected
+) {
+  border-color: #2c6570 !important;
+  background: #123139 !important;
+  color: #8be0e9 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .settings-segment button.is-active {
+  border-color: #55bdcb !important;
+  background: linear-gradient(135deg, #176b7a, #3197aa) !important;
+  color: #ffffff !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .subscription-v3-kicker,
+  .installer-app-download-kicker,
+  .subscription-v3-current-badge,
+  .subscription-v3-pro-badge
+) {
+  border-color: #2c6570 !important;
+  background: #102b31 !important;
+  color: #8be0e9 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
+  .admin-modern-hero,
+  .admin-modern-shell .lux-panel,
+  .admin-modern-empty,
+  .admin-modern-shell .admin-activity-column,
+  .admin-modern-shell .summary-strip-item,
+  .admin-modern-shell .admin-content-panel,
+  .admin-modern-shell .admin-section-nav
+) {
+  border-color: #2a3b41 !important;
+  background: #121a1d !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .admin-modern-shell .admin-section-tab.is-active {
+  border-color: #2c6570 !important;
+  background: #123139 !important;
+  color: #8be0e9 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .email-verification-notice {
+  border-color: #2c6570 !important;
+  background: #10262c !important;
+  color: #d7e8eb !important;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2) !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .email-verification-notice strong {
+  color: #8be0e9 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .email-verification-notice .ghost-button {
+  border-color: #2c6570 !important;
+  background: #172126 !important;
+  color: #8be0e9 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .agenda-modern-legend .today-day {
+  border-color: #2c6570 !important;
+  background: #102b31 !important;
+}
+
+@media (max-width: 860px) {
+  html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme .ref-panel-mobile-drawer {
+    background: #0d1518 !important;
+  }
+}
