@@ -224,7 +224,7 @@ export default function InstallerPanelShell({ children }) {
   };
 
   return (
-    <section className={`ref-panel-shell ref-panel-route-shell ${sidebarCollapsed ? 'is-collapsed' : ''}`}>
+    <section className={`ref-panel-shell ref-panel-route-shell ${sidebarCollapsed ? 'is-collapsed' : ''} ${location.pathname === '/dashboard' ? 'is-dashboard-aqua' : ''}`.trim()}>
       <aside className="ref-panel-sidebar" aria-label="Navegação do painel">
         <SidebarContent
           allowCollapse

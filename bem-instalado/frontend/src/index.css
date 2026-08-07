@@ -28632,3 +28632,232 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
     display: none;
   }
 }
+
+/* Dashboard: acabamento claro, discreto e azul-turquesa. */
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua {
+  --dashboard-aqua: #3197aa;
+  --dashboard-aqua-deep: #217c8d;
+  --dashboard-aqua-soft: #e8f7f9;
+  --dashboard-aqua-line: #b9e1e7;
+  --dashboard-aqua-ink: #25333c;
+  --dashboard-aqua-muted: #66757d;
+  background: #f6f8f9 !important;
+}
+
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-sidebar {
+  border-right-color: #e8edef;
+  background: #ffffff !important;
+  box-shadow: 10px 0 26px rgba(35, 55, 62, 0.035);
+}
+
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-brand {
+  border-color: #edf1f2;
+}
+
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-brand button,
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-nav-link,
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-logout {
+  color: #607078;
+}
+
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-user {
+  border-color: #e8eef0;
+  background: #fbfcfc;
+}
+
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-user strong,
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-account strong {
+  color: var(--dashboard-aqua-ink);
+}
+
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-user small,
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-nav-block p {
+  color: #8a989f;
+}
+
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-user .ref-panel-avatar::after {
+  border-color: #ffffff;
+}
+
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-nav-link:hover,
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-logout:hover {
+  color: var(--dashboard-aqua-deep);
+  background: #f0fafb;
+}
+
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-nav-link.is-active {
+  color: var(--dashboard-aqua-deep);
+  background: linear-gradient(90deg, #e3f6f8, #f3fbfc);
+}
+
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-nav-link.is-active::before {
+  background: var(--dashboard-aqua);
+}
+
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-nav-link em {
+  background: var(--dashboard-aqua);
+  color: #ffffff;
+}
+
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-main {
+  background: #f6f8f9 !important;
+}
+
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-topbar,
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-mobile-header,
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-bottom-nav {
+  border-color: #e8edef;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua :is(
+  .ref-panel-search,
+  .ref-panel-date,
+  .ref-panel-bell,
+  .ref-panel-account
+) {
+  border-color: #e4ecee;
+  background: #ffffff;
+  color: #607078;
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme {
+  --site-accent: var(--dashboard-aqua);
+  --site-accent-rgb: 49, 151, 170;
+  --site-accent-strong: #55b5c4;
+  --site-accent-deep: var(--dashboard-aqua-deep);
+  --site-accent-soft: var(--dashboard-aqua-soft);
+  background: #f6f8f9 !important;
+  color: var(--dashboard-aqua-ink);
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-frame {
+  border-color: #e9eff0;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(35, 55, 62, 0.055);
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-heading h1,
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-card h2,
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-panel :is(h2, h3) {
+  color: var(--dashboard-aqua-ink);
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-kicker,
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-card-label,
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-mini-title {
+  color: var(--dashboard-aqua);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-heading > div > p:not(.dashboard-neo-kicker),
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-card-foot,
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-panel-head p {
+  color: var(--dashboard-aqua-muted);
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-card,
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-panel {
+  border-color: #e8eff1;
+  border-radius: 1rem;
+  box-shadow: 0 4px 14px rgba(35, 55, 62, 0.045);
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-card {
+  min-height: 8rem;
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-card-top > span,
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-metric-icon,
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-icon {
+  border: 1px solid #d5eff2;
+  border-radius: 50%;
+  background: #eaf8fa;
+  color: var(--dashboard-aqua);
+  box-shadow: none;
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-card-top > span,
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-metric-icon {
+  border-radius: 0.7rem;
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .plan-usage,
+.dashboard-reference-layout .dashboard-aqua-theme .pro-feature-notice {
+  border-color: #e6edef !important;
+  background: #fbfcfc !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .plan-usage-label,
+.dashboard-reference-layout .dashboard-aqua-theme .pro-feature-notice .eyebrow {
+  color: var(--dashboard-aqua-deep) !important;
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .plan-usage-track {
+  background: #e7f1f3 !important;
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .plan-usage-progress {
+  background: linear-gradient(90deg, var(--dashboard-aqua), #6bc4d0) !important;
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-chart-gridline {
+  stroke: #e3ecee;
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-chart-line,
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-chart-point {
+  stroke: var(--dashboard-aqua);
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-chart-area {
+  fill: rgba(49, 151, 170, 0.13);
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-view-tab.is-active,
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-primary {
+  border-color: var(--dashboard-aqua-deep);
+  background: var(--dashboard-aqua);
+  color: #ffffff;
+  box-shadow: 0 7px 16px rgba(49, 151, 170, 0.16);
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-sponsor {
+  border-color: #dcecef;
+  background: #fbfefe;
+  box-shadow: 0 4px 14px rgba(35, 55, 62, 0.045);
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-sponsor:hover {
+  border-color: var(--dashboard-aqua-line);
+  box-shadow: 0 10px 22px rgba(35, 55, 62, 0.09);
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-sponsor-label,
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-sponsor-cta {
+  color: var(--dashboard-aqua-deep);
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-sponsor-brand {
+  border-color: #d5eff2;
+  background: #eaf8fa;
+  color: var(--dashboard-aqua);
+}
+
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-sponsor.has-media .dashboard-neo-sponsor-label,
+.dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-sponsor.has-media .dashboard-neo-sponsor-cta {
+  color: #b9f0f5;
+}
+
+@media (max-width: 860px) {
+  .dashboard-reference-layout .ref-panel-shell.is-dashboard-aqua .ref-panel-mobile-drawer {
+    background: #ffffff;
+  }
+
+  .dashboard-reference-layout .dashboard-aqua-theme .dashboard-neo-frame {
+    border-radius: 1rem;
+  }
+}

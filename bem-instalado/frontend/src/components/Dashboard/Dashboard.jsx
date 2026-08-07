@@ -1354,7 +1354,7 @@ export default function Dashboard() {
   }
 
   return (
-    <section className="dashboard-neo-shell">
+    <section className="dashboard-neo-shell dashboard-aqua-theme">
       <div className="dashboard-neo-frame fade-up" style={{ animationDelay: '0.06s' }}>
         <div className="dashboard-neo-heading">
           <div>
