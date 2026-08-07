@@ -4,8 +4,7 @@ export const SITE_PREFERENCES_EVENT = 'site-preferences:changed';
 
 const STORAGE_KEY = 'instalar-site-preferences';
 const THEME_PREFERENCE_VERSION = 2;
-const ACCENT_PREFERENCE_VERSION = 3;
-const LEGACY_DEFAULT_GOLDS = ['#e2b42d', '#a86600'];
+const ACCENT_PREFERENCE_VERSION = 4;
 
 export const DEFAULT_SITE_PREFERENCES = {
   accentColor: '#c48400',
@@ -15,15 +14,6 @@ export const DEFAULT_SITE_PREFERENCES = {
   density: 'comfortable',
   motion: 'smooth',
 };
-
-export const ACCENT_PRESETS = [
-  { name: 'Dourado', value: '#c48400' },
-  { name: 'Azul', value: '#3b82f6' },
-  { name: 'Verde', value: '#22c55e' },
-  { name: 'Rosa', value: '#ec4899' },
-  { name: 'Violeta', value: '#8b5cf6' },
-  { name: 'Ciano', value: '#06b6d4' },
-];
 
 function normalizeHexColor(value) {
   const input = String(value || '').trim();
@@ -114,14 +104,11 @@ function buildAccentTokens(accentColor, theme) {
 export function normalizeSitePreferences(value) {
   const source = value && typeof value === 'object' ? value : {};
   const hasCurrentThemeChoice = Number(source.themeVersion) >= THEME_PREFERENCE_VERSION;
-  const hasCurrentAccentChoice = Number(source.accentVersion) >= ACCENT_PREFERENCE_VERSION;
-  const normalizedAccent = normalizeHexColor(source.accentColor);
-  const accentColor = !hasCurrentAccentChoice && LEGACY_DEFAULT_GOLDS.includes(normalizedAccent)
-    ? DEFAULT_SITE_PREFERENCES.accentColor
-    : normalizedAccent;
 
   return {
-    accentColor,
+    // A escolha de cor foi removida do produto. Ignorar cores que ficaram
+    // salvas em versões antigas impede que o painel continue roxo ou rosa.
+    accentColor: DEFAULT_SITE_PREFERENCES.accentColor,
     accentVersion: ACCENT_PREFERENCE_VERSION,
     // Preferências salvas antes do novo tema claro não registravam uma escolha
     // consciente de tema. Elas migram para o novo padrão, sem impedir que a

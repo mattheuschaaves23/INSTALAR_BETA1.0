@@ -26,6 +26,20 @@ describe('preferências visuais', () => {
     });
   });
 
+  it('descarta uma cor antiga salva e mantém o padrão visual do produto', () => {
+    expect(
+      normalizeSitePreferences({
+        accentColor: '#8b5cf6',
+        accentVersion: 3,
+        theme: 'light',
+        themeVersion: 2,
+      })
+    ).toMatchObject({
+      accentColor: '#c48400',
+      theme: 'light',
+    });
+  });
+
   it('descarta valores de tema inválidos', () => {
     expect(normalizeSitePreferences({ theme: 'automatic' }).theme).toBe('light');
   });
