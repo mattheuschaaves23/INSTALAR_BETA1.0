@@ -1,19 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import toast from 'react-hot-toast';
 import PageIntro from '../Layout/PageIntro';
 import { useAuth } from '../../contexts/AuthContext';
 import { useConfirm } from '../../contexts/ConfirmContext';
 import api from '../../services/api';
-import {
-  ACCENT_PRESETS,
-  DEFAULT_SITE_PREFERENCES,
-  readSitePreferences,
-  resetSitePreferences,
-  saveSitePreferences,
-} from '../../utils/sitePreferences';
+import { readSitePreferences, resetSitePreferences, saveSitePreferences } from '../../utils/sitePreferences';
 import { useSubscription } from '../../contexts/SubscriptionContext';
-import { ProFeatureNotice } from '../Subscription/PlanUsage';
 
 const densityOptions = [
   { value: 'comfortable', label: 'Espaçosa', detail: 'Mais respiro' },
@@ -51,7 +44,6 @@ function SettingsIcon({ type }) {
   };
 
   const icons = {
-    palette: <><path d="M12 4a8 8 0 0 0 0 16h1.2a1.8 1.8 0 0 0 1.3-3.05 1.3 1.3 0 0 1 .9-2.25H17a3 3 0 0 0 3-3A7.7 7.7 0 0 0 12 4Z" /><circle cx="8.2" cy="11" r=".8" /><circle cx="10.5" cy="8" r=".8" /><circle cx="14" cy="8.2" r=".8" /></>,
     layout: <><rect x="4" y="5" width="16" height="14" rx="2" /><path d="M4 10h16M9 10v9" /></>,
     motion: <><path d="M4 16c4-8 8 8 12 0" /><path d="M16 8h4v4" /><path d="M20 8c-3.5 7-7-7-11 0" /></>,
     reset: <><path d="M20 12a8 8 0 1 1-2.4-5.7" /><path d="M20 4v5h-5" /></>,
@@ -64,7 +56,7 @@ function SettingsIcon({ type }) {
     trash: <><path d="M4.5 7h15" /><path d="M9 7V4.8h6V7" /><path d="m7 7 .7 12h8.6L17 7" /><path d="M10 10.5v5M14 10.5v5" /></>,
   };
 
-  return <svg {...sharedProps}>{icons[type] || icons.palette}</svg>;
+  return <svg {...sharedProps}>{icons[type] || icons.layout}</svg>;
 }
 
 function PreferenceSegment({ label, options, value, onChange }) {
@@ -98,18 +90,11 @@ export default function Settings() {
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [isExportingData, setIsExportingData] = useState(false);
 
-  const currentPreset = useMemo(
-    () => ACCENT_PRESETS.find((preset) => preset.value === preferences.accentColor),
-    [preferences.accentColor]
-  );
   const firstName = user?.name?.split(' ')[0] || 'usuário';
 
   const savePreference = (patch) => {
-    if (subscription && !isPro && (
-      (patch.accentColor && patch.accentColor !== DEFAULT_SITE_PREFERENCES.accentColor)
-      || patch.density === 'compact'
-    )) {
-      toast('Cores personalizadas e modo compacto estão disponíveis no plano Pro.');
+    if (subscription && !isPro && patch.density === 'compact') {
+      toast('O modo compacto está disponível no plano Pro.');
       return;
     }
 
@@ -128,13 +113,9 @@ export default function Settings() {
   };
 
   useEffect(() => {
-    if (!planLoading && subscription && !isPro && (
-      preferences.accentColor !== DEFAULT_SITE_PREFERENCES.accentColor
-      || preferences.density === 'compact'
-    )) {
+    if (!planLoading && subscription && !isPro && preferences.density === 'compact') {
       const nextPreferences = saveSitePreferences({
         ...preferences,
-        accentColor: DEFAULT_SITE_PREFERENCES.accentColor,
         density: 'comfortable',
       });
       setPreferences(nextPreferences);
@@ -199,11 +180,6 @@ export default function Settings() {
       detail: 'Tema deste dispositivo',
     },
     {
-      label: 'Cor secundária',
-      value: currentPreset?.name || preferences.accentColor.toUpperCase(),
-      detail: preferences.accentColor.toUpperCase(),
-    },
-    {
       label: 'Densidade',
       value: preferences.density === 'compact' ? 'Compacta' : 'Espaçosa',
       detail: 'Preferência da interface',
@@ -231,58 +207,6 @@ export default function Settings() {
       />
 
       <section className="settings-layout">
-        <article className="settings-panel settings-panel--accent">
-          <div className="settings-section-head">
-            <span><SettingsIcon type="palette" /></span>
-            <div>
-              <p>Aparência</p>
-              <h2>Cor secundária</h2>
-            </div>
-          </div>
-
-          <div className="settings-color-row" aria-label="Cores prontas">
-            {ACCENT_PRESETS.map((preset) => (
-              <button
-                aria-label={`Usar cor ${preset.name}`}
-                className={preferences.accentColor === preset.value ? 'is-selected' : ''}
-                key={preset.value}
-                onClick={() => savePreference({ accentColor: preset.value })}
-                disabled={!isPro && preset.value !== DEFAULT_SITE_PREFERENCES.accentColor}
-                style={{ '--swatch-color': preset.value }}
-                type="button"
-              >
-                <span />
-                <strong>{preset.name}</strong>
-              </button>
-            ))}
-          </div>
-
-          <label className="settings-color-picker">
-            <span>Cor personalizada</span>
-            <input
-              aria-label="Escolher cor personalizada"
-              onChange={(event) => savePreference({ accentColor: event.target.value })}
-              disabled={!isPro}
-              type="color"
-              value={preferences.accentColor}
-            />
-          </label>
-          {!isPro ? (
-            <ProFeatureNotice className="mt-4" title="Personalização Pro">
-              No plano Grátis, o dourado padrão mantém a identidade do InstalaPro. O Pro libera todas as cores.
-            </ProFeatureNotice>
-          ) : null}
-
-          <div className="settings-live-preview">
-            <div>
-              <span className="settings-preview-dot" />
-              <p>Painel InstalaPro</p>
-              <strong>Fundo {preferences.theme === 'light' ? 'branco' : 'preto'}, destaque na sua cor</strong>
-            </div>
-            <button type="button">Botão principal</button>
-          </div>
-        </article>
-
         <article className="settings-panel">
           <div className="settings-section-head">
             <span><SettingsIcon type="layout" /></span>
