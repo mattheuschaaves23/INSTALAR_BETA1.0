@@ -597,6 +597,7 @@ export default function Dashboard() {
   });
   const [budgets, setBudgets] = useState([]);
   const [clients, setClients] = useState([]);
+  const [sponsoredStores, setSponsoredStores] = useState([]);
   const [search, setSearch] = useState('');
   const [chartView, setChartView] = useState('monthly');
   const [chartDate, setChartDate] = useState(() => new Date());
@@ -676,6 +677,27 @@ export default function Dashboard() {
       document.removeEventListener('visibilitychange', refreshWhenVisible);
     };
   }, [loadDashboardData]);
+
+  useEffect(() => {
+    let active = true;
+
+    api.get('/public/recommended-stores')
+      .then((response) => {
+        if (!active) return;
+
+        const stores = Array.isArray(response.data?.stores)
+          ? response.data.stores.filter((store) => store?.is_active !== false && store?.link_url)
+          : [];
+        setSponsoredStores(stores);
+      })
+      .catch(() => {
+        if (active) setSponsoredStores([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = mobileDrawerOpen ? 'hidden' : '';
@@ -936,6 +958,7 @@ export default function Dashboard() {
   const installationsThisWeek = Number(metrics.installations_this_week || 0);
   const completedThisWeek = Number(metrics.completed_this_week || 0);
   const rankingItems = ranking.slice(0, 4);
+  const sponsoredStore = sponsoredStores[0] || null;
 
   const useLegacyDashboard = process.env.REACT_APP_DASHBOARD_VARIANT === 'legacy';
 
@@ -1585,7 +1608,8 @@ export default function Dashboard() {
             </div>
           </article>
 
-          <article className="dashboard-neo-panel dashboard-neo-panel--summary">
+          <div className="dashboard-neo-bottom-side">
+            <article className="dashboard-neo-panel dashboard-neo-panel--summary">
             <div className="dashboard-neo-panel-head">
               <div>
                 <h3>{isPro ? 'Resumo financeiro' : 'Seu perfil'}</h3>
@@ -1640,7 +1664,39 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : null}
-          </article>
+            </article>
+
+            {sponsoredStore ? (
+              <a
+                className="dashboard-neo-sponsor"
+                href={sponsoredStore.link_url}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <span className="dashboard-neo-sponsor-label">Patrocinado</span>
+                <div className="dashboard-neo-sponsor-brand">
+                  <span className="dashboard-neo-sponsor-monogram" aria-hidden="true">
+                    {sponsoredStore.name?.slice(0, 1)?.toUpperCase() || 'I'}
+                  </span>
+                  {sponsoredStore.image_url ? (
+                    <img
+                      alt=""
+                      loading="lazy"
+                      onError={(event) => {
+                        event.currentTarget.remove();
+                      }}
+                      src={sponsoredStore.image_url}
+                    />
+                  ) : null}
+                </div>
+                <strong>{sponsoredStore.name}</strong>
+                <p>{sponsoredStore.description || 'Conheça esta empresa parceira.'}</p>
+                <span className="dashboard-neo-sponsor-cta">
+                  {sponsoredStore.cta_label || 'Conhecer'} <span aria-hidden="true">→</span>
+                </span>
+              </a>
+            ) : null}
+          </div>
         </div>
       </div>
 

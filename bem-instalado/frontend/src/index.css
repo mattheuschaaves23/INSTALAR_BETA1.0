@@ -27650,6 +27650,113 @@ html[data-site-theme='dark'] .panel-v3 .settings-panel--danger {
   fill: rgba(187, 132, 39, 0.14);
 }
 
+/* Espaço patrocinado: compacto, identificado e gerenciado em Lojas recomendadas. */
+.dashboard-reference-layout .dashboard-neo-bottom-side {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor {
+  width: min(100%, 13rem);
+  aspect-ratio: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  overflow: hidden;
+  padding: 0.9rem;
+  border: 1px solid #dfe6e8;
+  border-radius: 0.9rem;
+  background: #fbfcfc;
+  color: #26343a;
+  box-shadow: 0 7px 18px rgba(24, 37, 42, 0.04);
+  text-decoration: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor:hover {
+  border-color: #c89843;
+  box-shadow: 0 12px 24px rgba(24, 37, 42, 0.1);
+  transform: translateY(-2px);
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor:focus-visible {
+  outline: 3px solid rgba(189, 133, 41, 0.32);
+  outline-offset: 3px;
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor-label {
+  color: #8c601b;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor-brand {
+  width: 2.9rem;
+  height: 2.9rem;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #e3e9eb;
+  border-radius: 0.72rem;
+  background: #fff4dd;
+  color: #9b6816;
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor-brand img {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor-monogram {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor > strong {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #26343a;
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.2;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor > p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: #68767d;
+  font-size: 0.74rem;
+  line-height: 1.36;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.dashboard-reference-layout .dashboard-neo-sponsor-cta {
+  margin-top: auto;
+  color: #8c601b;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+@media (max-width: 860px) {
+  .dashboard-reference-layout .dashboard-neo-sponsor {
+    justify-self: start;
+  }
+}
+
 /* Agenda, clientes e oportunidades ---------------------------------------- */
 .dashboard-reference-layout .agenda-modern-hero,
 .dashboard-reference-layout .agenda-modern-calendar-card,
