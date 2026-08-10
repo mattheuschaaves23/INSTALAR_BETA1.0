@@ -12363,6 +12363,16 @@ body {
   gap: 1rem;
 }
 
+.budget-modern-calculation-section {
+  gap: 1.25rem;
+}
+
+.budget-modern-calculation-divider {
+  height: 1px;
+  margin: 0.1rem 0;
+  background: rgba(var(--site-accent-rgb), 0.16);
+}
+
 .budget-modern-section-title {
   display: flex;
   align-items: center;
@@ -12447,6 +12457,10 @@ body {
 
 .budget-modern-field-grid.is-identity {
   grid-template-columns: 1fr;
+}
+
+.budget-modern-material-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .budget-modern-field,

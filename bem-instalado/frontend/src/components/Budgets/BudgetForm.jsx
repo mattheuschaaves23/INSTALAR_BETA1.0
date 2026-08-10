@@ -424,17 +424,17 @@ export default function BudgetForm() {
                 </div>
                 <div>
                   <h2>{activeStep === 1 ? 'Escolha o cliente' : activeStep === 2 ? 'Monte o orçamento' : activeStep === 4 ? 'Confirme o envio' : 'Revise o orçamento'}</h2>
-                  <p>{activeStep === 1 ? 'Defina para quem este orçamento será criado.' : activeStep === 2 ? 'Comece pelos ambientes e pela remoção; depois defina o material e o pagamento.' : activeStep === 4 ? 'Confira os dados finais antes de salvar o orçamento.' : 'Confira os valores antes de seguir para o envio.'}</p>
+                  <p>{activeStep === 1 ? 'Defina para quem este orçamento será criado.' : activeStep === 2 ? 'Preencha os detalhes para montar o orçamento em uma única etapa.' : activeStep === 4 ? 'Confira os dados finais antes de salvar o orçamento.' : 'Confira os valores antes de seguir para o envio.'}</p>
                 </div>
               </header>
 
               {activeStep === 2 ? (
                 <>
-              <div className="budget-modern-section">
+              <div className="budget-modern-section budget-modern-calculation-section">
                 <div className="budget-modern-section-title">
                   <div>
                     <BudgetIcon type="measure" />
-                    <span>1. Ambientes e remoção</span>
+                    <span>Cálculo do orçamento</span>
                   </div>
 
                   <button className="budget-modern-inline-button" onClick={addEnvironment} type="button">
@@ -583,17 +583,10 @@ export default function BudgetForm() {
                       : 'Marque os ambientes que precisam de remoção para liberar este valor.'}
                   </div>
                 </div>
-              </div>
 
-              <div className="budget-modern-section">
-                <div className="budget-modern-section-title">
-                  <div>
-                    <BudgetIcon type="wallpaper" />
-                    <span>2. Material e cálculo</span>
-                  </div>
-                </div>
+                <div className="budget-modern-calculation-divider" />
 
-                <div className="budget-modern-field-grid">
+                <div className="budget-modern-field-grid budget-modern-material-grid">
                   {pricingMode === 'roll' ? (
                     <label className="budget-modern-field">
                       <span>Preço do rolo (R$)</span>
@@ -679,15 +672,8 @@ export default function BudgetForm() {
                     <strong>{formatCurrency(totals.removal)}</strong>
                   </div>
                 </div>
-              </div>
 
-              <div className="budget-modern-section">
-                <div className="budget-modern-section-title">
-                  <div>
-                    <BudgetIcon type="services" />
-                    <span>3. Pagamento</span>
-                  </div>
-                </div>
+                <div className="budget-modern-calculation-divider" />
 
                 <div className="budget-modern-payment-box">
                   <label className="budget-modern-toggle">
