@@ -484,7 +484,7 @@ export default function BudgetForm() {
           ))}
         </section>
 
-        <div className="budget-modern-layout">
+        <div className={`budget-modern-layout${activeStep === 3 ? '' : ' budget-modern-layout--wide'}`}>
           <main className="budget-modern-main">
             <section className="budget-modern-calculator-card fade-up" style={{ animationDelay: '0.06s' }}>
               <header className="budget-modern-card-head">

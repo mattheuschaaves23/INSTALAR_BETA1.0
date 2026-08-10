@@ -32426,3 +32426,167 @@ html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqu
 html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-step-line {
   background: #79602c !important;
 }
+
+/* Cálculo aberto no espaço disponível, com cartões apenas onde existe um grupo de ação. */
+@media (min-width: 1181px) {
+  .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-layout--wide {
+    grid-template-columns: minmax(0, 1fr);
+    width: 90%;
+    margin-right: auto;
+  }
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-layout--wide .budget-modern-main,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-layout--wide .budget-modern-calculator-card {
+  width: 100%;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-base,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-removal-rate,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions {
+  border-color: #b7d7de !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 7px rgba(36, 91, 103, 0.035);
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme :is(
+  .budget-modern-calculation-base-head,
+  .budget-modern-payment-conditions-head
+) {
+  margin: 0 !important;
+  padding: 0 0 0.6rem !important;
+  border: 0 !important;
+  border-bottom: 1px solid #d5e6e9 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environments-block {
+  gap: 0.7rem;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-group-head {
+  padding: 0 0 0.55rem !important;
+  border: 0 !important;
+  border-bottom: 1px solid #cddfe3 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environments-block .budget-modern-environment {
+  border: 1px solid #b9d9df !important;
+  border-left: 3px solid #2e91a4 !important;
+  border-radius: 0.58rem;
+  background: #ffffff !important;
+  box-shadow: 0 2px 7px rgba(36, 91, 103, 0.035);
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment-head {
+  margin: 0 0 0.55rem !important;
+  padding: 0 0 0.5rem !important;
+  border: 0 !important;
+  border-bottom: 1px solid #d9e7e9 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme :is(
+  .budget-modern-calculation-base .budget-modern-field,
+  .budget-modern-environment-compact-grid > .budget-modern-field,
+  .budget-modern-removal-rate .budget-modern-field,
+  .budget-modern-payment-conditions-body .budget-modern-field
+) {
+  min-height: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment-area,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment-removal {
+  min-height: 2.65rem;
+  padding: 0 0 0 0.62rem;
+  border: 0 !important;
+  border-left: 2px solid #b8dce2 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-removal-rate {
+  width: 100%;
+  grid-template-columns: minmax(15rem, 22rem) minmax(0, 1fr);
+  align-items: center;
+  padding: 0.8rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-removal-summary {
+  min-height: 3.45rem;
+  padding: 0 0 0 0.85rem;
+  border: 0 !important;
+  border-left: 2px solid #b8dce2 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions-body .budget-modern-installment-control,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions-body .budget-modern-upfront-payment-control {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions-body .budget-modern-installment-control {
+  padding-right: 0.8rem !important;
+  border-right: 1px solid #d8e7e9 !important;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions-body .budget-modern-upfront-payment-method {
+  box-shadow: none;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-base,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-removal-rate,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environments-block .budget-modern-environment {
+  border-color: #4a4a4a !important;
+  background: #171717 !important;
+  box-shadow: none;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme :is(
+  .budget-modern-calculation-base-head,
+  .budget-modern-payment-conditions-head,
+  .budget-modern-calculation-group-head,
+  .budget-modern-environment-head
+) {
+  border-color: #3f3f3f !important;
+  background: transparent !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment-area,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment-removal,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-removal-summary,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions-body .budget-modern-installment-control {
+  border-color: #554421 !important;
+  background: transparent !important;
+}
+
+@media (max-width: 680px) {
+  .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions-body .budget-modern-installment-control {
+    padding: 0 0 0.7rem !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid #d8e7e9 !important;
+  }
+}
