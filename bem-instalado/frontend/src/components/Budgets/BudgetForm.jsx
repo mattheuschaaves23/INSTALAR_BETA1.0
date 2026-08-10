@@ -500,29 +500,11 @@ export default function BudgetForm() {
               {activeStep === 2 ? (
                 <>
               <div className="budget-modern-section budget-modern-calculation-section">
-                <div className="budget-modern-calculation-toolbar">
-                  <div>
-                    <div className="budget-modern-section-title">
-                      <div>
-                        <BudgetIcon type="measure" />
-                        <span>Cálculo do orçamento</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="budget-modern-calculation-toolbar-actions">
-                    <button className="budget-modern-inline-button" onClick={addEnvironment} type="button">
-                      <BudgetIcon type="add" />
-                      {isPro ? 'Adicionar ambiente' : 'Adicionar • Pro'}
-                    </button>
-                  </div>
-                </div>
-
                 <div className="budget-modern-calculation-base budget-modern-calculation-block">
                   <div className="budget-modern-calculation-base-head">
                     <div>
-                      <span>Material e cobrança</span>
-                      <strong>Valor e rendimento do rolo</strong>
+                      <span>01 · Material e cobrança</span>
+                      <strong>Defina o valor e o rendimento do material</strong>
                     </div>
                     <div className="budget-modern-mode-switch">
                       <button
@@ -599,10 +581,16 @@ export default function BudgetForm() {
                 <div className="budget-modern-calculation-block budget-modern-environments-block">
                 <div className="budget-modern-calculation-group-head">
                   <div>
-                    <span>Ambientes do serviço</span>
+                    <span>02 · Ambientes</span>
                     <strong>Informe as medidas de cada espaço</strong>
                   </div>
-                  <small>{environments.length} ambiente{environments.length === 1 ? '' : 's'} no orçamento</small>
+                  <div className="budget-modern-calculation-group-actions">
+                    <small>{environments.length} ambiente{environments.length === 1 ? '' : 's'} no orçamento</small>
+                    <button className="budget-modern-inline-button" onClick={addEnvironment} type="button">
+                      <BudgetIcon type="add" />
+                      {isPro ? 'Adicionar ambiente' : 'Adicionar • Pro'}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="budget-modern-environments">
@@ -697,7 +685,7 @@ export default function BudgetForm() {
 
                 <div className="budget-modern-payment-box budget-modern-removal-rate budget-modern-calculation-block">
                   <label className="budget-modern-field">
-                    <span>Remoção por rolo</span>
+                    <span>03 · Remoção por rolo</span>
                     <div className="budget-modern-currency-input">
                       <i>R$</i>
                       <input
@@ -713,7 +701,7 @@ export default function BudgetForm() {
                   </label>
 
                   <div className="budget-modern-removal-summary">
-                    <span>Resumo da remoção</span>
+                    <span>Remoção selecionada</span>
                     {removalIncluded
                       ? <strong>{totals.removalRolls} rolo{totals.removalRolls === 1 ? '' : 's'} • {formatCurrency(totals.removal)}</strong>
                       : <strong>Nenhum ambiente marcado</strong>}
@@ -723,7 +711,7 @@ export default function BudgetForm() {
                 <div className="budget-modern-payment-conditions budget-modern-calculation-block">
                   <div className="budget-modern-payment-conditions-head">
                     <div>
-                      <span>Pagamento</span>
+                      <span>04 · Pagamento</span>
                       <strong>Parcelamento e desconto à vista</strong>
                     </div>
                     <small>Marque apenas as opções que você aceita.</small>
