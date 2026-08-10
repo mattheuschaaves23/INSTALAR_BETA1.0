@@ -100,6 +100,7 @@ function createEnvironment() {
     height: '',
     width: '',
     rolls_manual: '',
+    removal_included: false,
   };
 }
 
@@ -125,7 +126,6 @@ export default function BudgetForm() {
   const [pricingMode, setPricingMode] = useState('roll');
   const [pricePerRoll, setPricePerRoll] = useState(0);
   const [pricePerSquareMeter, setPricePerSquareMeter] = useState(10);
-  const [removalIncluded, setRemovalIncluded] = useState(false);
   const [removalPricePerRoll, setRemovalPricePerRoll] = useState(0);
   const [profileDefaults, setProfileDefaults] = useState({ rollPrice: 0, removalPricePerRoll: 0 });
   const [installmentEnabled, setInstallmentEnabled] = useState(false);
@@ -175,6 +175,8 @@ export default function BudgetForm() {
     setEnvironments((current) => current.filter((_, currentIndex) => currentIndex !== index));
   };
 
+  const removalIncluded = environments.some((environment) => Boolean(environment.removal_included));
+
   const environmentBreakdown = useMemo(
     () =>
       environments.map((environment) => {
@@ -191,6 +193,7 @@ export default function BudgetForm() {
         return {
           area,
           baseSubtotal,
+          removalIncluded: Boolean(environment.removal_included),
           rollsAuto,
           rollsForMode,
           total: baseSubtotal,
@@ -206,14 +209,15 @@ export default function BudgetForm() {
           (accumulator, environment) => ({
             area: accumulator.area + environment.area,
             rolls: accumulator.rolls + environment.rollsForMode,
+            removalRolls: accumulator.removalRolls + (environment.removalIncluded ? environment.rollsForMode : 0),
             subtotal: accumulator.subtotal + environment.baseSubtotal,
             total: accumulator.total + environment.total,
           }),
-          { area: 0, rolls: 0, subtotal: 0, total: 0 }
+          { area: 0, rolls: 0, removalRolls: 0, subtotal: 0, total: 0 }
         );
         const unitRemovalPrice = Number(removalPricePerRoll || 0);
         const removal = removalIncluded && Number.isFinite(unitRemovalPrice)
-          ? baseTotals.rolls * unitRemovalPrice
+          ? baseTotals.removalRolls * unitRemovalPrice
           : 0;
 
         return {
@@ -259,7 +263,6 @@ export default function BudgetForm() {
     setPricingMode('roll');
     setPricePerRoll(profileDefaults.rollPrice);
     setPricePerSquareMeter(10);
-    setRemovalIncluded(false);
     setRemovalPricePerRoll(profileDefaults.removalPricePerRoll);
     setInstallmentEnabled(false);
     setInstallmentsCount(3);
@@ -359,6 +362,7 @@ export default function BudgetForm() {
           height: Number(environment.height),
           width: Number(environment.width),
           rolls_manual: pricingMode === 'roll' && environment.rolls_manual ? Number(environment.rolls_manual) : null,
+          removal_included: Boolean(environment.removal_included),
         })),
       });
 
@@ -515,45 +519,42 @@ export default function BudgetForm() {
                           </div>
                         ) : null}
 
+                        <label className="budget-modern-toggle">
+                          <input
+                            checked={Boolean(environment.removal_included)}
+                            onChange={(event) => updateEnvironment(index, 'removal_included', event.target.checked)}
+                            type="checkbox"
+                          />
+                          <span>Remover o papel deste ambiente</span>
+                        </label>
+
                       </article>
                     );
                   })}
                 </div>
 
                 <div className="budget-modern-payment-box">
-                  <label className="budget-modern-toggle">
-                    <input
-                      checked={removalIncluded}
-                      onChange={(event) => setRemovalIncluded(event.target.checked)}
-                      type="checkbox"
-                    />
-                    <span>Incluir remoção de papel de parede</span>
-                  </label>
-
-                  {removalIncluded ? (
-                    <div className="budget-modern-field-grid">
-                      <label className="budget-modern-field budget-modern-field--full">
-                        <span>Valor da remoção por rolo/unidade</span>
-                        <div className="budget-modern-currency-input">
-                          <i>R$</i>
-                          <input
-                            min="0"
-                            onChange={(event) => setRemovalPricePerRoll(event.target.value)}
-                            placeholder="0,00"
-                            step="0.01"
-                            type="number"
-                            value={removalPricePerRoll}
-                          />
-                        </div>
-                      </label>
+                  <label className="budget-modern-field budget-modern-field--full">
+                    <span>Valor da remoção por rolo/unidade</span>
+                    <div className="budget-modern-currency-input">
+                      <i>R$</i>
+                      <input
+                        disabled={!removalIncluded}
+                        min="0"
+                        onChange={(event) => setRemovalPricePerRoll(event.target.value)}
+                        placeholder="0,00"
+                        step="0.01"
+                        type="number"
+                        value={removalPricePerRoll}
+                      />
                     </div>
-                  ) : null}
+                  </label>
 
                   <div className="budget-modern-note">
                     <BudgetIcon type="info" />
                     {removalIncluded
-                      ? `${totals.rolls} rolo${totals.rolls === 1 ? '' : 's'} × ${formatCurrency(removalPricePerRoll)} = ${formatCurrency(totals.removal)}`
-                      : 'A remoção é opcional e será calculada pela quantidade total de rolos.'}
+                      ? `${totals.removalRolls} rolo${totals.removalRolls === 1 ? '' : 's'} dos ambientes marcados × ${formatCurrency(removalPricePerRoll)} = ${formatCurrency(totals.removal)}`
+                      : 'Marque os ambientes que precisam de remoção para liberar este valor.'}
                   </div>
                 </div>
               </div>
@@ -653,7 +654,7 @@ export default function BudgetForm() {
                     <strong>{formatCurrency(totals.subtotal)}</strong>
                   </div>
                   <div className="budget-modern-service-row">
-                    <span>Remoção ({totals.rolls} rolos)</span>
+                    <span>Remoção ({totals.removalRolls} rolos marcados)</span>
                     <strong>{formatCurrency(totals.removal)}</strong>
                   </div>
                 </div>
@@ -836,7 +837,7 @@ export default function BudgetForm() {
                 <strong>{formatCurrency(totals.subtotal)}</strong>
               </div>
               <div className="budget-modern-summary-row">
-                <span>Remoção por rolo ({totals.rolls} rolos)</span>
+                <span>Remoção por rolo ({totals.removalRolls} rolos marcados)</span>
                 <strong>{formatCurrency(totals.removal)}</strong>
               </div>
               <div className="budget-modern-summary-row">

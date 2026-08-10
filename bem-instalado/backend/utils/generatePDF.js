@@ -373,8 +373,9 @@ function drawTotalsPanel(doc, budget, installment, y, width) {
   const panelHeight = 136;
   const total = formatCurrency(budget.total_amount);
   const removalPricePerRoll = toNumber(budget.removal_price_per_roll);
+  const removalRolls = toNumber(budget.removal_rolls) || toNumber(budget.total_rolls);
   const removalDescription = removalPricePerRoll > 0
-    ? `Remoção: ${toNumber(budget.total_rolls)} rolos x ${formatCurrency(removalPricePerRoll)} = ${formatCurrency(budget.removal_cost)}`
+    ? `Remoção: ${removalRolls} rolos selecionados x ${formatCurrency(removalPricePerRoll)} = ${formatCurrency(budget.removal_cost)}`
     : `Remoção: ${formatCurrency(budget.removal_cost)}`;
   const lines = [
     `Subtotal do serviço: ${formatCurrency(budget.subtotal_rolls)}`,

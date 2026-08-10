@@ -1,0 +1,2 @@
+ALTER TABLE budgets
+  ADD COLUMN IF NOT EXISTS removal_rolls INTEGER DEFAULT 0;

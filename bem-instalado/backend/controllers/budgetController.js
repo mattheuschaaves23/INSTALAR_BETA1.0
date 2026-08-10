@@ -227,6 +227,7 @@ exports.createBudget = async (req, res) => {
     let totalRolls = 0;
     let subtotal = 0;
     let totalRemovalByEnvironment = 0;
+    let totalRemovalRolls = 0;
 
     const computedEnvironments = environments.map((environment) => {
       const name = normalizeString(environment.name);
@@ -234,7 +235,7 @@ exports.createBudget = async (req, res) => {
       const width = normalizeNumber(environment.width);
       const hasManualRolls = environment.rolls_manual !== null && environment.rolls_manual !== undefined && String(environment.rolls_manual).trim() !== '';
       const rollsManual = hasManualRolls ? Number(environment.rolls_manual) : null;
-      const removalIncludedByEnvironment = !usesRemovalPerRoll && normalizeBoolean(environment.removal_included);
+      const removalIncludedByEnvironment = normalizeBoolean(environment.removal_included);
       const removalPriceByEnvironmentRaw =
         environment.removal_price === null ||
         environment.removal_price === undefined ||
@@ -255,6 +256,15 @@ exports.createBudget = async (req, res) => {
       }
 
       if (
+        usesRemovalPerRoll &&
+        removalIncludedByEnvironment &&
+        (!Number.isFinite(removalPricePerRoll) || removalPricePerRoll < 0)
+      ) {
+        throw new Error('VALIDATION_REMOVAL_PER_ROLL');
+      }
+
+      if (
+        !usesRemovalPerRoll &&
         removalIncludedByEnvironment &&
         (!Number.isFinite(removalPriceByEnvironmentRaw) || removalPriceByEnvironmentRaw < 0)
       ) {
@@ -267,13 +277,19 @@ exports.createBudget = async (req, res) => {
       const subtotalByEnvironment = cleanPricingMode === 'square_meter'
         ? area * cleanPricePerSquareMeter
         : rollsUsed * cleanPricePerRoll;
-      const removalTotalByEnvironment = removalIncludedByEnvironment ? removalPriceByEnvironmentRaw : 0;
+      const removalPriceByEnvironment = removalIncludedByEnvironment
+        ? (usesRemovalPerRoll ? removalPricePerRoll : removalPriceByEnvironmentRaw)
+        : 0;
+      const removalTotalByEnvironment = removalIncludedByEnvironment
+        ? (usesRemovalPerRoll ? rollsUsed * removalPriceByEnvironment : removalPriceByEnvironment)
+        : 0;
       const total = subtotalByEnvironment + removalTotalByEnvironment;
 
       totalArea += area;
       totalRolls += rollsUsed;
       subtotal += subtotalByEnvironment;
       totalRemovalByEnvironment += removalTotalByEnvironment;
+      totalRemovalRolls += usesRemovalPerRoll && removalIncludedByEnvironment ? rollsUsed : 0;
 
       return {
         name,
@@ -285,7 +301,7 @@ exports.createBudget = async (req, res) => {
         pricePerSquareMeter: cleanPricingMode === 'square_meter' ? cleanPricePerSquareMeter : 0,
         pricePerRoll: cleanPricingMode === 'roll' ? cleanPricePerRoll : 0,
         removalIncluded: removalIncludedByEnvironment,
-        removalPrice: removalTotalByEnvironment,
+        removalPrice: removalPriceByEnvironment,
         removalTotal: removalTotalByEnvironment,
         total,
       };
@@ -302,9 +318,7 @@ exports.createBudget = async (req, res) => {
       totalRemovalByEnvironment = fallbackLegacyRemoval;
     }
 
-    const removalCost = usesRemovalPerRoll && removalIncludedByRoll
-      ? totalRolls * removalPricePerRoll
-      : totalRemovalByEnvironment;
+    const removalCost = totalRemovalByEnvironment;
     const totalAmount = subtotal + removalCost;
 
     await db.query('BEGIN');
@@ -325,11 +339,12 @@ exports.createBudget = async (req, res) => {
           removal_cost,
           removal_included,
           removal_price_per_roll,
+          removal_rolls,
           total_amount,
           installment_enabled,
           installments_count
         )
-        VALUES ($1, $2, 'pending', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+        VALUES ($1, $2, 'pending', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
         RETURNING *
       `,
       [
@@ -342,8 +357,9 @@ exports.createBudget = async (req, res) => {
         totalArea,
         subtotal,
         removalCost,
-        usesRemovalPerRoll && removalIncludedByRoll,
-        usesRemovalPerRoll && removalIncludedByRoll ? removalPricePerRoll : 0,
+        usesRemovalPerRoll && totalRemovalRolls > 0,
+        usesRemovalPerRoll && totalRemovalRolls > 0 ? removalPricePerRoll : 0,
+        usesRemovalPerRoll ? totalRemovalRolls : 0,
         totalAmount,
         installmentsEnabled,
         installmentsEnabled ? installmentsCount : 1,
@@ -412,6 +428,10 @@ exports.createBudget = async (req, res) => {
 
     if (error?.message === 'VALIDATION_ENV_REMOVAL') {
       return res.status(400).json({ error: 'Remoção por ambiente precisa ser um valor válido e não negativo.' });
+    }
+
+    if (error?.message === 'VALIDATION_REMOVAL_PER_ROLL') {
+      return res.status(400).json({ error: 'Remoção por rolo precisa ser um valor válido e não negativo.' });
     }
 
     return res.status(500).json({ error: 'Erro ao criar orçamento.' });
