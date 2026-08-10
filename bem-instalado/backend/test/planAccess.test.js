@@ -17,7 +17,7 @@ test('plano Grátis mantém acesso ao aplicativo e aplica limites', () => {
   assert.equal(access.is_pro, false);
   assert.deepEqual(access.limits, FREE_PLAN_LIMITS);
   assert.equal(access.remaining.monthly_interests, 2);
-  assert.equal(access.features.installment_budgets, false);
+  assert.equal(access.features.installment_budgets, true);
 });
 
 test('plano Pro ativo libera recursos avançados e uso ilimitado', () => {

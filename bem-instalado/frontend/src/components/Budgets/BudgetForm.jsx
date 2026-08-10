@@ -167,7 +167,6 @@ export default function BudgetForm() {
   useEffect(() => {
     if (!isPro) {
       setEnvironments((current) => current.slice(0, 1));
-      setInstallmentEnabled(false);
     }
   }, [isPro]);
 
@@ -691,11 +690,10 @@ export default function BudgetForm() {
                   <label className="budget-modern-toggle">
                     <input
                       checked={installmentEnabled}
-                      disabled={!isPro}
                       onChange={(event) => setInstallmentEnabled(event.target.checked)}
                       type="checkbox"
                     />
-                    <span>{isPro ? 'Permitir pagamento parcelado' : 'Pagamento parcelado • Pro'}</span>
+                    <span>Permitir pagamento parcelado</span>
                   </label>
 
                   {installmentEnabled ? (
@@ -716,7 +714,7 @@ export default function BudgetForm() {
                 </div>
                 {!isPro ? (
                   <ProFeatureNotice className="mt-4" title="Orçamento profissional">
-                    No Pro, cada proposta pode ter vários ambientes, parcelamento em até 12x e PDF com a sua marca.
+                    No Pro, cada proposta pode ter vários ambientes e PDF com a sua marca.
                   </ProFeatureNotice>
                 ) : null}
               </div>

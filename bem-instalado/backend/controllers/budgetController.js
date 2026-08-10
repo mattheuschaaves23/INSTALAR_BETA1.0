@@ -183,15 +183,6 @@ exports.createBudget = async (req, res) => {
       });
     }
 
-    if (installmentsEnabled && !planAccess.features.installment_budgets) {
-      return upgradeRequired(res, {
-        code: 'PRO_INSTALLMENTS_REQUIRED',
-        error: 'Parcelamento de propostas está disponível no plano Pro.',
-        planAccess,
-        feature: 'installment_budgets',
-      });
-    }
-
     if (cleanPricingMode === 'roll' && !isPositiveNumber(cleanPricePerRoll)) {
       return res.status(400).json({ error: 'Preço por rolo deve ser maior que zero.' });
     }

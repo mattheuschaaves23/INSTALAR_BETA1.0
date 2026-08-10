@@ -20,7 +20,7 @@ const FREE_FEATURES = Object.freeze({
   advanced_dashboard: false,
   advanced_reviews: false,
   multi_environment_budgets: false,
-  installment_budgets: false,
+  installment_budgets: true,
   custom_pdf_branding: false,
   custom_accent: false,
   compact_density: false,

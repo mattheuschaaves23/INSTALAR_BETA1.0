@@ -51,7 +51,7 @@ function getPublicAppUrl(req) {
 function getPlanBenefits() {
   return [
     'Interesses, clientes e orçamentos sem limite.',
-    'Orçamentos com vários ambientes e parcelamento.',
+    'Orçamentos com vários ambientes.',
     'PDF profissional com a sua marca.',
     'Dashboard comercial e avaliações avançadas.',
     'Personalização completa do aplicativo.',

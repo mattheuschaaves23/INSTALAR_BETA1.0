@@ -12,12 +12,13 @@ const FREE_ITEMS = [
   '5 interesses por mês',
   '15 clientes ativos',
   '5 orçamentos por mês',
+  'Parcelamento em até 12x',
   'Agenda e suporte essenciais',
 ];
 
 const PRO_ITEMS = [
   'Interesses, clientes e orçamentos ilimitados',
-  'Orçamentos com vários ambientes e parcelamento',
+  'Orçamentos com vários ambientes',
   'PDF profissional com a sua marca',
   'Dashboard comercial e análises avançadas',
   'Mais fotos, horários e personalização',
