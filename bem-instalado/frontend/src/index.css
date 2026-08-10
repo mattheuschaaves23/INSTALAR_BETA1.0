@@ -32343,3 +32343,86 @@ html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqu
     width: 100%;
   }
 }
+
+/* Navegação do orçamento: contraste suficiente para ler cada etapa de primeira. */
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-stepper {
+  border: 1px solid #afd8df !important;
+  border-radius: 0.7rem;
+  background: #eef8fa !important;
+  box-shadow: 0 3px 10px rgba(36, 91, 103, 0.035);
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-step-bubble {
+  border: 1.5px solid #72bcc9 !important;
+  background: #ffffff !important;
+  color: #216f80 !important;
+  font-weight: 800;
+  box-shadow: 0 1px 2px rgba(36, 91, 103, 0.07);
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-step-bubble[data-state='done'] {
+  border-color: #3e9daf !important;
+  background: #d8eff3 !important;
+  color: #185f70 !important;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-step-bubble[data-state='active'] {
+  border-color: #1f7d8f !important;
+  background: #247f91 !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 8px rgba(31, 125, 143, 0.22);
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-step-label {
+  color: #31545d !important;
+  font-size: 0.77rem;
+  font-weight: 700;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-step-label[data-state='done'] {
+  color: #216f80 !important;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-step-label[data-state='active'] {
+  color: #174e5b !important;
+  font-weight: 800;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-step-line {
+  height: 2px;
+  border-radius: 999px;
+  background: #94cfd9 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-stepper {
+  border-color: #5a4620 !important;
+  background: #161616 !important;
+  box-shadow: none;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-step-bubble {
+  border-color: #6f5525 !important;
+  background: #101010 !important;
+  color: #f4c968 !important;
+  box-shadow: none;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-step-bubble[data-state='done'] {
+  border-color: #a77b2c !important;
+  background: #281f0e !important;
+  color: #f4c968 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-step-bubble[data-state='active'] {
+  border-color: #e1b24e !important;
+  background: #d6a43d !important;
+  color: #101010 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-step-label[data-state='active'] {
+  color: #f4c968 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-step-line {
+  background: #79602c !important;
+}
