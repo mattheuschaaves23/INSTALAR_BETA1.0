@@ -273,6 +273,14 @@ export default function BudgetForm() {
       .join(' • ')
     : 'Não definido';
   const selectedClient = clients.find((client) => Number(client.id) === Number(clientId));
+  const selectedClientAddress = [
+    [
+      selectedClient?.street,
+      selectedClient?.house_number && `Nº ${selectedClient.house_number}`,
+    ].filter(Boolean).join(', '),
+    [selectedClient?.neighborhood, [selectedClient?.city, selectedClient?.state].filter(Boolean).join(' - ')].filter(Boolean).join(', '),
+    selectedClient?.zip_code && `CEP ${selectedClient.zip_code}`,
+  ].filter(Boolean).join(' • ') || selectedClient?.address || 'Endereço não informado';
   const canCalculate = totals.area > 0;
   const canSave = canCalculate && grandTotal > 0 && Number(clientId) > 0;
 
@@ -915,20 +923,166 @@ export default function BudgetForm() {
                   <div className="budget-modern-section-title">
                     <div>
                       <BudgetIcon type="summary" />
-                      <span>3. Resumo</span>
+                      <span>3. Revisão do orçamento</span>
                     </div>
                   </div>
                   <p className="budget-modern-send-copy">
-                    Revise o cliente, os ambientes e os valores no painel ao lado. Se algo mudou, volte para ajustar antes de enviar.
+                    Confira os dados abaixo antes de salvar. Você ainda pode voltar e alterar qualquer informação.
                   </p>
-                  <div className="budget-modern-calculated-grid">
-                    <article><span>Cliente</span><strong>{selectedClient?.name || '—'}</strong><small>{selectedClient?.phone || selectedClient?.email || 'Contato não informado'}</small></article>
-                    <article><span>Ambientes</span><strong>{environments.length}</strong><small>{totals.area.toFixed(2)} m² no total</small></article>
-                    <article><span>Total</span><strong>{formatCurrency(grandTotal)}</strong><small>{installmentEnabled ? `${normalizedInstallments}x no cartão` : 'Pagamento à vista'}{selectedUpfrontPaymentTerms.length ? ` • ${upfrontPaymentSummary}` : ''}</small></article>
+
+                  <div className="budget-modern-review-overview">
+                    <article>
+                      <span>Cliente</span>
+                      <strong>{selectedClient?.name || '—'}</strong>
+                      <small>{selectedClient?.phone || selectedClient?.email || 'Contato não informado'}</small>
+                    </article>
+                    <article>
+                      <span>Ambientes</span>
+                      <strong>{environments.length}</strong>
+                      <small>{totals.area.toFixed(2)} m² • {totals.rolls} rolos</small>
+                    </article>
+                    <article>
+                      <span>Valor total</span>
+                      <strong>{formatCurrency(grandTotal)}</strong>
+                      <small>{installmentEnabled ? `${normalizedInstallments}x no cartão` : 'Pagamento à vista'}</small>
+                    </article>
                   </div>
+
+                  <div className="budget-modern-review-grid">
+                    <article className="budget-modern-review-card">
+                      <div className="budget-modern-review-card-head">
+                        <div>
+                          <BudgetIcon type="summary" />
+                          <div>
+                            <span>Cliente e local</span>
+                            <h3>Quem vai receber</h3>
+                          </div>
+                        </div>
+                        <button className="budget-modern-review-edit" onClick={() => setActiveStep(1)} type="button">
+                          Alterar
+                        </button>
+                      </div>
+                      <dl className="budget-modern-review-data">
+                        <div><dt>Nome</dt><dd>{selectedClient?.name || 'Não informado'}</dd></div>
+                        <div><dt>Contato</dt><dd>{selectedClient?.phone || selectedClient?.email || 'Não informado'}</dd></div>
+                        <div className="budget-modern-review-data--full"><dt>Local do serviço</dt><dd>{selectedClientAddress}</dd></div>
+                      </dl>
+                    </article>
+
+                    <article className="budget-modern-review-card">
+                      <div className="budget-modern-review-card-head">
+                        <div>
+                          <BudgetIcon type="measure" />
+                          <div>
+                            <span>Cálculo</span>
+                            <h3>Materiais e medidas</h3>
+                          </div>
+                        </div>
+                        <button className="budget-modern-review-edit" onClick={() => setActiveStep(2)} type="button">
+                          Alterar
+                        </button>
+                      </div>
+                      <dl className="budget-modern-review-data">
+                        <div><dt>Cobrança</dt><dd>{pricingMode === 'roll' ? 'Por rolo' : 'Por m²'}</dd></div>
+                        <div><dt>Área total</dt><dd>{totals.area.toFixed(2)} m²</dd></div>
+                        <div><dt>Rendimento do rolo</dt><dd>{effectiveRollArea.toFixed(2)} m²</dd></div>
+                        <div><dt>{pricingMode === 'roll' ? 'Preço por rolo' : 'Preço por m²'}</dt><dd>{formatCurrency(pricingMode === 'roll' ? pricePerRoll : pricePerSquareMeter)}</dd></div>
+                      </dl>
+                    </article>
+
+                    <article className="budget-modern-review-card budget-modern-review-card--full">
+                      <div className="budget-modern-review-card-head">
+                        <div>
+                          <BudgetIcon type="wallpaper" />
+                          <div>
+                            <span>Ambientes</span>
+                            <h3>Itens incluídos no serviço</h3>
+                          </div>
+                        </div>
+                        <button className="budget-modern-review-edit" onClick={() => setActiveStep(2)} type="button">
+                          Alterar
+                        </button>
+                      </div>
+                      <div className="budget-modern-review-environment-list">
+                        {environments.map((environment, index) => {
+                          const details = environmentBreakdown[index];
+
+                          return (
+                            <div className="budget-modern-review-environment" key={`review-${index}`}>
+                              <div>
+                                <strong>{environment.name || `Ambiente ${index + 1}`}</strong>
+                                <small>
+                                  {Number(environment.height || 0).toFixed(2)} m × {Number(environment.width || 0).toFixed(2)} m • {details.area.toFixed(2)} m² • {details.rollsForMode} rolo{details.rollsForMode === 1 ? '' : 's'}
+                                </small>
+                              </div>
+                              <div className="budget-modern-review-environment-value">
+                                <span>{details.removalIncluded ? 'Com remoção' : 'Sem remoção'}</span>
+                                <strong>{formatCurrency(details.total)}</strong>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </article>
+
+                    <article className="budget-modern-review-card budget-modern-review-card--full">
+                      <div className="budget-modern-review-card-head">
+                        <div>
+                          <BudgetIcon type="save" />
+                          <div>
+                            <span>Pagamento</span>
+                            <h3>Condições apresentadas ao cliente</h3>
+                          </div>
+                        </div>
+                        <button className="budget-modern-review-edit" onClick={() => setActiveStep(2)} type="button">
+                          Alterar
+                        </button>
+                      </div>
+                      <div className="budget-modern-review-payment-grid">
+                        <div className="budget-modern-review-payment-card">
+                          <span>Parcelado no cartão</span>
+                          <strong>{installmentEnabled ? `${normalizedInstallments}x de ${formatCurrency(grandTotal / normalizedInstallments)}` : 'Não oferecido'}</strong>
+                          <small>{installmentEnabled ? 'Sem desconto de pagamento à vista.' : 'Ative caso queira oferecer parcelamento.'}</small>
+                        </div>
+                        <div className="budget-modern-review-payment-card">
+                          <span>À vista</span>
+                          <strong>{selectedUpfrontPaymentTerms.length ? upfrontPaymentSummary : 'Não informado'}</strong>
+                          <small>{selectedUpfrontPaymentTerms.length ? 'As formas abaixo aparecem como opção para o cliente.' : 'Nenhuma forma à vista foi selecionada.'}</small>
+                        </div>
+                      </div>
+                      {selectedUpfrontPaymentTerms.length ? (
+                        <div className="budget-modern-review-discount-list">
+                          {selectedUpfrontPaymentTerms.map((term) => (
+                            <div key={`payment-${term.method}`}>
+                              <span>{term.label}</span>
+                              <small>{term.discount_percent > 0 ? `${term.discount_percent}% de desconto` : 'Sem desconto'}</small>
+                              <strong>{formatCurrency(grandTotal * (1 - term.discount_percent / 100))}</strong>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+                    </article>
+
+                    <article className="budget-modern-review-ready-card budget-modern-review-card--full">
+                      <div>
+                        <span>Próximo passo</span>
+                        <strong>Pronto para salvar e enviar</strong>
+                        <p>O orçamento será criado como pendente. Depois, você poderá baixar o PDF e compartilhar no WhatsApp.</p>
+                      </div>
+                      <ul>
+                        <li>Cliente selecionado</li>
+                        <li>Medidas e valores revisados</li>
+                        <li>Condições de pagamento definidas</li>
+                      </ul>
+                    </article>
+                  </div>
+
                   <div className="budget-modern-stage-actions">
                     <button className="budget-modern-secondary-cta" onClick={() => setActiveStep(2)} type="button">
                       Ajustar cálculo
+                    </button>
+                    <button className="budget-modern-primary-cta" disabled={!canSave} onClick={() => setActiveStep(4)} type="button">
+                      Continuar para envio
                     </button>
                   </div>
                 </div>
@@ -939,8 +1093,8 @@ export default function BudgetForm() {
           {activeStep === 3 ? (
           <aside className="budget-modern-summary-panel fade-up" style={{ animationDelay: '0.1s' }}>
             <div className="budget-modern-summary-head">
-              <p className="budget-modern-section-label">Resumo do orçamento</p>
-              <h3>Valores finais</h3>
+              <p className="budget-modern-section-label">Resumo financeiro</p>
+              <h3>Total e condições</h3>
             </div>
 
             <div className="budget-modern-summary-list">
@@ -953,12 +1107,12 @@ export default function BudgetForm() {
                 <strong>{formatCurrency(totals.removal)}</strong>
               </div>
               <div className="budget-modern-summary-row">
-                <span>Forma de pagamento</span>
-                <strong>{installmentEnabled ? `${normalizedInstallments}x` : 'A vista'}</strong>
+                <span>Subtotal do serviço</span>
+                <strong>{formatCurrency(totals.subtotal)}</strong>
               </div>
               <div className="budget-modern-summary-row">
-                <span>À vista: formas e descontos</span>
-                <strong>{upfrontPaymentSummary}</strong>
+                <span>Pagamento parcelado</span>
+                <strong>{installmentEnabled ? `${normalizedInstallments}x` : 'Não oferecido'}</strong>
               </div>
             </div>
 
@@ -970,35 +1124,10 @@ export default function BudgetForm() {
               </small>
             </div>
 
-            <div className="budget-modern-client-box">
-              <span>Cliente selecionado</span>
-              <strong>{selectedClient?.name || 'Escolha quem vai receber o orçamento'}</strong>
-              <small>
-                {selectedClient?.phone || selectedClient?.email || 'Os dados do cliente aparecem aqui.'}
-              </small>
-            </div>
-
-            <div className="budget-modern-environment-summary">
-              <p>Ambientes</p>
-              {environments.map((environment, index) => {
-                const details = environmentBreakdown[index];
-
-                return (
-                  <div className="budget-modern-mini-row" key={`summary-${index}`}>
-                    <span>{environment.name || `Ambiente ${index + 1}`}</span>
-                    <strong>{formatCurrency(details.total)}</strong>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="budget-modern-summary-actions">
-              <button className="budget-modern-primary-cta" disabled={!canSave} onClick={() => setActiveStep(4)} type="button">
-                Continuar para envio
-              </button>
-              <button className="budget-modern-secondary-cta" onClick={() => setActiveStep(2)} type="button">
-                Ajustar cálculo
-              </button>
+            <div className="budget-modern-review-side-note">
+              <span>Conferência</span>
+              <strong>{environments.length} ambiente{environments.length === 1 ? '' : 's'} • {totals.area.toFixed(2)} m²</strong>
+              <small>{selectedUpfrontPaymentTerms.length ? `À vista: ${upfrontPaymentSummary}` : 'Nenhuma condição à vista selecionada.'}</small>
             </div>
           </aside>
           ) : null}

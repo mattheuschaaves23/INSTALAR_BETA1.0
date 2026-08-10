@@ -30756,3 +30756,418 @@ html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqu
     grid-template-columns: 1fr;
   }
 }
+
+/* Revisão final do orçamento: detalhes legíveis antes do envio. */
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-stage {
+  gap: 1.15rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-overview article {
+  display: grid;
+  gap: 0.24rem;
+  min-width: 0;
+  padding: 0.9rem;
+  border: 1px solid #dce9ec;
+  border-radius: 0.85rem;
+  background: #f8fcfc;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-overview span,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-card-head span,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-ready-card span,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-side-note span {
+  color: #60787f;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-overview strong {
+  overflow-wrap: anywhere;
+  color: #26353a;
+  font-size: 1.1rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-overview small {
+  overflow-wrap: anywhere;
+  color: #687a80;
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-card {
+  display: grid;
+  gap: 0.95rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid #e0e9eb;
+  border-radius: 0.9rem;
+  background: #ffffff;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-card--full {
+  grid-column: 1 / -1;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-card-head,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-card-head > div {
+  display: flex;
+  align-items: center;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-card-head {
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-card-head > div {
+  min-width: 0;
+  gap: 0.6rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-card-head svg {
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  padding: 0.48rem;
+  border-radius: 0.55rem;
+  background: #e9f8fa;
+  color: #25879a;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-card-head > div > div {
+  display: grid;
+  gap: 0.08rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-card-head h3 {
+  margin: 0;
+  color: #243238;
+  font-size: 0.98rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-edit {
+  min-height: 2rem;
+  padding: 0.35rem 0.62rem;
+  border: 1px solid #d6e3e6;
+  border-radius: 0.48rem;
+  background: #ffffff;
+  color: #247f90;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-edit:hover {
+  border-color: #8ecbd5;
+  background: #edf9fa;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-data {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem 1rem;
+  margin: 0;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-data > div {
+  min-width: 0;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-data--full {
+  grid-column: 1 / -1;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-data dt {
+  margin-bottom: 0.16rem;
+  color: #708288;
+  font-size: 0.71rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-data dd {
+  overflow-wrap: anywhere;
+  margin: 0;
+  color: #2c3b40;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment-list {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid #e3ebed;
+  border-radius: 0.7rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.72rem 0.8rem;
+  border-bottom: 1px solid #e8eff0;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment:last-child {
+  border-bottom: 0;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment > div:first-child,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment-value {
+  display: grid;
+  gap: 0.16rem;
+  min-width: 0;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment > div:first-child strong,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment-value strong {
+  color: #2a393f;
+  font-size: 0.86rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment > div:first-child small,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment-value span {
+  color: #6a7c81;
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment-value {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-payment-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-payment-card {
+  display: grid;
+  gap: 0.22rem;
+  padding: 0.75rem 0.8rem;
+  border-radius: 0.7rem;
+  background: #f4fafb;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-payment-card span,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-payment-card small {
+  color: #63767b;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-payment-card strong {
+  overflow-wrap: anywhere;
+  color: #26373d;
+  font-size: 0.92rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-discount-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-discount-list > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.08rem 0.5rem;
+  padding: 0.62rem 0.68rem;
+  border: 1px solid #d9eaed;
+  border-radius: 0.65rem;
+  background: #fbfefe;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-discount-list span,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-discount-list small {
+  color: #61757a;
+  font-size: 0.72rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-discount-list strong {
+  grid-column: 1 / -1;
+  color: #237b8d;
+  font-size: 0.9rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-ready-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1rem;
+  border: 1px solid #b7e0e6;
+  border-radius: 0.9rem;
+  border-color: #b7e0e6;
+  background: #eefafc;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-ready-card > div {
+  display: grid;
+  gap: 0.22rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-ready-card strong {
+  color: #1e4149;
+  font-size: 0.98rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-ready-card p {
+  max-width: 33rem;
+  margin: 0;
+  color: #557077;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-ready-card ul {
+  display: grid;
+  gap: 0.36rem;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+  color: #28515a;
+  font-size: 0.76rem;
+  list-style: none;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-ready-card li::before {
+  content: '✓';
+  display: inline-block;
+  margin-right: 0.42rem;
+  color: #208096;
+  font-weight: 800;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-side-note {
+  display: grid;
+  gap: 0.22rem;
+  padding: 0.85rem;
+  border: 1px solid #dcebed;
+  border-radius: 0.75rem;
+  background: #f7fbfc;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-side-note strong {
+  color: #2a393f;
+  font-size: 0.84rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-side-note small {
+  color: #65777c;
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-overview article,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-card,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-payment-card,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-discount-list > div,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-side-note {
+  border-color: #393939 !important;
+  background: #181818 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-card-head h3,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-overview strong,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-data dd,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment > div:first-child strong,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment-value strong,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-payment-card strong,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-side-note strong {
+  color: #ffffff !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-overview span,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-overview small,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-card-head span,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-data dt,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment > div:first-child small,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment-value span,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-payment-card span,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-payment-card small,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-discount-list span,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-discount-list small,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-side-note span,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-side-note small {
+  color: #c7c7c7 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-card-head svg {
+  background: #28200f !important;
+  color: #f4c968 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-edit {
+  border-color: #5a4825 !important;
+  background: #211b10 !important;
+  color: #f4c968 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment-list {
+  border-color: #393939 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment {
+  border-color: #343434 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-ready-card {
+  border-color: #6b5224 !important;
+  background: #211b10 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-ready-card strong,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-ready-card p,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-ready-card ul {
+  color: #f5f5f5 !important;
+}
+
+@media (max-width: 760px) {
+  .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-overview,
+  .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-grid,
+  .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-payment-grid,
+  .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-discount-list {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-ready-card {
+    display: grid;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-data {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-data--full {
+    grid-column: auto;
+  }
+
+  .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment {
+    align-items: flex-start;
+    display: grid;
+  }
+
+  .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-review-environment-value {
+    text-align: left;
+  }
+}
