@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { formatCurrency } from '../../utils/formatters';
 import { useSubscription } from '../../contexts/SubscriptionContext';
-import PlanUsage, { ProFeatureNotice } from '../Subscription/PlanUsage';
+import PlanUsage from '../Subscription/PlanUsage';
 import ClientForm from '../Clients/ClientForm';
 
 const INSTALLMENT_OPTIONS = Array.from({ length: 11 }, (_, index) => index + 2);
@@ -500,36 +500,42 @@ export default function BudgetForm() {
               {activeStep === 2 ? (
                 <>
               <div className="budget-modern-section budget-modern-calculation-section">
-                <div className="budget-modern-section-title">
+                <div className="budget-modern-calculation-toolbar">
                   <div>
-                    <BudgetIcon type="measure" />
-                    <span>Cálculo do orçamento</span>
+                    <div className="budget-modern-section-title">
+                      <div>
+                        <BudgetIcon type="measure" />
+                        <span>Cálculo do orçamento</span>
+                      </div>
+                    </div>
                   </div>
 
-                  <button className="budget-modern-inline-button" onClick={addEnvironment} type="button">
-                    <BudgetIcon type="add" />
-                    {isPro ? 'Adicionar ambiente' : 'Vários ambientes • Pro'}
-                  </button>
+                  <div className="budget-modern-calculation-toolbar-actions">
+                    <div className="budget-modern-mode-switch">
+                      <button
+                        className={pricingMode === 'roll' ? 'is-active' : ''}
+                        onClick={() => setPricingMode('roll')}
+                        type="button"
+                      >
+                        Por rolo
+                      </button>
+                      <button
+                        className={pricingMode === 'square_meter' ? 'is-active' : ''}
+                        onClick={() => setPricingMode('square_meter')}
+                        type="button"
+                      >
+                        Por m²
+                      </button>
+                    </div>
+
+                    <button className="budget-modern-inline-button" onClick={addEnvironment} type="button">
+                      <BudgetIcon type="add" />
+                      {isPro ? 'Adicionar ambiente' : 'Adicionar • Pro'}
+                    </button>
+                  </div>
                 </div>
 
-                <div className="budget-modern-mode-switch">
-                  <button
-                    className={pricingMode === 'roll' ? 'is-active' : ''}
-                    onClick={() => setPricingMode('roll')}
-                    type="button"
-                  >
-                    Cobrar por rolo
-                  </button>
-                  <button
-                    className={pricingMode === 'square_meter' ? 'is-active' : ''}
-                    onClick={() => setPricingMode('square_meter')}
-                    type="button"
-                  >
-                    Cobrar por m²
-                  </button>
-                </div>
-
-                <div className="budget-modern-field-grid budget-modern-material-grid">
+                <div className="budget-modern-field-grid budget-modern-material-grid budget-modern-material-grid--compact">
                   {pricingMode === 'roll' ? (
                     <label className="budget-modern-field">
                       <span>Preço do rolo (R$)</span>
@@ -582,11 +588,6 @@ export default function BudgetForm() {
                   </label>
                 </div>
 
-                <div className="budget-modern-note">
-                  <BudgetIcon type="info" />
-                  Informe as medidas de cada ambiente. O ajuste manual de rolos fica disponível quando necessário.
-                </div>
-
                 <div className="budget-modern-environments">
                   {environments.map((environment, index) => {
                     const details = environmentBreakdown[index];
@@ -596,7 +597,6 @@ export default function BudgetForm() {
                         <div className="budget-modern-environment-head">
                           <div>
                             <strong>Ambiente {index + 1}</strong>
-                            <span>Defina nome e medidas deste espaço.</span>
                           </div>
 
                           {environments.length > 1 ? (
@@ -606,19 +606,17 @@ export default function BudgetForm() {
                           ) : null}
                         </div>
 
-                        <div className="budget-modern-field-grid is-identity">
-                          <label className="budget-modern-field budget-modern-field--full">
-                            <span>Nome do ambiente</span>
+                        <div className="budget-modern-environment-compact-grid">
+                          <label className="budget-modern-field budget-modern-environment-name">
+                            <span>Ambiente</span>
                             <input
                               onChange={(event) => updateEnvironment(index, 'name', event.target.value)}
-                              placeholder="Ex.: Sala principal"
+                              placeholder="Ex.: Sala"
                               required
                               value={environment.name}
                             />
                           </label>
-                        </div>
 
-                        <div className="budget-modern-field-grid">
                           <label className="budget-modern-field">
                             <span>Largura (m)</span>
                             <input
@@ -645,36 +643,34 @@ export default function BudgetForm() {
                             />
                           </label>
 
-                          <label className="budget-modern-field budget-modern-field--readonly">
-                            <span>Área total</span>
-                            <input disabled readOnly value={`${details.area.toFixed(2)} m²`} />
-                          </label>
-                        </div>
+                          <div className="budget-modern-environment-area" aria-label={`Área do ambiente ${index + 1}`}>
+                            <span>Área</span>
+                            <strong>{details.area.toFixed(2)} m²</strong>
+                          </div>
 
-                        {pricingMode === 'roll' ? (
-                          <div className="budget-modern-field-grid">
-                            <label className="budget-modern-field budget-modern-field--full">
-                              <span>Rolos manuais (opcional)</span>
+                          {pricingMode === 'roll' ? (
+                            <label className="budget-modern-field">
+                              <span>Rolos (opcional)</span>
                               <input
                                 min="1"
                                 onChange={(event) => updateEnvironment(index, 'rolls_manual', event.target.value)}
-                                placeholder={`Automático: ${details.rollsAuto}`}
+                                placeholder={`Auto: ${details.rollsAuto}`}
                                 step="1"
                                 type="number"
                                 value={environment.rolls_manual}
                               />
                             </label>
-                          </div>
-                        ) : null}
+                          ) : null}
 
-                        <label className="budget-modern-toggle">
-                          <input
-                            checked={Boolean(environment.removal_included)}
-                            onChange={(event) => updateEnvironment(index, 'removal_included', event.target.checked)}
-                            type="checkbox"
-                          />
-                          <span>Remover o papel deste ambiente</span>
-                        </label>
+                          <label className="budget-modern-toggle budget-modern-environment-removal">
+                            <input
+                              checked={Boolean(environment.removal_included)}
+                              onChange={(event) => updateEnvironment(index, 'removal_included', event.target.checked)}
+                              type="checkbox"
+                            />
+                            <span>Remover papel</span>
+                          </label>
+                        </div>
 
                       </article>
                     );
@@ -683,7 +679,7 @@ export default function BudgetForm() {
 
                 <div className="budget-modern-payment-box budget-modern-removal-rate">
                   <label className="budget-modern-field">
-                    <span>Valor da remoção por rolo/unidade</span>
+                    <span>Remoção por rolo</span>
                     <div className="budget-modern-currency-input">
                       <i>R$</i>
                       <input
@@ -698,128 +694,94 @@ export default function BudgetForm() {
                     </div>
                   </label>
 
-                  <div className="budget-modern-note">
-                    <BudgetIcon type="info" />
+                  <div className="budget-modern-removal-summary">
+                    <span>Resumo da remoção</span>
                     {removalIncluded
-                      ? `${totals.removalRolls} rolo${totals.removalRolls === 1 ? '' : 's'} dos ambientes marcados × ${formatCurrency(removalPricePerRoll)} = ${formatCurrency(totals.removal)}`
-                      : 'Marque os ambientes que precisam de remoção para liberar este valor.'}
+                      ? <strong>{totals.removalRolls} rolo{totals.removalRolls === 1 ? '' : 's'} • {formatCurrency(totals.removal)}</strong>
+                      : <strong>Nenhum ambiente marcado</strong>}
                   </div>
                 </div>
 
-                <div className="budget-modern-calculation-divider" />
-
-                <div className="budget-modern-calculated-grid">
-                  <article>
-                    <span>Área total</span>
-                    <strong>{totals.area.toFixed(2)} m²</strong>
-                    <small>Base somada de todos os ambientes.</small>
-                  </article>
-                  <article>
-                    <span>Rolos necessarios</span>
-                    <strong>{totals.rolls} rolos</strong>
-                    <small>{(totals.rolls * effectiveRollArea).toFixed(2)} m² previstos</small>
-                  </article>
-                  <article>
-                    <span>Subtotal de materiais</span>
-                    <strong>{formatCurrency(totals.subtotal)}</strong>
-                    <small>{pricingMode === 'roll' ? 'Calculo por rolo.' : 'Calculo por metro quadrado.'}</small>
-                  </article>
-                </div>
-
-                <div className="budget-modern-service-list">
-                  <div className="budget-modern-service-row">
-                    <span>Modo de cobrança</span>
-                    <strong>{pricingMode === 'roll' ? 'Por rolo' : 'Por m²'}</strong>
-                  </div>
-                  <div className="budget-modern-service-row">
-                    <span>Base de materiais</span>
-                    <strong>{formatCurrency(totals.subtotal)}</strong>
-                  </div>
-                  <div className="budget-modern-service-row">
-                    <span>Remoção ({totals.removalRolls} rolos marcados)</span>
-                    <strong>{formatCurrency(totals.removal)}</strong>
-                  </div>
-                </div>
-
-                <div className="budget-modern-calculation-divider" />
-
-                <div className="budget-modern-payment-box budget-modern-installment-control">
-                  <label className="budget-modern-toggle">
-                    <input
-                      checked={installmentEnabled}
-                      onChange={(event) => setInstallmentEnabled(event.target.checked)}
-                      type="checkbox"
-                    />
-                    <span>Permitir pagamento parcelado</span>
-                  </label>
-
-                  {installmentEnabled ? (
-                    <label className="budget-modern-field budget-modern-field--full">
-                      <span>Parcelamento</span>
-                      <select
-                        onChange={(event) => setInstallmentsCount(Number(event.target.value))}
-                        value={installmentsCount}
-                      >
-                        {INSTALLMENT_OPTIONS.map((option) => (
-                          <option key={option} value={option}>
-                            {option}x de {formatCurrency(grandTotal / option)}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  ) : null}
-                </div>
-
-                <div className="budget-modern-payment-box budget-modern-upfront-payment-control">
-                  <div className="budget-modern-upfront-payment-head">
+                <div className="budget-modern-payment-conditions">
+                  <div className="budget-modern-payment-conditions-head">
                     <div>
-                      <span>Pagamento à vista</span>
-                      <strong>Formas aceitas e desconto</strong>
+                      <span>Pagamento</span>
+                      <strong>Parcelamento e desconto à vista</strong>
                     </div>
-                    <small>Desconto em %</small>
+                    <small>Marque apenas as opções que você aceita.</small>
                   </div>
 
-                  <div className="budget-modern-upfront-payment-grid">
-                    {UPFRONT_PAYMENT_METHODS.map((method) => {
-                      const configuration = upfrontPaymentTerms[method.id];
-                      const discountedTotal = grandTotal * (1 - Number(configuration?.discount || 0) / 100);
+                  <div className="budget-modern-payment-conditions-body">
+                    <div className="budget-modern-payment-box budget-modern-installment-control">
+                      <label className="budget-modern-toggle">
+                        <input
+                          checked={installmentEnabled}
+                          onChange={(event) => setInstallmentEnabled(event.target.checked)}
+                          type="checkbox"
+                        />
+                        <span>Permitir parcelamento</span>
+                      </label>
 
-                      return (
-                        <label className="budget-modern-upfront-payment-method" key={method.id}>
-                          <span className="budget-modern-upfront-payment-method-name">
-                            <input
-                              checked={Boolean(configuration?.enabled)}
-                              onChange={(event) => updateUpfrontPaymentTerm(method.id, 'enabled', event.target.checked)}
-                              type="checkbox"
-                            />
-                            <strong>{method.label}</strong>
-                          </span>
-                          <span className="budget-modern-upfront-payment-discount">
-                            <input
-                              aria-label={`Desconto no ${method.label}`}
-                              disabled={!configuration?.enabled}
-                              max="100"
-                              min="0"
-                              onChange={(event) => updateUpfrontPaymentTerm(method.id, 'discount', event.target.value)}
-                              step="0.01"
-                              type="number"
-                              value={configuration?.discount ?? 0}
-                            />
-                            <i>%</i>
-                          </span>
-                          {configuration?.enabled ? (
-                            <small>À vista: {formatCurrency(discountedTotal)}</small>
-                          ) : null}
+                      {installmentEnabled ? (
+                        <label className="budget-modern-field budget-modern-field--full">
+                          <span>Parcelamento</span>
+                          <select
+                            onChange={(event) => setInstallmentsCount(Number(event.target.value))}
+                            value={installmentsCount}
+                          >
+                            {INSTALLMENT_OPTIONS.map((option) => (
+                              <option key={option} value={option}>
+                                {option}x de {formatCurrency(grandTotal / option)}
+                              </option>
+                            ))}
+                          </select>
                         </label>
-                      );
-                    })}
+                      ) : null}
+                    </div>
+
+                    <div className="budget-modern-payment-box budget-modern-upfront-payment-control">
+                      <div className="budget-modern-upfront-payment-head">
+                        <div>
+                          <span>À vista</span>
+                          <strong>Forma e desconto</strong>
+                        </div>
+                        <small>Desconto %</small>
+                      </div>
+
+                      <div className="budget-modern-upfront-payment-grid">
+                        {UPFRONT_PAYMENT_METHODS.map((method) => {
+                          const configuration = upfrontPaymentTerms[method.id];
+
+                          return (
+                            <label className="budget-modern-upfront-payment-method" key={method.id}>
+                              <span className="budget-modern-upfront-payment-method-name">
+                                <input
+                                  checked={Boolean(configuration?.enabled)}
+                                  onChange={(event) => updateUpfrontPaymentTerm(method.id, 'enabled', event.target.checked)}
+                                  type="checkbox"
+                                />
+                                <strong>{method.label}</strong>
+                              </span>
+                              <span className="budget-modern-upfront-payment-discount">
+                                <input
+                                  aria-label={`Desconto no ${method.label}`}
+                                  disabled={!configuration?.enabled}
+                                  max="100"
+                                  min="0"
+                                  onChange={(event) => updateUpfrontPaymentTerm(method.id, 'discount', event.target.value)}
+                                  step="0.01"
+                                  type="number"
+                                  value={configuration?.discount ?? 0}
+                                />
+                                <i>%</i>
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 </div>
-                {!isPro ? (
-                  <ProFeatureNotice className="mt-4" title="Orçamento profissional">
-                    No Pro, cada proposta pode ter vários ambientes e PDF com a sua marca.
-                  </ProFeatureNotice>
-                ) : null}
               </div>
 
               <div className="budget-modern-stage-actions">
