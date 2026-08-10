@@ -629,17 +629,20 @@ export default function BudgetForm() {
                   )}
 
                   <label className="budget-modern-field">
-                    <span>Rendimento do rolo (m²)</span>
-                    <input
-                      inputMode="decimal"
-                      min="0.01"
-                      onChange={(event) => setRollArea(event.target.value)}
-                      placeholder="Ex.: 4,5"
-                      required
-                      step="0.01"
-                      type="number"
-                      value={rollArea}
-                    />
+                    <span>Rendimento do rolo</span>
+                    <div className="budget-modern-currency-input">
+                      <i>m²</i>
+                      <input
+                        inputMode="decimal"
+                        min="0.01"
+                        onChange={(event) => setRollArea(event.target.value)}
+                        placeholder="Ex.: 4,5"
+                        required
+                        step="0.01"
+                        type="number"
+                        value={rollArea}
+                      />
+                    </div>
                   </label>
 
                 </div>
