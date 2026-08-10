@@ -913,7 +913,7 @@ export default function Profile() {
             </label>
 
             <label className="block">
-              <span className="field-label">Remoção padrão</span>
+              <span className="field-label">Remoção por rolo/unidade</span>
               <input
                 className="field-input"
                 name="default_removal_price"

@@ -288,7 +288,7 @@ function drawEnvironmentRow(doc, environment, y, widths, isAlt) {
     `${toNumber(environment.height).toFixed(2)}m x ${toNumber(environment.width).toFixed(2)}m`,
     `${toNumber(environment.area).toFixed(2)}m²`,
     `${rolls}`,
-    formatCurrency(environment.total),
+    formatCurrency(toNumber(environment.total) - toNumber(environment.removal_total)),
   ];
 
   let x = MARGIN;
@@ -372,9 +372,13 @@ function drawEnvironmentRowWithRemoval(doc, environment, y, widths, isAlt) {
 function drawTotalsPanel(doc, budget, installment, y, width) {
   const panelHeight = 136;
   const total = formatCurrency(budget.total_amount);
+  const removalPricePerRoll = toNumber(budget.removal_price_per_roll);
+  const removalDescription = removalPricePerRoll > 0
+    ? `Remoção: ${toNumber(budget.total_rolls)} rolos x ${formatCurrency(removalPricePerRoll)} = ${formatCurrency(budget.removal_cost)}`
+    : `Remoção: ${formatCurrency(budget.removal_cost)}`;
   const lines = [
-    `Subtotal dos rolos: ${formatCurrency(budget.subtotal_rolls)}`,
-    `Remoção: ${formatCurrency(budget.removal_cost)}`,
+    `Subtotal do serviço: ${formatCurrency(budget.subtotal_rolls)}`,
+    removalDescription,
     `Pagamento à vista: ${total}`,
     installment.enabled
       ? `Pagamento parcelado: ${installment.count}x de ${formatCurrency(installment.installmentValue)}`
@@ -536,8 +540,8 @@ module.exports = function generateBudgetPDF({ budget, client, environments, user
     y += 76;
 
     y = drawSectionTitle(doc, 'Detalhamento dos ambientes', y);
-    const tableWidths = [150, 102, 60, 50, 82, contentWidth - (150 + 102 + 60 + 50 + 82)];
-    y = drawTableHeaderWithRemoval(doc, y, tableWidths);
+    const tableWidths = [190, 120, 75, 60, contentWidth - (190 + 120 + 75 + 60)];
+    y = drawTableHeader(doc, y, tableWidths);
 
     environments.forEach((environment, index) => {
       if (!canFit(doc, y, 28)) {
@@ -545,10 +549,10 @@ module.exports = function generateBudgetPDF({ budget, client, environments, user
         drawSubHeader(doc, budget);
         y = 72;
         y = drawSectionTitle(doc, 'Detalhamento dos ambientes (continuação)', y);
-        y = drawTableHeaderWithRemoval(doc, y, tableWidths);
+        y = drawTableHeader(doc, y, tableWidths);
       }
 
-      y = drawEnvironmentRowWithRemoval(doc, environment, y, tableWidths, index % 2 === 1);
+      y = drawEnvironmentRow(doc, environment, y, tableWidths, index % 2 === 1);
     });
 
     y += 14;

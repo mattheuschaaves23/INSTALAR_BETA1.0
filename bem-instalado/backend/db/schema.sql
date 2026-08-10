@@ -68,6 +68,8 @@ CREATE TABLE IF NOT EXISTS budgets (
   total_area NUMERIC(10, 2) DEFAULT 0,
   subtotal_rolls NUMERIC(10, 2) DEFAULT 0,
   removal_cost NUMERIC(10, 2) DEFAULT 0,
+  removal_included BOOLEAN NOT NULL DEFAULT FALSE,
+  removal_price_per_roll NUMERIC(10, 2) DEFAULT 0,
   total_amount NUMERIC(10, 2) DEFAULT 0,
   installment_enabled BOOLEAN NOT NULL DEFAULT FALSE,
   installments_count INTEGER NOT NULL DEFAULT 1,

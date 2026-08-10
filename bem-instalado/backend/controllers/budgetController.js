@@ -130,6 +130,7 @@ exports.createBudget = async (req, res) => {
       installments_count,
       removal_included,
       removal_price,
+      removal_price_per_roll,
     } = req.body;
     const cleanClientId = Number(client_id);
     const cleanPricingMode = normalizePricingMode(pricing_mode);
@@ -138,6 +139,11 @@ exports.createBudget = async (req, res) => {
     const installmentsEnabled = normalizeBoolean(installment_enabled);
     const requestedInstallmentsCount = normalizeInteger(installments_count);
     const installmentsCount = installmentsEnabled ? requestedInstallmentsCount : 1;
+    const usesRemovalPerRoll = Object.prototype.hasOwnProperty.call(req.body || {}, 'removal_price_per_roll');
+    const removalIncludedByRoll = normalizeBoolean(removal_included);
+    const removalPricePerRoll = removal_price_per_roll === null || removal_price_per_roll === undefined || String(removal_price_per_roll).trim() === ''
+      ? 0
+      : Number(removal_price_per_roll);
     const legacyRemovalIncluded = normalizeBoolean(removal_included);
     const legacyRemovalPrice = removal_price === null || removal_price === undefined || String(removal_price).trim() === ''
       ? 0
@@ -190,6 +196,15 @@ exports.createBudget = async (req, res) => {
     }
 
     if (
+      usesRemovalPerRoll &&
+      removalIncludedByRoll &&
+      (!Number.isFinite(removalPricePerRoll) || removalPricePerRoll < 0)
+    ) {
+      return res.status(400).json({ error: 'Remoção por rolo precisa ser um valor válido e não negativo.' });
+    }
+
+    if (
+      !usesRemovalPerRoll &&
       legacyRemovalIncluded &&
       (!Number.isFinite(legacyRemovalPrice) || legacyRemovalPrice < 0)
     ) {
@@ -219,7 +234,7 @@ exports.createBudget = async (req, res) => {
       const width = normalizeNumber(environment.width);
       const hasManualRolls = environment.rolls_manual !== null && environment.rolls_manual !== undefined && String(environment.rolls_manual).trim() !== '';
       const rollsManual = hasManualRolls ? Number(environment.rolls_manual) : null;
-      const removalIncludedByEnvironment = normalizeBoolean(environment.removal_included);
+      const removalIncludedByEnvironment = !usesRemovalPerRoll && normalizeBoolean(environment.removal_included);
       const removalPriceByEnvironmentRaw =
         environment.removal_price === null ||
         environment.removal_price === undefined ||
@@ -276,8 +291,8 @@ exports.createBudget = async (req, res) => {
       };
     });
 
-    const hasEnvironmentRemoval = computedEnvironments.some((environment) => environment.removalIncluded);
-    const fallbackLegacyRemoval = legacyRemovalIncluded ? legacyRemovalPrice : 0;
+    const hasEnvironmentRemoval = !usesRemovalPerRoll && computedEnvironments.some((environment) => environment.removalIncluded);
+    const fallbackLegacyRemoval = !usesRemovalPerRoll && legacyRemovalIncluded ? legacyRemovalPrice : 0;
 
     if (!hasEnvironmentRemoval && fallbackLegacyRemoval > 0 && computedEnvironments.length > 0) {
       computedEnvironments[0].removalIncluded = true;
@@ -287,7 +302,9 @@ exports.createBudget = async (req, res) => {
       totalRemovalByEnvironment = fallbackLegacyRemoval;
     }
 
-    const removalCost = totalRemovalByEnvironment;
+    const removalCost = usesRemovalPerRoll && removalIncludedByRoll
+      ? totalRolls * removalPricePerRoll
+      : totalRemovalByEnvironment;
     const totalAmount = subtotal + removalCost;
 
     await db.query('BEGIN');
@@ -306,11 +323,13 @@ exports.createBudget = async (req, res) => {
           total_area,
           subtotal_rolls,
           removal_cost,
+          removal_included,
+          removal_price_per_roll,
           total_amount,
           installment_enabled,
           installments_count
         )
-        VALUES ($1, $2, 'pending', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        VALUES ($1, $2, 'pending', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
         RETURNING *
       `,
       [
@@ -323,6 +342,8 @@ exports.createBudget = async (req, res) => {
         totalArea,
         subtotal,
         removalCost,
+        usesRemovalPerRoll && removalIncludedByRoll,
+        usesRemovalPerRoll && removalIncludedByRoll ? removalPricePerRoll : 0,
         totalAmount,
         installmentsEnabled,
         installmentsEnabled ? installmentsCount : 1,

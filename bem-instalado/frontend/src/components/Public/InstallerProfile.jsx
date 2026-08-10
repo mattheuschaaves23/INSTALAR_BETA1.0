@@ -235,7 +235,7 @@ export default function InstallerProfile() {
             <div><span>Visita técnica</span><strong>{formatCurrency(installer.base_service_cost)}</strong></div>
             <div><span>Deslocamento</span><strong>{formatCurrency(installer.travel_fee)}</strong></div>
             <div><span>Instalação por rolo</span><strong>{formatCurrency(installer.default_price_per_roll)}</strong></div>
-            <div><span>Remoção</span><strong>{formatCurrency(installer.default_removal_price)}</strong></div>
+            <div><span>Remoção por rolo</span><strong>{formatCurrency(installer.default_removal_price)}</strong></div>
             <small>O orçamento final considera o seu ambiente.</small>
           </article>
         </section>
