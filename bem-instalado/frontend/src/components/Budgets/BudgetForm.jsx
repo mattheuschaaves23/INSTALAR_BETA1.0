@@ -511,6 +511,19 @@ export default function BudgetForm() {
                   </div>
 
                   <div className="budget-modern-calculation-toolbar-actions">
+                    <button className="budget-modern-inline-button" onClick={addEnvironment} type="button">
+                      <BudgetIcon type="add" />
+                      {isPro ? 'Adicionar ambiente' : 'Adicionar • Pro'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="budget-modern-calculation-base">
+                  <div className="budget-modern-calculation-base-head">
+                    <div>
+                      <span>Material e cobrança</span>
+                      <strong>Valor e rendimento do rolo</strong>
+                    </div>
                     <div className="budget-modern-mode-switch">
                       <button
                         className={pricingMode === 'roll' ? 'is-active' : ''}
@@ -527,15 +540,9 @@ export default function BudgetForm() {
                         Por m²
                       </button>
                     </div>
-
-                    <button className="budget-modern-inline-button" onClick={addEnvironment} type="button">
-                      <BudgetIcon type="add" />
-                      {isPro ? 'Adicionar ambiente' : 'Adicionar • Pro'}
-                    </button>
                   </div>
-                </div>
 
-                <div className="budget-modern-field-grid budget-modern-material-grid budget-modern-material-grid--compact">
+                  <div className="budget-modern-field-grid budget-modern-material-grid budget-modern-material-grid--compact">
                   {pricingMode === 'roll' ? (
                     <label className="budget-modern-field">
                       <span>Preço do rolo (R$)</span>
@@ -586,6 +593,7 @@ export default function BudgetForm() {
                       />
                     </div>
                   </label>
+                </div>
                 </div>
 
                 <div className="budget-modern-environments">
