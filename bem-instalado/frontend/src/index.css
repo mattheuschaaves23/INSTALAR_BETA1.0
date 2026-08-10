@@ -30517,6 +30517,15 @@ html[data-site-theme='dark'] .dashboard-reference-layout.aqua-panel-theme :is(
   color: #217c8d;
 }
 
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-currency-input {
+  background: #ffffff;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-currency-input i,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-currency-input input {
+  color: #17242a;
+}
+
 html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-note {
   border: 1px solid #373126;
   background: #1b1b1b;
@@ -30525,6 +30534,18 @@ html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqu
 
 html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-note svg {
   color: #f4c968;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-currency-input {
+  background: #181818;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-currency-input i {
+  color: #f4c968;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-currency-input input {
+  color: #ffffff;
 }
 
 @media (max-width: 860px) {
