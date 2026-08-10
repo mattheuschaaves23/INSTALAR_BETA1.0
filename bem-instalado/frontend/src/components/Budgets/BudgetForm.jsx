@@ -648,9 +648,9 @@ export default function BudgetForm() {
                             />
                           </label>
 
-                          <div className="budget-modern-environment-area" aria-label={`Área do ambiente ${index + 1}`}>
+                          <div className="budget-modern-field budget-modern-environment-area" aria-label={`Área calculada automaticamente do ambiente ${index + 1}`}>
                             <span>Área</span>
-                            <strong>{details.area.toFixed(2)} m²</strong>
+                            <output title="Valor calculado automaticamente">{details.area.toFixed(2)} m²</output>
                           </div>
 
                           {pricingMode === 'roll' ? (

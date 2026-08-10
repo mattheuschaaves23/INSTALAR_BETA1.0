@@ -32656,3 +32656,42 @@ html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqu
 html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment-area span::after {
   color: #c9c9c9 !important;
 }
+
+/* Área calculada usa a mesma estrutura visual dos campos que recebem medida. */
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment-area {
+  display: grid;
+  gap: 0.22rem;
+  min-height: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  border-left: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment-area span::after {
+  content: none;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment-area output {
+  display: flex;
+  align-items: center;
+  min-height: 2.55rem;
+  padding-inline: 0.65rem;
+  border: 1.5px solid #8fc7d2;
+  border-radius: 0.45rem;
+  background: #f5fbfc;
+  color: #1d343b;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment-area output {
+  border-color: #755d2d;
+  background: #111111;
+  color: #ffffff;
+  box-shadow: none;
+}
