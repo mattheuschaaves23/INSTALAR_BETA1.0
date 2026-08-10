@@ -634,11 +634,11 @@ export default function BudgetForm() {
                     <span>02 · Ambientes</span>
                     <strong>Informe as medidas de cada espaço</strong>
                   </div>
-                  <div className="budget-modern-calculation-group-actions">
-                    <small>{environments.length} ambiente{environments.length === 1 ? '' : 's'} no orçamento</small>
-                    <button className="budget-modern-inline-button" onClick={addEnvironment} type="button">
+                  <div className="budget-modern-environment-actions">
+                    <button className="budget-modern-inline-button budget-modern-environment-add" onClick={addEnvironment} type="button">
                       <BudgetIcon type="add" />
-                      {isPro ? 'Adicionar ambiente' : 'Adicionar • Pro'}
+                      <span>{isPro ? 'Adicionar ambiente' : 'Adicionar ambiente • Pro'}</span>
+                      <small>{environments.length} ambiente{environments.length === 1 ? '' : 's'}</small>
                     </button>
                   </div>
                 </div>
