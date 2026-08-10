@@ -12629,6 +12629,16 @@ body {
   border: 1px solid rgba(var(--site-accent-rgb), 0.12);
 }
 
+.budget-modern-installment-control {
+  width: min(100%, 31rem);
+  justify-self: start;
+  padding: 0.75rem 0.9rem;
+}
+
+.budget-modern-installment-control .budget-modern-toggle {
+  min-height: 2.6rem;
+}
+
 .budget-modern-removal-rate {
   width: min(100%, 44rem);
   justify-self: start;

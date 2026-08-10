@@ -674,7 +674,7 @@ export default function BudgetForm() {
 
                 <div className="budget-modern-calculation-divider" />
 
-                <div className="budget-modern-payment-box">
+                <div className="budget-modern-payment-box budget-modern-installment-control">
                   <label className="budget-modern-toggle">
                     <input
                       checked={installmentEnabled}
