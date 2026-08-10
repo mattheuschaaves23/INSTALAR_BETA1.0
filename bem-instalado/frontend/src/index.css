@@ -31740,3 +31740,224 @@ html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqu
     border-left: 0;
   }
 }
+
+/* Hierarquia visual da calculadora: superfícies em camadas, sem excesso de branco. */
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculator-card {
+  border-color: #dce8eb !important;
+  background:
+    radial-gradient(38rem 18rem at 100% 0%, rgba(154, 218, 229, 0.18), transparent 58%),
+    #f4f8f9 !important;
+  box-shadow: 0 14px 30px rgba(30, 65, 72, 0.07) !important;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-card-head {
+  padding: 0.85rem 0.9rem;
+  border: 1px solid #e0ebed;
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 4px 12px rgba(31, 74, 83, 0.035);
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-toolbar {
+  padding: 0.1rem 0.1rem 0.7rem;
+  border-bottom: 1px solid #dbe8ea;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-toolbar .budget-modern-section-title > div:first-child {
+  color: #20363d;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-toolbar .budget-modern-section-title svg {
+  padding: 0.4rem;
+  border-radius: 0.52rem;
+  background: #dff4f7;
+  color: #25869a;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-toolbar .budget-modern-inline-button {
+  border-color: #91cdd7;
+  background: #ffffff;
+  color: #21798b;
+  box-shadow: 0 3px 8px rgba(32, 110, 126, 0.06);
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-base {
+  border-color: #cfe4e8;
+  background: linear-gradient(135deg, #edf9fb, #fafeff 72%);
+  box-shadow: 0 6px 16px rgba(32, 103, 118, 0.04);
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-base-head {
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid #d7e9ec;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-base .budget-modern-field {
+  padding: 0.58rem 0.65rem;
+  border: 1px solid #d8e8eb;
+  border-radius: 0.68rem;
+  background: #ffffff;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-base .budget-modern-currency-input {
+  border-color: #dbe8eb;
+  background: #fbfefe;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.1rem 0.15rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-group-head > div {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-group-head span {
+  color: #527982;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-group-head strong {
+  color: #26393f;
+  font-size: 0.9rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-group-head small {
+  flex: 0 0 auto;
+  padding: 0.32rem 0.5rem;
+  border: 1px solid #cbe5e9;
+  border-radius: 999px;
+  background: #e9f8fa;
+  color: #277d8f;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment {
+  position: relative;
+  overflow: hidden;
+  border-left: 3px solid #51afbe;
+  box-shadow: 0 5px 13px rgba(31, 77, 87, 0.035);
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment-head {
+  padding-bottom: 0.65rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment-compact-grid > .budget-modern-field {
+  padding: 0.45rem 0.5rem;
+  border: 1px solid #e0eaec;
+  border-radius: 0.62rem;
+  background: #fbfdfd;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment-compact-grid > .budget-modern-field input {
+  min-height: 2.2rem;
+  border: 0;
+  background: transparent;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment-area {
+  border-color: #d3e7ea;
+  background: #eef9fa;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment-removal {
+  border-color: #d9e7e9;
+  background: #f6fafb;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-removal-rate {
+  border-color: #d6e6e9;
+  background: #eef6f7;
+  box-shadow: 0 4px 12px rgba(31, 77, 87, 0.03);
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions {
+  border-color: #d3e6e9;
+  background: linear-gradient(135deg, #f8fcfc, #edf7f8);
+  box-shadow: 0 6px 15px rgba(31, 77, 87, 0.035);
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions-head {
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid #d8e8ea;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions-body .budget-modern-installment-control,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions-body .budget-modern-upfront-payment-control {
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 3px 10px rgba(31, 77, 87, 0.025);
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-stage-actions {
+  padding-top: 0.85rem;
+  border-top: 1px solid #d9e7e9;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculator-card {
+  border-color: #363636 !important;
+  background:
+    radial-gradient(38rem 18rem at 100% 0%, rgba(214, 164, 61, 0.11), transparent 58%),
+    #101010 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-card-head,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-base,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-removal-rate {
+  border-color: #393939 !important;
+  background: #181818 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-toolbar,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-base-head,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions-head,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-stage-actions {
+  border-color: #343434 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-base .budget-modern-field,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment-compact-grid > .budget-modern-field,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions-body .budget-modern-installment-control,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions-body .budget-modern-upfront-payment-control {
+  border-color: #383838 !important;
+  background: #141414 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-group-head strong {
+  color: #ffffff !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-group-head span {
+  color: #d2d2d2 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-group-head small {
+  border-color: #6b5224 !important;
+  background: #241c0c !important;
+  color: #f4c968 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-environment {
+  border-left-color: #d6a43d !important;
+}
+
+@media (max-width: 620px) {
+  .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-calculation-group-head {
+    align-items: flex-start;
+    display: grid;
+  }
+
+  .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-card-head {
+    padding: 0.75rem;
+  }
+}

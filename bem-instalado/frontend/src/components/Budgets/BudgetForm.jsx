@@ -596,6 +596,14 @@ export default function BudgetForm() {
                 </div>
                 </div>
 
+                <div className="budget-modern-calculation-group-head">
+                  <div>
+                    <span>Ambientes do serviço</span>
+                    <strong>Informe as medidas de cada espaço</strong>
+                  </div>
+                  <small>{environments.length} ambiente{environments.length === 1 ? '' : 's'} no orçamento</small>
+                </div>
+
                 <div className="budget-modern-environments">
                   {environments.map((environment, index) => {
                     const details = environmentBreakdown[index];
