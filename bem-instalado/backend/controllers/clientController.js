@@ -14,11 +14,28 @@ function normalizeNullableString(value) {
   return normalized || null;
 }
 
+function normalizeClientType(value) {
+  return String(value || '').trim().toLowerCase() === 'company' ? 'company' : 'person';
+}
+
+function normalizeDocument(value) {
+  const document = String(value || '').replace(/\D/g, '');
+  return document || null;
+}
+
+function hasValidDocument(document, clientType) {
+  return clientType === 'company' ? document?.length === 14 : document?.length === 11;
+}
+
 exports.createClient = async (req, res) => {
   try {
     const {
       name,
       phone,
+      client_type,
+      document_id,
+      whatsapp,
+      contact_name,
       email,
       address,
       street,
@@ -29,6 +46,17 @@ exports.createClient = async (req, res) => {
       zip_code,
       address_reference,
     } = req.body;
+
+    const clientType = normalizeClientType(client_type);
+    const document = normalizeDocument(document_id);
+
+    if (!hasValidDocument(document, clientType)) {
+      return res.status(400).json({ error: `Informe um ${clientType === 'company' ? 'CNPJ' : 'CPF'} válido.` });
+    }
+
+    if (clientType === 'company' && !normalizeNullableString(contact_name)) {
+      return res.status(400).json({ error: 'Informe a pessoa responsável pela empresa.' });
+    }
 
     if (!name || !phone) {
       return res.status(400).json({ error: 'Nome e telefone são obrigatórios.' });
@@ -50,6 +78,10 @@ exports.createClient = async (req, res) => {
           user_id,
           name,
           phone,
+          client_type,
+          document_id,
+          whatsapp,
+          contact_name,
           email,
           address,
           street,
@@ -60,13 +92,17 @@ exports.createClient = async (req, res) => {
           zip_code,
           address_reference
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
         RETURNING *
       `,
       [
         req.userId,
         String(name).trim(),
         String(phone).trim(),
+        clientType,
+        document,
+        normalizeNullableString(whatsapp) || String(phone).trim(),
+        clientType === 'company' ? normalizeNullableString(contact_name) : null,
         normalizeNullableString(email),
         normalizeNullableString(address),
         normalizeNullableString(street),
@@ -129,6 +165,10 @@ exports.updateClient = async (req, res) => {
     const {
       name,
       phone,
+      client_type,
+      document_id,
+      whatsapp,
+      contact_name,
       email,
       address,
       street,
@@ -140,28 +180,43 @@ exports.updateClient = async (req, res) => {
       address_reference,
     } = req.body;
 
+    const clientType = client_type === undefined ? null : normalizeClientType(client_type);
+    const document = document_id === undefined ? null : normalizeDocument(document_id);
+
+    if (clientType && document_id !== undefined && !hasValidDocument(document, clientType)) {
+      return res.status(400).json({ error: `Informe um ${clientType === 'company' ? 'CNPJ' : 'CPF'} válido.` });
+    }
+
     const { rows } = await pool.query(
       `
         UPDATE clients
         SET
           name = COALESCE($1, name),
           phone = COALESCE($2, phone),
-          email = COALESCE($3, email),
-          address = COALESCE($4, address),
-          street = COALESCE($5, street),
-          house_number = COALESCE($6, house_number),
-          neighborhood = COALESCE($7, neighborhood),
-          city = COALESCE($8, city),
-          state = COALESCE($9, state),
-          zip_code = COALESCE($10, zip_code),
-          address_reference = COALESCE($11, address_reference),
+          client_type = COALESCE($3, client_type),
+          document_id = COALESCE($4, document_id),
+          whatsapp = COALESCE($5, whatsapp),
+          contact_name = COALESCE($6, contact_name),
+          email = COALESCE($7, email),
+          address = COALESCE($8, address),
+          street = COALESCE($9, street),
+          house_number = COALESCE($10, house_number),
+          neighborhood = COALESCE($11, neighborhood),
+          city = COALESCE($12, city),
+          state = COALESCE($13, state),
+          zip_code = COALESCE($14, zip_code),
+          address_reference = COALESCE($15, address_reference),
           updated_at = NOW()
-        WHERE id = $12 AND user_id = $13
+        WHERE id = $16 AND user_id = $17
         RETURNING *
       `,
       [
         normalizeNullableString(name),
         normalizeNullableString(phone),
+        clientType,
+        document,
+        normalizeNullableString(whatsapp),
+        normalizeNullableString(contact_name),
         normalizeNullableString(email),
         normalizeNullableString(address),
         normalizeNullableString(street),
