@@ -7,7 +7,6 @@ import { useSubscription } from '../../contexts/SubscriptionContext';
 import PlanUsage, { ProFeatureNotice } from '../Subscription/PlanUsage';
 import ClientForm from '../Clients/ClientForm';
 
-const rollArea = 4.5;
 const INSTALLMENT_OPTIONS = Array.from({ length: 11 }, (_, index) => index + 2);
 
 function BudgetIcon({ type }) {
@@ -124,6 +123,7 @@ export default function BudgetForm() {
   const [showClientForm, setShowClientForm] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
   const [pricingMode, setPricingMode] = useState('roll');
+  const [rollArea, setRollArea] = useState(4.5);
   const [pricePerRoll, setPricePerRoll] = useState(0);
   const [pricePerSquareMeter, setPricePerSquareMeter] = useState(10);
   const [removalPricePerRoll, setRemovalPricePerRoll] = useState(0);
@@ -176,6 +176,8 @@ export default function BudgetForm() {
   };
 
   const removalIncluded = environments.some((environment) => Boolean(environment.removal_included));
+  const rollYield = Number(rollArea);
+  const effectiveRollArea = Number.isFinite(rollYield) && rollYield > 0 ? rollYield : 0;
 
   const environmentBreakdown = useMemo(
     () =>
@@ -183,7 +185,7 @@ export default function BudgetForm() {
         const height = Number(environment.height || 0);
         const width = Number(environment.width || 0);
         const area = height * width;
-        const rollsAuto = Math.ceil(area / rollArea || 0);
+        const rollsAuto = effectiveRollArea > 0 ? Math.ceil(area / effectiveRollArea) : 0;
         const rollsManual = environment.rolls_manual ? Number(environment.rolls_manual) : null;
         const rollsForMode = pricingMode === 'roll' ? (rollsManual || rollsAuto) : rollsAuto;
         const baseSubtotal =
@@ -199,7 +201,7 @@ export default function BudgetForm() {
           total: baseSubtotal,
         };
       }),
-    [environments, pricePerRoll, pricePerSquareMeter, pricingMode]
+    [effectiveRollArea, environments, pricePerRoll, pricePerSquareMeter, pricingMode]
   );
 
   const totals = useMemo(
@@ -261,6 +263,7 @@ export default function BudgetForm() {
   const handleClear = () => {
     setClientId('');
     setPricingMode('roll');
+    setRollArea(4.5);
     setPricePerRoll(profileDefaults.rollPrice);
     setPricePerSquareMeter(10);
     setRemovalPricePerRoll(profileDefaults.removalPricePerRoll);
@@ -288,6 +291,7 @@ export default function BudgetForm() {
     const normalizedClientId = Number(clientId);
     const normalizedPricePerRoll = Number(pricePerRoll);
     const normalizedPricePerSquareMeter = Number(pricePerSquareMeter);
+    const normalizedRollArea = Number(rollArea);
     const normalizedRemovalPricePerRoll = Number(removalPricePerRoll);
     const normalizedInstallmentsCount = Number(installmentsCount);
 
@@ -298,6 +302,11 @@ export default function BudgetForm() {
 
     if (pricingMode === 'roll' && (!Number.isFinite(normalizedPricePerRoll) || normalizedPricePerRoll <= 0)) {
       toast.error('Informe um preço por rolo maior que zero.');
+      return;
+    }
+
+    if (!Number.isFinite(normalizedRollArea) || normalizedRollArea <= 0 || normalizedRollArea > 1000) {
+      toast.error('Informe um rendimento de rolo válido.');
       return;
     }
 
@@ -351,6 +360,7 @@ export default function BudgetForm() {
       await api.post('/budgets', {
         client_id: normalizedClientId,
         pricing_mode: pricingMode,
+        roll_area: normalizedRollArea,
         price_per_roll: normalizedPricePerRoll,
         price_per_square_meter: normalizedPricePerSquareMeter,
         installment_enabled: installmentEnabled,
@@ -621,7 +631,16 @@ export default function BudgetForm() {
 
                   <label className="budget-modern-field">
                     <span>Rendimento do rolo (m²)</span>
-                    <input disabled readOnly value={rollArea.toFixed(1).replace('.', ',')} />
+                    <input
+                      inputMode="decimal"
+                      min="0.01"
+                      onChange={(event) => setRollArea(event.target.value)}
+                      placeholder="Ex.: 4,5"
+                      required
+                      step="0.01"
+                      type="number"
+                      value={rollArea}
+                    />
                   </label>
 
                 </div>
@@ -635,7 +654,7 @@ export default function BudgetForm() {
                   <article>
                     <span>Rolos necessarios</span>
                     <strong>{totals.rolls} rolos</strong>
-                    <small>{(totals.rolls * rollArea).toFixed(2)} m² previstos</small>
+                    <small>{(totals.rolls * effectiveRollArea).toFixed(2)} m² previstos</small>
                   </article>
                   <article>
                     <span>Subtotal de materiais</span>

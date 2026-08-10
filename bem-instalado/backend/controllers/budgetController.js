@@ -8,7 +8,8 @@ const {
   upgradeRequired,
 } = require('../services/planAccess');
 
-const ROLL_AREA = 4.5;
+const DEFAULT_ROLL_AREA = 4.5;
+const MAX_ROLL_AREA = 1000;
 
 function normalizeNumber(value) {
   return Number(value || 0);
@@ -124,6 +125,7 @@ exports.createBudget = async (req, res) => {
       client_id,
       environments,
       pricing_mode,
+      roll_area,
       price_per_roll,
       price_per_square_meter,
       installment_enabled,
@@ -134,6 +136,9 @@ exports.createBudget = async (req, res) => {
     } = req.body;
     const cleanClientId = Number(client_id);
     const cleanPricingMode = normalizePricingMode(pricing_mode);
+    const cleanRollArea = roll_area === null || roll_area === undefined || String(roll_area).trim() === ''
+      ? DEFAULT_ROLL_AREA
+      : Number(roll_area);
     const cleanPricePerRoll = normalizeNumber(price_per_roll);
     const cleanPricePerSquareMeter = normalizeNumber(price_per_square_meter);
     const installmentsEnabled = normalizeBoolean(installment_enabled);
@@ -193,6 +198,10 @@ exports.createBudget = async (req, res) => {
 
     if (cleanPricingMode === 'square_meter' && !isPositiveNumber(cleanPricePerSquareMeter)) {
       return res.status(400).json({ error: 'Preço por metro quadrado deve ser maior que zero.' });
+    }
+
+    if (!isPositiveNumber(cleanRollArea) || cleanRollArea > MAX_ROLL_AREA) {
+      return res.status(400).json({ error: 'Rendimento do rolo precisa ser maior que zero e menor que 1000 m².' });
     }
 
     if (
@@ -272,7 +281,7 @@ exports.createBudget = async (req, res) => {
       }
 
       const area = height * width;
-      const rollsAuto = Math.ceil(area / ROLL_AREA);
+      const rollsAuto = Math.ceil(area / cleanRollArea);
       const rollsUsed = rollsManual || rollsAuto;
       const subtotalByEnvironment = cleanPricingMode === 'square_meter'
         ? area * cleanPricePerSquareMeter
@@ -331,6 +340,7 @@ exports.createBudget = async (req, res) => {
           client_id,
           status,
           pricing_mode,
+          roll_area,
           price_per_roll,
           price_per_square_meter,
           total_rolls,
@@ -344,13 +354,14 @@ exports.createBudget = async (req, res) => {
           installment_enabled,
           installments_count
         )
-        VALUES ($1, $2, 'pending', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        VALUES ($1, $2, 'pending', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
         RETURNING *
       `,
       [
         req.userId,
         cleanClientId,
         cleanPricingMode,
+        cleanRollArea,
         cleanPricingMode === 'roll' ? cleanPricePerRoll : 0,
         cleanPricingMode === 'square_meter' ? cleanPricePerSquareMeter : 0,
         totalRolls,
