@@ -518,7 +518,7 @@ export default function BudgetForm() {
                   </div>
                 </div>
 
-                <div className="budget-modern-calculation-base">
+                <div className="budget-modern-calculation-base budget-modern-calculation-block">
                   <div className="budget-modern-calculation-base-head">
                     <div>
                       <span>Material e cobrança</span>
@@ -596,6 +596,7 @@ export default function BudgetForm() {
                 </div>
                 </div>
 
+                <div className="budget-modern-calculation-block budget-modern-environments-block">
                 <div className="budget-modern-calculation-group-head">
                   <div>
                     <span>Ambientes do serviço</span>
@@ -692,8 +693,9 @@ export default function BudgetForm() {
                     );
                   })}
                 </div>
+                </div>
 
-                <div className="budget-modern-payment-box budget-modern-removal-rate">
+                <div className="budget-modern-payment-box budget-modern-removal-rate budget-modern-calculation-block">
                   <label className="budget-modern-field">
                     <span>Remoção por rolo</span>
                     <div className="budget-modern-currency-input">
@@ -718,7 +720,7 @@ export default function BudgetForm() {
                   </div>
                 </div>
 
-                <div className="budget-modern-payment-conditions">
+                <div className="budget-modern-payment-conditions budget-modern-calculation-block">
                   <div className="budget-modern-payment-conditions-head">
                     <div>
                       <span>Pagamento</span>
