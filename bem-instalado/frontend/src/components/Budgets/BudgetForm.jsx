@@ -411,7 +411,7 @@ export default function BudgetForm() {
                 </div>
                 <div>
                   <h2>{activeStep === 1 ? 'Escolha o cliente' : activeStep === 2 ? 'Monte o orçamento' : activeStep === 4 ? 'Confirme o envio' : 'Revise o orçamento'}</h2>
-                  <p>{activeStep === 1 ? 'Defina para quem este orçamento será criado.' : activeStep === 2 ? 'Informe medidas e valores para calcular.' : activeStep === 4 ? 'Confira os dados finais antes de salvar o orçamento.' : 'Confira os valores antes de seguir para o envio.'}</p>
+                  <p>{activeStep === 1 ? 'Defina para quem este orçamento será criado.' : activeStep === 2 ? 'Comece pelos ambientes e pela remoção; depois defina o material e o pagamento.' : activeStep === 4 ? 'Confira os dados finais antes de salvar o orçamento.' : 'Confira os valores antes de seguir para o envio.'}</p>
                 </div>
               </header>
 
@@ -421,7 +421,7 @@ export default function BudgetForm() {
                 <div className="budget-modern-section-title">
                   <div>
                     <BudgetIcon type="measure" />
-                    <span>1. Medidas da parede</span>
+                    <span>1. Ambientes e remoção</span>
                   </div>
 
                   <button className="budget-modern-inline-button" onClick={addEnvironment} type="button">
@@ -432,7 +432,7 @@ export default function BudgetForm() {
 
                 <div className="budget-modern-note">
                   <BudgetIcon type="info" />
-                  Ajuste manual de rolos disponível em cada ambiente quando necessário.
+                  Informe as medidas de cada ambiente. O ajuste manual de rolos fica disponível quando necessário.
                 </div>
 
                 <div className="budget-modern-environments">
@@ -519,13 +519,50 @@ export default function BudgetForm() {
                     );
                   })}
                 </div>
+
+                <div className="budget-modern-payment-box">
+                  <label className="budget-modern-toggle">
+                    <input
+                      checked={removalIncluded}
+                      onChange={(event) => setRemovalIncluded(event.target.checked)}
+                      type="checkbox"
+                    />
+                    <span>Incluir remoção de papel de parede</span>
+                  </label>
+
+                  {removalIncluded ? (
+                    <div className="budget-modern-field-grid">
+                      <label className="budget-modern-field budget-modern-field--full">
+                        <span>Valor da remoção por rolo/unidade</span>
+                        <div className="budget-modern-currency-input">
+                          <i>R$</i>
+                          <input
+                            min="0"
+                            onChange={(event) => setRemovalPricePerRoll(event.target.value)}
+                            placeholder="0,00"
+                            step="0.01"
+                            type="number"
+                            value={removalPricePerRoll}
+                          />
+                        </div>
+                      </label>
+                    </div>
+                  ) : null}
+
+                  <div className="budget-modern-note">
+                    <BudgetIcon type="info" />
+                    {removalIncluded
+                      ? `${totals.rolls} rolo${totals.rolls === 1 ? '' : 's'} × ${formatCurrency(removalPricePerRoll)} = ${formatCurrency(totals.removal)}`
+                      : 'A remoção é opcional e será calculada pela quantidade total de rolos.'}
+                  </div>
+                </div>
               </div>
 
               <div className="budget-modern-section">
                 <div className="budget-modern-section-title">
                   <div>
                     <BudgetIcon type="wallpaper" />
-                    <span>2. Papel de parede</span>
+                    <span>2. Material e cálculo</span>
                   </div>
                 </div>
 
@@ -605,52 +642,6 @@ export default function BudgetForm() {
                     <small>{pricingMode === 'roll' ? 'Calculo por rolo.' : 'Calculo por metro quadrado.'}</small>
                   </article>
                 </div>
-              </div>
-
-              <div className="budget-modern-section">
-                <div className="budget-modern-section-title">
-                  <div>
-                    <BudgetIcon type="services" />
-                    <span>3. Remoção e pagamento</span>
-                  </div>
-                </div>
-
-                <div className="budget-modern-payment-box">
-                  <label className="budget-modern-toggle">
-                    <input
-                      checked={removalIncluded}
-                      onChange={(event) => setRemovalIncluded(event.target.checked)}
-                      type="checkbox"
-                    />
-                    <span>Incluir remoção de papel de parede</span>
-                  </label>
-
-                  {removalIncluded ? (
-                    <div className="budget-modern-field-grid">
-                      <label className="budget-modern-field budget-modern-field--full">
-                        <span>Valor da remoção por rolo/unidade</span>
-                        <div className="budget-modern-currency-input">
-                          <i>R$</i>
-                          <input
-                            min="0"
-                            onChange={(event) => setRemovalPricePerRoll(event.target.value)}
-                            placeholder="0,00"
-                            step="0.01"
-                            type="number"
-                            value={removalPricePerRoll}
-                          />
-                        </div>
-                      </label>
-                    </div>
-                  ) : null}
-
-                  <div className="budget-modern-note">
-                    <BudgetIcon type="info" />
-                    {removalIncluded
-                      ? `${totals.rolls} rolo${totals.rolls === 1 ? '' : 's'} × ${formatCurrency(removalPricePerRoll)} = ${formatCurrency(totals.removal)}`
-                      : 'A remoção é opcional e será calculada pela quantidade total de rolos.'}
-                  </div>
-                </div>
 
                 <div className="budget-modern-service-list">
                   <div className="budget-modern-service-row">
@@ -664,6 +655,15 @@ export default function BudgetForm() {
                   <div className="budget-modern-service-row">
                     <span>Remoção ({totals.rolls} rolos)</span>
                     <strong>{formatCurrency(totals.removal)}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div className="budget-modern-section">
+                <div className="budget-modern-section-title">
+                  <div>
+                    <BudgetIcon type="services" />
+                    <span>3. Pagamento</span>
                   </div>
                 </div>
 
