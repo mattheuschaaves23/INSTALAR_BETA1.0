@@ -1,0 +1,3 @@
+ALTER TABLE budgets
+  ADD COLUMN IF NOT EXISTS interest_free_installments INTEGER NOT NULL DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS installment_interest_rate NUMERIC(5, 2) NOT NULL DEFAULT 0;

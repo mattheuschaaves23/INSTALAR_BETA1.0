@@ -8,6 +8,8 @@ import PlanUsage from '../Subscription/PlanUsage';
 import ClientForm from '../Clients/ClientForm';
 
 const INSTALLMENT_OPTIONS = Array.from({ length: 11 }, (_, index) => index + 2);
+const INTEREST_FREE_INSTALLMENT_OPTIONS = Array.from({ length: 12 }, (_, index) => index + 1);
+const INSTALLMENT_INTEREST_OPTIONS = [0, 1, 1.5, 2, 2.5, 3, 4, 5];
 const UPFRONT_PAYMENT_METHODS = [
   { id: 'pix', label: 'Pix' },
   { id: 'boleto', label: 'Boleto' },
@@ -61,6 +63,20 @@ function BudgetIcon({ type }) {
           <path d="M6 6.5a1.5 1.5 0 0 1 1.5-1.5H16a2 2 0 0 1 2 2v2.2H9a2 2 0 0 0-2 2V18" />
           <path d="M9 18h4M13 18v2.5" />
           <path d="M8 8h2M12 8h2M10 11h2M8 14h2M12 14h2" />
+        </svg>
+      );
+    case 'card':
+      return (
+        <svg {...props}>
+          <rect x="3.5" y="5.5" width="17" height="13" rx="2.5" />
+          <path d="M3.5 10h17M7 15h3.5" />
+        </svg>
+      );
+    case 'view':
+      return (
+        <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <path d="M2.8 12s3.2-5.3 9.2-5.3S21.2 12 21.2 12 18 17.3 12 17.3 2.8 12 2.8 12Z" />
+          <circle cx="12" cy="12" r="2.3" />
         </svg>
       );
     case 'services':
@@ -144,6 +160,8 @@ export default function BudgetForm() {
   const [profileDefaults, setProfileDefaults] = useState({ rollPrice: 0, removalPricePerRoll: 0 });
   const [installmentEnabled, setInstallmentEnabled] = useState(false);
   const [installmentsCount, setInstallmentsCount] = useState(3);
+  const [interestFreeInstallments, setInterestFreeInstallments] = useState(3);
+  const [installmentInterestRate, setInstallmentInterestRate] = useState(0);
   const [upfrontPaymentTerms, setUpfrontPaymentTerms] = useState(createUpfrontPaymentTerms);
   const [environments, setEnvironments] = useState([createEnvironment()]);
 
@@ -247,6 +265,14 @@ export default function BudgetForm() {
 
   const grandTotal = totals.total;
   const normalizedInstallments = installmentEnabled ? Number(installmentsCount || 2) : 1;
+  const normalizedInterestFreeInstallments = installmentEnabled
+    ? Math.min(normalizedInstallments, Math.max(1, Number(interestFreeInstallments || 1)))
+    : 1;
+  const normalizedInstallmentInterestRate = installmentEnabled
+    ? Math.max(0, Number(installmentInterestRate || 0))
+    : 0;
+  const pixDiscountPercent = Number(upfrontPaymentTerms.pix?.discount || 0);
+  const pixPreviewValue = grandTotal * (1 - (pixDiscountPercent / 100));
   const selectedUpfrontPaymentTerms = useMemo(
     () =>
       UPFRONT_PAYMENT_METHODS.reduce((selected, method) => {
@@ -316,6 +342,8 @@ export default function BudgetForm() {
     setRemovalPricePerRoll(profileDefaults.removalPricePerRoll);
     setInstallmentEnabled(false);
     setInstallmentsCount(3);
+    setInterestFreeInstallments(3);
+    setInstallmentInterestRate(0);
     setUpfrontPaymentTerms(createUpfrontPaymentTerms());
     setEnvironments([createEnvironment()]);
   };
@@ -352,6 +380,8 @@ export default function BudgetForm() {
     const normalizedRollArea = Number(rollArea);
     const normalizedRemovalPricePerRoll = Number(removalPricePerRoll);
     const normalizedInstallmentsCount = Number(installmentsCount);
+    const normalizedInterestFreeCount = Number(interestFreeInstallments);
+    const normalizedInterestRate = Number(installmentInterestRate);
 
     if (!Number.isInteger(normalizedClientId) || normalizedClientId <= 0) {
       toast.error('Selecione um cliente válido.');
@@ -394,6 +424,24 @@ export default function BudgetForm() {
       return;
     }
 
+    if (
+      installmentEnabled &&
+      (!Number.isInteger(normalizedInterestFreeCount) ||
+        normalizedInterestFreeCount < 1 ||
+        normalizedInterestFreeCount > normalizedInstallmentsCount)
+    ) {
+      toast.error('Defina até quantas parcelas ficam sem juros.');
+      return;
+    }
+
+    if (
+      installmentEnabled &&
+      (!Number.isFinite(normalizedInterestRate) || normalizedInterestRate < 0 || normalizedInterestRate > 100)
+    ) {
+      toast.error('Informe uma taxa de juros entre 0% e 100%.');
+      return;
+    }
+
     const invalidUpfrontPaymentTerm = selectedUpfrontPaymentTerms.find((term) => (
       !Number.isFinite(term.discount_percent) || term.discount_percent < 0 || term.discount_percent > 100
     ));
@@ -432,6 +480,8 @@ export default function BudgetForm() {
         price_per_square_meter: normalizedPricePerSquareMeter,
         installment_enabled: installmentEnabled,
         installments_count: installmentEnabled ? normalizedInstallmentsCount : 1,
+        interest_free_installments: installmentEnabled ? normalizedInterestFreeCount : 1,
+        installment_interest_rate: installmentEnabled ? normalizedInterestRate : 0,
         upfront_payment_terms: selectedUpfrontPaymentTerms,
         removal_included: removalIncluded,
         removal_price_per_roll: removalIncluded ? normalizedRemovalPricePerRoll : 0,
@@ -719,29 +769,85 @@ export default function BudgetForm() {
 
                   <div className="budget-modern-payment-conditions-body">
                     <div className="budget-modern-payment-box budget-modern-installment-control">
-                      <label className="budget-modern-toggle">
+                      <label className="budget-modern-toggle budget-modern-installment-switch">
                         <input
                           checked={installmentEnabled}
                           onChange={(event) => setInstallmentEnabled(event.target.checked)}
                           type="checkbox"
                         />
-                        <span>Permitir parcelamento</span>
+                        <span>Aceitar pagamento parcelado</span>
                       </label>
 
                       {installmentEnabled ? (
-                        <label className="budget-modern-field budget-modern-field--full">
-                          <span>Parcelamento</span>
-                          <select
-                            onChange={(event) => setInstallmentsCount(Number(event.target.value))}
-                            value={installmentsCount}
-                          >
-                            {INSTALLMENT_OPTIONS.map((option) => (
-                              <option key={option} value={option}>
-                                {option}x de {formatCurrency(grandTotal / option)}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
+                        <>
+                          <div className="budget-modern-credit-card-settings">
+                            <div className="budget-modern-credit-card-head">
+                              <BudgetIcon type="card" />
+                              <strong>Cartão de crédito</strong>
+                            </div>
+
+                            <div className="budget-modern-installment-fields">
+                              <label className="budget-modern-field">
+                                <span>Máximo de parcelas</span>
+                                <select
+                                  onChange={(event) => {
+                                    const nextCount = Number(event.target.value);
+                                    setInstallmentsCount(nextCount);
+                                    setInterestFreeInstallments((current) => Math.min(Number(current || nextCount), nextCount));
+                                  }}
+                                  value={installmentsCount}
+                                >
+                                  {INSTALLMENT_OPTIONS.map((option) => (
+                                    <option key={option} value={option}>{option}x</option>
+                                  ))}
+                                </select>
+                              </label>
+
+                              <label className="budget-modern-field">
+                                <span>Sem juros até</span>
+                                <select
+                                  onChange={(event) => setInterestFreeInstallments(Number(event.target.value))}
+                                  value={Math.min(interestFreeInstallments, installmentsCount)}
+                                >
+                                  {INTEREST_FREE_INSTALLMENT_OPTIONS.filter((option) => option <= installmentsCount).map((option) => (
+                                    <option key={option} value={option}>{option}x</option>
+                                  ))}
+                                </select>
+                              </label>
+
+                              <label className="budget-modern-field">
+                                <span>Juros após (a.m.)</span>
+                                <select
+                                  onChange={(event) => setInstallmentInterestRate(Number(event.target.value))}
+                                  value={installmentInterestRate}
+                                >
+                                  {INSTALLMENT_INTEREST_OPTIONS.map((option) => (
+                                    <option key={option} value={option}>{option.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%</option>
+                                  ))}
+                                </select>
+                              </label>
+                            </div>
+                          </div>
+
+                          <div className="budget-modern-installment-preview">
+                            <div>
+                              <BudgetIcon type="view" />
+                              <strong>Prévia para o cliente</strong>
+                            </div>
+                            <span>
+                              {upfrontPaymentTerms.pix?.enabled
+                                ? `Pix: ${formatCurrency(pixPreviewValue)}${pixDiscountPercent > 0 ? ` com ${pixDiscountPercent}% de desconto` : ''}`
+                                : 'Pix: configure a opção à vista ao lado'}
+                            </span>
+                            <span>Cartão: até {normalizedInstallments}x de {formatCurrency(grandTotal / normalizedInstallments)}</span>
+                            <small>
+                              Sem juros até {normalizedInterestFreeInstallments}x
+                              {normalizedInterestFreeInstallments < normalizedInstallments
+                                ? ` • juros após: ${normalizedInstallmentInterestRate.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}% a.m.`
+                                : ''}
+                            </small>
+                          </div>
+                        </>
                       ) : null}
                     </div>
 

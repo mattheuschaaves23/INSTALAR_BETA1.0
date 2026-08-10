@@ -32695,3 +32695,221 @@ html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqu
   color: #ffffff;
   box-shadow: none;
 }
+
+/* Parcelamento: configuração curta, com a leitura do cliente no próprio bloco. */
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions-body {
+  grid-template-columns: minmax(24rem, 0.9fr) minmax(26rem, 1.1fr);
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions-body .budget-modern-installment-control {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.8rem !important;
+  border: 1px solid #b9dbe1 !important;
+  border-radius: 0.72rem !important;
+  background: #fafdfe !important;
+  box-shadow: 0 4px 12px rgba(31, 79, 88, 0.045) !important;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-switch {
+  min-height: 2.15rem !important;
+  gap: 0.62rem;
+  color: #203840 !important;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-switch input {
+  appearance: none;
+  position: relative;
+  flex: 0 0 auto;
+  width: 2.45rem;
+  height: 1.42rem;
+  margin: 0;
+  border: 1px solid #91b9c1;
+  border-radius: 999px;
+  background: #c9dce0;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-switch input::after {
+  content: '' !important;
+  position: absolute;
+  top: 0.16rem;
+  left: 0.16rem;
+  width: 0.95rem !important;
+  height: 0.95rem !important;
+  border: 0 !important;
+  border-radius: 999px;
+  background: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(16, 49, 56, 0.2);
+  transform: none !important;
+  transition: transform 160ms ease;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-switch input:checked {
+  border-color: #197f90;
+  background: #218b9c;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-switch input:checked::after {
+  transform: translateX(1rem) !important;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-credit-card-settings {
+  display: grid;
+  gap: 0.62rem;
+  padding: 0.72rem;
+  border: 1px solid #d2e6e9;
+  border-radius: 0.6rem;
+  background: #ffffff;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-credit-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.48rem;
+  color: #1f343b;
+  font-size: 0.83rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-credit-card-head svg {
+  width: 1.14rem;
+  height: 1.14rem;
+  color: #287e8f;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-fields .budget-modern-field {
+  gap: 0.28rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-fields .budget-modern-field span {
+  min-height: 0;
+  color: #557078;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-fields select {
+  min-height: 2.35rem;
+  padding: 0 0.7rem;
+  border: 1px solid #c4dde2;
+  border-radius: 0.48rem;
+  background: #fbfdfe;
+  color: #203840;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-fields select:focus {
+  border-color: #218b9c;
+  box-shadow: 0 0 0 3px rgba(33, 139, 156, 0.13);
+  outline: 0;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-preview {
+  display: grid;
+  gap: 0.23rem;
+  padding: 0.65rem 0.72rem;
+  border: 1px solid #d3e9ec;
+  border-radius: 0.6rem;
+  background: #edf8f9;
+  color: #34525a;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-preview > div {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+  margin-bottom: 0.06rem;
+  color: #246f7d;
+  font-size: 0.76rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-preview svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-preview span,
+.dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-preview small {
+  color: #34525a;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 70rem) {
+  .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 34rem) {
+  .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-payment-conditions-body .budget-modern-installment-control {
+  border-color: #5d4821 !important;
+  background: #151515 !important;
+  box-shadow: none !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-switch,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-credit-card-head {
+  color: #ffffff !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-switch input {
+  border-color: #725921;
+  background: #45413a;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-switch input:checked {
+  border-color: #d6a43d;
+  background: #b9851d;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-credit-card-settings {
+  border-color: #3e3a32;
+  background: #1e1e1e;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-credit-card-head svg {
+  color: #e0b351;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-fields .budget-modern-field span,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-preview,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-preview span,
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-preview small {
+  color: #d4d4d4 !important;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-fields select {
+  border-color: #5d4821;
+  background: #111111;
+  color: #ffffff;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-preview {
+  border-color: #4a3b20;
+  background: #211c12;
+}
+
+html[data-site-theme='dark'] .dashboard-reference-layout.installer-workspace.aqua-panel-theme .budget-modern-installment-preview > div {
+  color: #e0b351;
+}

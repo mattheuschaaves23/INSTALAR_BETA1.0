@@ -252,6 +252,8 @@ async function ensureRuntimeSchema() {
     'ALTER TABLE budgets ADD COLUMN IF NOT EXISTS price_per_square_meter NUMERIC(10, 2) DEFAULT 0',
     'ALTER TABLE budgets ADD COLUMN IF NOT EXISTS installment_enabled BOOLEAN NOT NULL DEFAULT FALSE',
     'ALTER TABLE budgets ADD COLUMN IF NOT EXISTS installments_count INTEGER NOT NULL DEFAULT 1',
+    'ALTER TABLE budgets ADD COLUMN IF NOT EXISTS interest_free_installments INTEGER NOT NULL DEFAULT 1',
+    'ALTER TABLE budgets ADD COLUMN IF NOT EXISTS installment_interest_rate NUMERIC(5, 2) NOT NULL DEFAULT 0',
     "ALTER TABLE budgets ADD COLUMN IF NOT EXISTS payment_terms JSONB NOT NULL DEFAULT '[]'::jsonb",
     'ALTER TABLE environments ADD COLUMN IF NOT EXISTS price_per_square_meter NUMERIC(10, 2) DEFAULT 0',
     'ALTER TABLE environments ADD COLUMN IF NOT EXISTS removal_included BOOLEAN NOT NULL DEFAULT FALSE',

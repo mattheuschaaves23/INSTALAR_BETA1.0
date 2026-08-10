@@ -192,6 +192,8 @@ exports.createBudget = async (req, res) => {
       price_per_square_meter,
       installment_enabled,
       installments_count,
+      interest_free_installments,
+      installment_interest_rate,
       upfront_payment_terms,
       removal_included,
       removal_price,
@@ -207,6 +209,14 @@ exports.createBudget = async (req, res) => {
     const installmentsEnabled = normalizeBoolean(installment_enabled);
     const requestedInstallmentsCount = normalizeInteger(installments_count);
     const installmentsCount = installmentsEnabled ? requestedInstallmentsCount : 1;
+    const requestedInterestFreeInstallments = interest_free_installments === undefined || interest_free_installments === null || interest_free_installments === ''
+      ? requestedInstallmentsCount
+      : normalizeInteger(interest_free_installments);
+    const requestedInstallmentInterestRate = installment_interest_rate === undefined || installment_interest_rate === null || installment_interest_rate === ''
+      ? 0
+      : Number(installment_interest_rate);
+    const interestFreeInstallments = installmentsEnabled ? requestedInterestFreeInstallments : 1;
+    const installmentInterestRate = installmentsEnabled ? requestedInstallmentInterestRate : 0;
     const upfrontPaymentTerms = normalizeUpfrontPaymentTerms(upfront_payment_terms);
     const usesRemovalPerRoll = Object.prototype.hasOwnProperty.call(req.body || {}, 'removal_price_per_roll');
     const removalIncludedByRoll = normalizeBoolean(removal_included);
@@ -278,6 +288,14 @@ exports.createBudget = async (req, res) => {
     if (installmentsEnabled) {
       if (!Number.isInteger(installmentsCount) || installmentsCount < 2 || installmentsCount > 12) {
         return res.status(400).json({ error: 'Parcelamento deve ser entre 2x e 12x.' });
+      }
+
+      if (!Number.isInteger(interestFreeInstallments) || interestFreeInstallments < 1 || interestFreeInstallments > installmentsCount) {
+        return res.status(400).json({ error: 'Parcelas sem juros devem ficar entre 1x e o máximo do cartão.' });
+      }
+
+      if (!Number.isFinite(installmentInterestRate) || installmentInterestRate < 0 || installmentInterestRate > 100) {
+        return res.status(400).json({ error: 'Juros do parcelamento devem ficar entre 0% e 100%.' });
       }
     }
 
@@ -408,9 +426,11 @@ exports.createBudget = async (req, res) => {
           total_amount,
           installment_enabled,
           installments_count,
+          interest_free_installments,
+          installment_interest_rate,
           payment_terms
         )
-        VALUES ($1, $2, 'pending', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+        VALUES ($1, $2, 'pending', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
         RETURNING *
       `,
       [
@@ -430,6 +450,8 @@ exports.createBudget = async (req, res) => {
         totalAmount,
         installmentsEnabled,
         installmentsEnabled ? installmentsCount : 1,
+        installmentsEnabled ? interestFreeInstallments : 1,
+        installmentsEnabled ? Math.round(installmentInterestRate * 100) / 100 : 0,
         JSON.stringify(upfrontPaymentTerms),
       ]
     );
@@ -865,8 +887,13 @@ exports.sendWhatsApp = async (req, res) => {
 
     const installmentsEnabled = Boolean(budget.installment_enabled);
     const installmentsCount = Number(budget.installments_count || 1);
+    const interestFreeInstallments = Math.min(
+      installmentsCount,
+      Math.max(1, Number(budget.interest_free_installments || installmentsCount))
+    );
+    const installmentInterestRate = Math.max(0, Number(budget.installment_interest_rate || 0));
     const installmentText = installmentsEnabled && installmentsCount > 1
-      ? ` Parcelamento disponível: ${installmentsCount}x de R$ ${(Number(budget.total_amount || 0) / installmentsCount).toFixed(2)}.`
+      ? ` Parcelamento disponível: até ${installmentsCount}x de R$ ${(Number(budget.total_amount || 0) / installmentsCount).toFixed(2)}. Sem juros até ${interestFreeInstallments}x${interestFreeInstallments < installmentsCount ? `; juros após: ${installmentInterestRate.toFixed(2)}% ao mês` : ''}.`
       : '';
     const upfrontPaymentTerms = formatUpfrontPaymentTerms(budget.payment_terms);
     const upfrontPaymentText = upfrontPaymentTerms

@@ -106,12 +106,19 @@ function installmentInfo(budget) {
   const enabled = Boolean(budget?.installment_enabled);
   const count = Number(budget?.installments_count || 1);
   const normalizedCount = enabled && count >= 2 ? Math.min(count, 12) : 1;
+  const interestFreeCount = Math.min(
+    normalizedCount,
+    Math.max(1, Number(budget?.interest_free_installments || normalizedCount))
+  );
+  const interestRate = Math.max(0, toNumber(budget?.installment_interest_rate));
   const total = toNumber(budget?.total_amount);
   const installmentValue = normalizedCount > 1 ? total / normalizedCount : total;
 
   return {
     enabled: normalizedCount > 1,
     count: normalizedCount,
+    interestFreeCount,
+    interestRate,
     installmentValue,
   };
 }
@@ -425,6 +432,9 @@ function drawTotalsPanel(doc, budget, installment, y, width) {
     installment.enabled
       ? `Pagamento parcelado: ${installment.count}x de ${formatCurrency(installment.installmentValue)}`
       : 'Pagamento parcelado: não habilitado',
+    installment.enabled
+      ? `Sem juros até ${installment.interestFreeCount}x${installment.interestFreeCount < installment.count ? ` • juros após: ${installment.interestRate.toFixed(2)}% a.m.` : ''}`
+      : '',
   ];
   const textWidth = width - 28;
   doc.font('Helvetica').fontSize(10);
