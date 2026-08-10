@@ -533,8 +533,8 @@ export default function BudgetForm() {
                   })}
                 </div>
 
-                <div className="budget-modern-payment-box">
-                  <label className="budget-modern-field budget-modern-field--full">
+                <div className="budget-modern-payment-box budget-modern-removal-rate">
+                  <label className="budget-modern-field">
                     <span>Valor da remoção por rolo/unidade</span>
                     <div className="budget-modern-currency-input">
                       <i>R$</i>

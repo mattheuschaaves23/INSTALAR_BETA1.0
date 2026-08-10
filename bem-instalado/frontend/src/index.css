@@ -12615,6 +12615,26 @@ body {
   border: 1px solid rgba(var(--site-accent-rgb), 0.12);
 }
 
+.budget-modern-removal-rate {
+  width: min(100%, 44rem);
+  justify-self: start;
+  grid-template-columns: minmax(13.5rem, 16rem) minmax(0, 1fr);
+  align-items: end;
+  gap: 1rem;
+}
+
+.budget-modern-removal-rate .budget-modern-note {
+  min-height: 3.45rem;
+  padding: 0.65rem 0.85rem;
+}
+
+@media (max-width: 42rem) {
+  .budget-modern-removal-rate {
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+}
+
 .budget-modern-actions-bar,
 .budget-modern-summary-actions,
 .budget-modern-stage-actions {
