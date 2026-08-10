@@ -460,6 +460,59 @@ export default function BudgetForm() {
                   </button>
                 </div>
 
+                <div className="budget-modern-field-grid budget-modern-material-grid">
+                  {pricingMode === 'roll' ? (
+                    <label className="budget-modern-field">
+                      <span>Preço do rolo (R$)</span>
+                      <div className="budget-modern-currency-input">
+                        <i>R$</i>
+                        <input
+                          min="0.01"
+                          onChange={(event) => setPricePerRoll(event.target.value)}
+                          placeholder="0,00"
+                          required
+                          step="0.01"
+                          type="number"
+                          value={pricePerRoll}
+                        />
+                      </div>
+                    </label>
+                  ) : (
+                    <label className="budget-modern-field">
+                      <span>Valor por m²</span>
+                      <div className="budget-modern-currency-input">
+                        <i>R$</i>
+                        <input
+                          min="0.01"
+                          onChange={(event) => setPricePerSquareMeter(event.target.value)}
+                          placeholder="0,00"
+                          required
+                          step="0.01"
+                          type="number"
+                          value={pricePerSquareMeter}
+                        />
+                      </div>
+                    </label>
+                  )}
+
+                  <label className="budget-modern-field">
+                    <span>Rendimento do rolo</span>
+                    <div className="budget-modern-currency-input">
+                      <i>m²</i>
+                      <input
+                        inputMode="decimal"
+                        min="0.01"
+                        onChange={(event) => setRollArea(event.target.value)}
+                        placeholder="Ex.: 4,5"
+                        required
+                        step="0.01"
+                        type="number"
+                        value={rollArea}
+                      />
+                    </div>
+                  </label>
+                </div>
+
                 <div className="budget-modern-note">
                   <BudgetIcon type="info" />
                   Informe as medidas de cada ambiente. O ajuste manual de rolos fica disponível quando necessário.
@@ -585,60 +638,6 @@ export default function BudgetForm() {
                 </div>
 
                 <div className="budget-modern-calculation-divider" />
-
-                <div className="budget-modern-field-grid budget-modern-material-grid">
-                  {pricingMode === 'roll' ? (
-                    <label className="budget-modern-field">
-                      <span>Preço do rolo (R$)</span>
-                      <div className="budget-modern-currency-input">
-                        <i>R$</i>
-                        <input
-                          min="0.01"
-                          onChange={(event) => setPricePerRoll(event.target.value)}
-                          placeholder="0,00"
-                          required
-                          step="0.01"
-                          type="number"
-                          value={pricePerRoll}
-                        />
-                      </div>
-                    </label>
-                  ) : (
-                    <label className="budget-modern-field">
-                      <span>Valor por m²</span>
-                      <div className="budget-modern-currency-input">
-                        <i>R$</i>
-                        <input
-                          min="0.01"
-                          onChange={(event) => setPricePerSquareMeter(event.target.value)}
-                          placeholder="0,00"
-                          required
-                          step="0.01"
-                          type="number"
-                          value={pricePerSquareMeter}
-                        />
-                      </div>
-                    </label>
-                  )}
-
-                  <label className="budget-modern-field">
-                    <span>Rendimento do rolo</span>
-                    <div className="budget-modern-currency-input">
-                      <i>m²</i>
-                      <input
-                        inputMode="decimal"
-                        min="0.01"
-                        onChange={(event) => setRollArea(event.target.value)}
-                        placeholder="Ex.: 4,5"
-                        required
-                        step="0.01"
-                        type="number"
-                        value={rollArea}
-                      />
-                    </div>
-                  </label>
-
-                </div>
 
                 <div className="budget-modern-calculated-grid">
                   <article>
