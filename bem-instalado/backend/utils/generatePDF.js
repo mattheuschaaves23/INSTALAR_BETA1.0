@@ -116,6 +116,43 @@ function installmentInfo(budget) {
   };
 }
 
+const UPFRONT_PAYMENT_LABELS = {
+  pix: 'Pix',
+  boleto: 'Boleto',
+  debit_card: 'Cartão de débito',
+  credit_card: 'Cartão à vista',
+  cash: 'Dinheiro',
+  bank_transfer: 'Transferência',
+};
+
+function upfrontPaymentInfo(budget) {
+  let terms = budget?.payment_terms;
+
+  if (typeof terms === 'string') {
+    try {
+      terms = JSON.parse(terms);
+    } catch (_error) {
+      terms = [];
+    }
+  }
+
+  if (!Array.isArray(terms)) {
+    return [];
+  }
+
+  return terms.reduce((result, term) => {
+    const method = toText(term?.method).toLowerCase();
+    const discountPercent = toNumber(term?.discount_percent);
+    const label = UPFRONT_PAYMENT_LABELS[method];
+
+    if (!label || !Number.isFinite(discountPercent) || discountPercent < 0 || discountPercent > 100) {
+      return result;
+    }
+
+    return [...result, { label, discountPercent }];
+  }, []);
+}
+
 function buildClientAddress(client) {
   const line1 = [toText(client?.street), toText(client?.house_number) && `Nº ${toText(client?.house_number)}`]
     .filter(Boolean)
@@ -370,21 +407,32 @@ function drawEnvironmentRowWithRemoval(doc, environment, y, widths, isAlt) {
 }
 
 function drawTotalsPanel(doc, budget, installment, y, width) {
-  const panelHeight = 136;
   const total = formatCurrency(budget.total_amount);
   const removalPricePerRoll = toNumber(budget.removal_price_per_roll);
   const removalRolls = toNumber(budget.removal_rolls) || toNumber(budget.total_rolls);
   const removalDescription = removalPricePerRoll > 0
     ? `Remoção: ${removalRolls} rolos selecionados x ${formatCurrency(removalPricePerRoll)} = ${formatCurrency(budget.removal_cost)}`
     : `Remoção: ${formatCurrency(budget.removal_cost)}`;
+  const upfrontTerms = upfrontPaymentInfo(budget);
+  const upfrontTermsDescription = upfrontTerms
+    .map((term) => `${term.label}${term.discountPercent > 0 ? ` (${term.discountPercent}% de desconto)` : ''}`)
+    .join(' • ');
   const lines = [
     `Subtotal do serviço: ${formatCurrency(budget.subtotal_rolls)}`,
     removalDescription,
     `Pagamento à vista: ${total}`,
+    upfrontTermsDescription ? `Formas à vista: ${upfrontTermsDescription}` : 'Formas à vista: não informadas',
     installment.enabled
       ? `Pagamento parcelado: ${installment.count}x de ${formatCurrency(installment.installmentValue)}`
       : 'Pagamento parcelado: não habilitado',
   ];
+  const textWidth = width - 28;
+  doc.font('Helvetica').fontSize(10);
+  const linesHeight = lines.reduce(
+    (totalHeight, line) => totalHeight + doc.heightOfString(line, { width: textWidth, lineGap: 2 }) + 4,
+    0
+  );
+  const panelHeight = Math.max(136, 34 + linesHeight + 48);
 
   doc.save();
   doc.roundedRect(MARGIN, y, width, panelHeight, 12).fillAndStroke(COLORS.panel, COLORS.border);
@@ -392,10 +440,13 @@ function drawTotalsPanel(doc, budget, installment, y, width) {
 
   doc.fillColor(COLORS.goldSoft).font('Helvetica-Bold').fontSize(10).text('RESUMO FINANCEIRO', MARGIN + 14, y + 12);
 
-  lines.forEach((line, index) => {
-    doc.fillColor(COLORS.text).font('Helvetica').fontSize(10).text(line, MARGIN + 14, y + 34 + index * 16, {
-      width: width - 28,
+  let lineY = y + 34;
+  lines.forEach((line) => {
+    doc.fillColor(COLORS.text).font('Helvetica').fontSize(10).text(line, MARGIN + 14, lineY, {
+      width: textWidth,
+      lineGap: 2,
     });
+    lineY += doc.heightOfString(line, { width: textWidth, lineGap: 2 }) + 4;
   });
 
   doc.save();
@@ -558,7 +609,7 @@ module.exports = function generateBudgetPDF({ budget, client, environments, user
 
     y += 14;
 
-    if (!canFit(doc, y, 380)) {
+    if (!canFit(doc, y, 430)) {
       doc.addPage();
       drawSubHeader(doc, budget);
       y = 72;

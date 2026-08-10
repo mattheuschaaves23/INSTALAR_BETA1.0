@@ -10,6 +10,22 @@ const {
 
 const DEFAULT_ROLL_AREA = 4.5;
 const MAX_ROLL_AREA = 1000;
+const UPFRONT_PAYMENT_METHODS = new Set([
+  'pix',
+  'boleto',
+  'debit_card',
+  'credit_card',
+  'cash',
+  'bank_transfer',
+]);
+const UPFRONT_PAYMENT_LABELS = {
+  pix: 'Pix',
+  boleto: 'Boleto',
+  debit_card: 'Cartão de débito',
+  credit_card: 'Cartão à vista',
+  cash: 'Dinheiro',
+  bank_transfer: 'Transferência',
+};
 
 function normalizeNumber(value) {
   return Number(value || 0);
@@ -47,6 +63,52 @@ function normalizePricingMode(value) {
     return 'square_meter';
   }
   return 'roll';
+}
+
+function normalizeUpfrontPaymentTerms(value) {
+  if (value === undefined || value === null) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    throw new Error('VALIDATION_UPFRONT_PAYMENT_TERMS');
+  }
+
+  const methods = new Set();
+
+  return value.map((term) => {
+    const method = normalizeString(term?.method).toLowerCase();
+    const discountPercent = term?.discount_percent === undefined || term?.discount_percent === null || term?.discount_percent === ''
+      ? 0
+      : Number(term.discount_percent);
+
+    if (
+      !UPFRONT_PAYMENT_METHODS.has(method) ||
+      methods.has(method) ||
+      !Number.isFinite(discountPercent) ||
+      discountPercent < 0 ||
+      discountPercent > 100
+    ) {
+      throw new Error('VALIDATION_UPFRONT_PAYMENT_TERMS');
+    }
+
+    methods.add(method);
+    return {
+      method,
+      label: UPFRONT_PAYMENT_LABELS[method],
+      discount_percent: Math.round(discountPercent * 100) / 100,
+    };
+  });
+}
+
+function formatUpfrontPaymentTerms(value) {
+  try {
+    return normalizeUpfrontPaymentTerms(value)
+      .map((term) => `${term.label}${term.discount_percent > 0 ? ` (${term.discount_percent}% de desconto)` : ''}`)
+      .join(', ');
+  } catch (_error) {
+    return '';
+  }
 }
 
 function firstFilled(...values) {
@@ -130,6 +192,7 @@ exports.createBudget = async (req, res) => {
       price_per_square_meter,
       installment_enabled,
       installments_count,
+      upfront_payment_terms,
       removal_included,
       removal_price,
       removal_price_per_roll,
@@ -144,6 +207,7 @@ exports.createBudget = async (req, res) => {
     const installmentsEnabled = normalizeBoolean(installment_enabled);
     const requestedInstallmentsCount = normalizeInteger(installments_count);
     const installmentsCount = installmentsEnabled ? requestedInstallmentsCount : 1;
+    const upfrontPaymentTerms = normalizeUpfrontPaymentTerms(upfront_payment_terms);
     const usesRemovalPerRoll = Object.prototype.hasOwnProperty.call(req.body || {}, 'removal_price_per_roll');
     const removalIncludedByRoll = normalizeBoolean(removal_included);
     const removalPricePerRoll = removal_price_per_roll === null || removal_price_per_roll === undefined || String(removal_price_per_roll).trim() === ''
@@ -343,9 +407,10 @@ exports.createBudget = async (req, res) => {
           removal_rolls,
           total_amount,
           installment_enabled,
-          installments_count
+          installments_count,
+          payment_terms
         )
-        VALUES ($1, $2, 'pending', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+        VALUES ($1, $2, 'pending', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
         RETURNING *
       `,
       [
@@ -365,6 +430,7 @@ exports.createBudget = async (req, res) => {
         totalAmount,
         installmentsEnabled,
         installmentsEnabled ? installmentsCount : 1,
+        JSON.stringify(upfrontPaymentTerms),
       ]
     );
 
@@ -434,6 +500,10 @@ exports.createBudget = async (req, res) => {
 
     if (error?.message === 'VALIDATION_REMOVAL_PER_ROLL') {
       return res.status(400).json({ error: 'Remoção por rolo precisa ser um valor válido e não negativo.' });
+    }
+
+    if (error?.message === 'VALIDATION_UPFRONT_PAYMENT_TERMS') {
+      return res.status(400).json({ error: 'Revise as formas de pagamento à vista e seus descontos.' });
     }
 
     return res.status(500).json({ error: 'Erro ao criar orçamento.' });
@@ -798,10 +868,14 @@ exports.sendWhatsApp = async (req, res) => {
     const installmentText = installmentsEnabled && installmentsCount > 1
       ? ` Parcelamento disponível: ${installmentsCount}x de R$ ${(Number(budget.total_amount || 0) / installmentsCount).toFixed(2)}.`
       : '';
+    const upfrontPaymentTerms = formatUpfrontPaymentTerms(budget.payment_terms);
+    const upfrontPaymentText = upfrontPaymentTerms
+      ? ` À vista: ${upfrontPaymentTerms}.`
+      : '';
 
     const link = generateWhatsAppLink(
       budget.phone,
-      `Olá ${budget.client_name}, seu orçamento #${budget.id} ficou em R$ ${Number(budget.total_amount || 0).toFixed(2)}.${installmentText}`
+      `Olá ${budget.client_name}, seu orçamento #${budget.id} ficou em R$ ${Number(budget.total_amount || 0).toFixed(2)}.${installmentText}${upfrontPaymentText}`
     );
 
     return res.json({ link });

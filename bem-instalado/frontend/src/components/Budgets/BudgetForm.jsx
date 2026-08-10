@@ -8,6 +8,20 @@ import PlanUsage, { ProFeatureNotice } from '../Subscription/PlanUsage';
 import ClientForm from '../Clients/ClientForm';
 
 const INSTALLMENT_OPTIONS = Array.from({ length: 11 }, (_, index) => index + 2);
+const UPFRONT_PAYMENT_METHODS = [
+  { id: 'pix', label: 'Pix' },
+  { id: 'boleto', label: 'Boleto' },
+  { id: 'debit_card', label: 'Cartão de débito' },
+  { id: 'credit_card', label: 'Cartão à vista' },
+  { id: 'cash', label: 'Dinheiro' },
+  { id: 'bank_transfer', label: 'Transferência' },
+];
+
+function createUpfrontPaymentTerms() {
+  return Object.fromEntries(
+    UPFRONT_PAYMENT_METHODS.map((method) => [method.id, { enabled: false, discount: 0 }])
+  );
+}
 
 function BudgetIcon({ type }) {
   const props = {
@@ -130,6 +144,7 @@ export default function BudgetForm() {
   const [profileDefaults, setProfileDefaults] = useState({ rollPrice: 0, removalPricePerRoll: 0 });
   const [installmentEnabled, setInstallmentEnabled] = useState(false);
   const [installmentsCount, setInstallmentsCount] = useState(3);
+  const [upfrontPaymentTerms, setUpfrontPaymentTerms] = useState(createUpfrontPaymentTerms);
   const [environments, setEnvironments] = useState([createEnvironment()]);
 
   useEffect(() => {
@@ -232,6 +247,31 @@ export default function BudgetForm() {
 
   const grandTotal = totals.total;
   const normalizedInstallments = installmentEnabled ? Number(installmentsCount || 2) : 1;
+  const selectedUpfrontPaymentTerms = useMemo(
+    () =>
+      UPFRONT_PAYMENT_METHODS.reduce((selected, method) => {
+        const configuration = upfrontPaymentTerms[method.id];
+        if (!configuration?.enabled) {
+          return selected;
+        }
+
+        const discountPercent = Number(configuration.discount);
+        return [
+          ...selected,
+          {
+            method: method.id,
+            label: method.label,
+            discount_percent: Number.isFinite(discountPercent) ? discountPercent : 0,
+          },
+        ];
+      }, []),
+    [upfrontPaymentTerms]
+  );
+  const upfrontPaymentSummary = selectedUpfrontPaymentTerms.length
+    ? selectedUpfrontPaymentTerms
+      .map((term) => `${term.label}${term.discount_percent > 0 ? ` ${term.discount_percent}%` : ''}`)
+      .join(' • ')
+    : 'Não definido';
   const selectedClient = clients.find((client) => Number(client.id) === Number(clientId));
   const canCalculate = totals.area > 0;
   const canSave = canCalculate && grandTotal > 0 && Number(clientId) > 0;
@@ -268,7 +308,18 @@ export default function BudgetForm() {
     setRemovalPricePerRoll(profileDefaults.removalPricePerRoll);
     setInstallmentEnabled(false);
     setInstallmentsCount(3);
+    setUpfrontPaymentTerms(createUpfrontPaymentTerms());
     setEnvironments([createEnvironment()]);
+  };
+
+  const updateUpfrontPaymentTerm = (methodId, field, value) => {
+    setUpfrontPaymentTerms((current) => ({
+      ...current,
+      [methodId]: {
+        ...current[methodId],
+        [field]: value,
+      },
+    }));
   };
 
   const handleClientCreated = (client) => {
@@ -335,6 +386,15 @@ export default function BudgetForm() {
       return;
     }
 
+    const invalidUpfrontPaymentTerm = selectedUpfrontPaymentTerms.find((term) => (
+      !Number.isFinite(term.discount_percent) || term.discount_percent < 0 || term.discount_percent > 100
+    ));
+
+    if (invalidUpfrontPaymentTerm) {
+      toast.error('O desconto à vista deve ficar entre 0% e 100%.');
+      return;
+    }
+
     const invalidEnvironment = environments.find((environment) => {
       const height = Number(environment.height);
       const width = Number(environment.width);
@@ -364,6 +424,7 @@ export default function BudgetForm() {
         price_per_square_meter: normalizedPricePerSquareMeter,
         installment_enabled: installmentEnabled,
         installments_count: installmentEnabled ? normalizedInstallmentsCount : 1,
+        upfront_payment_terms: selectedUpfrontPaymentTerms,
         removal_included: removalIncluded,
         removal_price_per_roll: removalIncluded ? normalizedRemovalPricePerRoll : 0,
         environments: environments.map((environment) => ({
@@ -700,6 +761,52 @@ export default function BudgetForm() {
                     </label>
                   ) : null}
                 </div>
+
+                <div className="budget-modern-payment-box budget-modern-upfront-payment-control">
+                  <div className="budget-modern-upfront-payment-head">
+                    <div>
+                      <span>Pagamento à vista</span>
+                      <strong>Formas aceitas e desconto</strong>
+                    </div>
+                    <small>Desconto em %</small>
+                  </div>
+
+                  <div className="budget-modern-upfront-payment-grid">
+                    {UPFRONT_PAYMENT_METHODS.map((method) => {
+                      const configuration = upfrontPaymentTerms[method.id];
+                      const discountedTotal = grandTotal * (1 - Number(configuration?.discount || 0) / 100);
+
+                      return (
+                        <label className="budget-modern-upfront-payment-method" key={method.id}>
+                          <span className="budget-modern-upfront-payment-method-name">
+                            <input
+                              checked={Boolean(configuration?.enabled)}
+                              onChange={(event) => updateUpfrontPaymentTerm(method.id, 'enabled', event.target.checked)}
+                              type="checkbox"
+                            />
+                            <strong>{method.label}</strong>
+                          </span>
+                          <span className="budget-modern-upfront-payment-discount">
+                            <input
+                              aria-label={`Desconto no ${method.label}`}
+                              disabled={!configuration?.enabled}
+                              max="100"
+                              min="0"
+                              onChange={(event) => updateUpfrontPaymentTerm(method.id, 'discount', event.target.value)}
+                              step="0.01"
+                              type="number"
+                              value={configuration?.discount ?? 0}
+                            />
+                            <i>%</i>
+                          </span>
+                          {configuration?.enabled ? (
+                            <small>À vista: {formatCurrency(discountedTotal)}</small>
+                          ) : null}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
                 {!isPro ? (
                   <ProFeatureNotice className="mt-4" title="Orçamento profissional">
                     No Pro, cada proposta pode ter vários ambientes e PDF com a sua marca.
@@ -789,7 +896,7 @@ export default function BudgetForm() {
                   <div className="budget-modern-send-checks">
                     <div><span>Cliente</span><strong>{selectedClient?.name}</strong></div>
                     <div><span>Total</span><strong>{formatCurrency(grandTotal)}</strong></div>
-                    <div><span>Pagamento</span><strong>{installmentEnabled ? `${normalizedInstallments}x` : 'À vista'}</strong></div>
+                    <div><span>Pagamento</span><strong>{installmentEnabled ? `${normalizedInstallments}x + à vista` : 'À vista'}</strong></div>
                   </div>
 
                   <div className="budget-modern-stage-actions">
@@ -817,7 +924,7 @@ export default function BudgetForm() {
                   <div className="budget-modern-calculated-grid">
                     <article><span>Cliente</span><strong>{selectedClient?.name || '—'}</strong><small>{selectedClient?.phone || selectedClient?.email || 'Contato não informado'}</small></article>
                     <article><span>Ambientes</span><strong>{environments.length}</strong><small>{totals.area.toFixed(2)} m² no total</small></article>
-                    <article><span>Total</span><strong>{formatCurrency(grandTotal)}</strong><small>{installmentEnabled ? `${normalizedInstallments}x no pagamento` : 'Pagamento à vista'}</small></article>
+                    <article><span>Total</span><strong>{formatCurrency(grandTotal)}</strong><small>{installmentEnabled ? `${normalizedInstallments}x no cartão` : 'Pagamento à vista'}{selectedUpfrontPaymentTerms.length ? ` • ${upfrontPaymentSummary}` : ''}</small></article>
                   </div>
                   <div className="budget-modern-stage-actions">
                     <button className="budget-modern-secondary-cta" onClick={() => setActiveStep(2)} type="button">
@@ -848,6 +955,10 @@ export default function BudgetForm() {
               <div className="budget-modern-summary-row">
                 <span>Forma de pagamento</span>
                 <strong>{installmentEnabled ? `${normalizedInstallments}x` : 'A vista'}</strong>
+              </div>
+              <div className="budget-modern-summary-row">
+                <span>À vista: formas e descontos</span>
+                <strong>{upfrontPaymentSummary}</strong>
               </div>
             </div>
 
