@@ -434,6 +434,23 @@ export default function BudgetForm() {
                   </button>
                 </div>
 
+                <div className="budget-modern-mode-switch">
+                  <button
+                    className={pricingMode === 'roll' ? 'is-active' : ''}
+                    onClick={() => setPricingMode('roll')}
+                    type="button"
+                  >
+                    Cobrar por rolo
+                  </button>
+                  <button
+                    className={pricingMode === 'square_meter' ? 'is-active' : ''}
+                    onClick={() => setPricingMode('square_meter')}
+                    type="button"
+                  >
+                    Cobrar por m²
+                  </button>
+                </div>
+
                 <div className="budget-modern-note">
                   <BudgetIcon type="info" />
                   Informe as medidas de cada ambiente. O ajuste manual de rolos fica disponível quando necessário.
@@ -565,23 +582,6 @@ export default function BudgetForm() {
                     <BudgetIcon type="wallpaper" />
                     <span>2. Material e cálculo</span>
                   </div>
-                </div>
-
-                <div className="budget-modern-mode-switch">
-                  <button
-                    className={pricingMode === 'roll' ? 'is-active' : ''}
-                    onClick={() => setPricingMode('roll')}
-                    type="button"
-                  >
-                    Cobrar por rolo
-                  </button>
-                  <button
-                    className={pricingMode === 'square_meter' ? 'is-active' : ''}
-                    onClick={() => setPricingMode('square_meter')}
-                    type="button"
-                  >
-                    Cobrar por m²
-                  </button>
                 </div>
 
                 <div className="budget-modern-field-grid">
