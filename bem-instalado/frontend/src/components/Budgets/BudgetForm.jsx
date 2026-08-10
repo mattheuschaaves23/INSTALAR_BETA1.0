@@ -923,14 +923,14 @@ export default function BudgetForm() {
                     onClick={() => document.getElementById('budget-client-select')?.focus()}
                     type="button"
                   >
-                    Usar cliente existente
+                    Cliente existente
                   </button>
                   <button
                     className="budget-modern-client-choice-button"
                     onClick={() => setShowClientForm(true)}
                     type="button"
                   >
-                    Criar cliente
+                    Novo cliente
                   </button>
                 </div>
 
