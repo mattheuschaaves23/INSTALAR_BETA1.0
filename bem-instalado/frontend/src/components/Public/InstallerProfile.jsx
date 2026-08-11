@@ -179,7 +179,7 @@ export default function InstallerProfile() {
   const rating = Number(installer.average_rating || 0);
   const reviewCount = Number(installer.review_count || 0);
   const certified = Boolean(installer.certificate_verified || installer.safety?.document_masked);
-  const profileActionPath = isOwnProfile ? '/perfil' : requestPath;
+  const profileActionPath = isOwnProfile ? '/profile' : requestPath;
   const profileActionLabel = isOwnProfile ? 'Editar perfil' : requestLabel;
   const trustItems = [
     { icon: 'clock', label: 'Horários', value: installer.service_hours || 'A combinar', detail: hasAvailability ? 'Agenda atualizada' : 'Consulte a agenda' },
