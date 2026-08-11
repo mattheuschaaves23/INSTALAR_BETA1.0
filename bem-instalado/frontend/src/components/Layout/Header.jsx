@@ -27,6 +27,10 @@ const routeCopy = {
     title: 'Perfil do instalador',
     subtitle: 'Dados de confiança, vitrine pública e horários vagos.',
   },
+  '/pdf-profissional': {
+    title: 'PDF profissional',
+    subtitle: 'Identidade visual e mensagens dos seus orçamentos.',
+  },
   '/subscription': {
     title: 'Assinatura',
     subtitle: 'Plano, pagamento e status de acesso.',

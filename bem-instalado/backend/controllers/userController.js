@@ -23,6 +23,47 @@ const {
 const { sendMarketplaceEmail } = require('../services/email');
 const { sendPushToUser } = require('../services/push');
 
+const PDF_BRANDING_DEFAULTS = Object.freeze({
+  brand_name: '',
+  document_title: 'Proposta comercial de instalação',
+  accent_color: '#CDA349',
+  intro_text: '',
+  closing_text: '',
+  show_logo: true,
+  show_installer_photo: true,
+  show_contact: true,
+});
+
+const PDF_ACCENT_COLORS = new Set([
+  '#CDA349', '#0F8798', '#2956A8', '#5B3FA3', '#2E8B57', '#B84372',
+]);
+
+function cleanPdfBrandingText(value, maxLength) {
+  return String(value || '')
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxLength);
+}
+
+function normalizePdfBranding(value) {
+  const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const requestedColor = cleanPdfBrandingText(source.accent_color, 7).toUpperCase();
+
+  return {
+    brand_name: cleanPdfBrandingText(source.brand_name, 80),
+    document_title: cleanPdfBrandingText(source.document_title, 100) || PDF_BRANDING_DEFAULTS.document_title,
+    accent_color: PDF_ACCENT_COLORS.has(requestedColor) ? requestedColor : PDF_BRANDING_DEFAULTS.accent_color,
+    intro_text: cleanPdfBrandingText(source.intro_text, 320),
+    closing_text: cleanPdfBrandingText(source.closing_text, 320),
+    show_logo: source.show_logo === undefined ? PDF_BRANDING_DEFAULTS.show_logo : Boolean(source.show_logo),
+    show_installer_photo: source.show_installer_photo === undefined
+      ? PDF_BRANDING_DEFAULTS.show_installer_photo
+      : Boolean(source.show_installer_photo),
+    show_contact: source.show_contact === undefined ? PDF_BRANDING_DEFAULTS.show_contact : Boolean(source.show_contact),
+  };
+}
+
 function normalizeStringList(values, maxItems = 8) {
   if (!Array.isArray(values)) {
     return [];
@@ -519,6 +560,7 @@ exports.getProfile = async (req, res) => {
           phone,
           logo,
           installer_photo,
+          COALESCE(pdf_branding, '{}'::jsonb) AS pdf_branding,
           COALESCE(installation_gallery, '[]'::jsonb) AS installation_gallery,
           certificate_file,
           certificate_name,
@@ -574,10 +616,53 @@ exports.getProfile = async (req, res) => {
       // o perfil recarregado precisa refletir a confirmação imediatamente.
       email_verified: Boolean(rows[0]?.email_verified_at),
       installation_gallery: normalizeGallery(rows[0]?.installation_gallery),
+      pdf_branding: normalizePdfBranding(rows[0]?.pdf_branding),
     };
     return res.json(profile);
   } catch (_error) {
     return res.status(500).json({ error: 'Erro ao carregar perfil.' });
+  }
+};
+
+exports.getPdfBranding = async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      "SELECT COALESCE(pdf_branding, '{}'::jsonb) AS pdf_branding FROM users WHERE id = $1",
+      [req.userId]
+    );
+
+    if (!rows[0]) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+
+    return res.json({ branding: normalizePdfBranding(rows[0].pdf_branding) });
+  } catch (_error) {
+    return res.status(500).json({ error: 'Erro ao carregar a personalização do PDF.' });
+  }
+};
+
+exports.updatePdfBranding = async (req, res) => {
+  try {
+    const planAccess = req.planAccess || await getInstallerPlanAccess(req.userId);
+
+    if (!planAccess.features.custom_pdf_branding) {
+      return upgradeRequired(res, {
+        code: 'PDF_BRANDING_PRO_REQUIRED',
+        error: 'A personalização do PDF é exclusiva do plano Pro.',
+        planAccess,
+        feature: 'custom_pdf_branding',
+      });
+    }
+
+    const branding = normalizePdfBranding(req.body);
+    await pool.query(
+      'UPDATE users SET pdf_branding = $1::jsonb, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      [JSON.stringify(branding), req.userId]
+    );
+
+    return res.json({ branding });
+  } catch (_error) {
+    return res.status(500).json({ error: 'Erro ao salvar a personalização do PDF.' });
   }
 };
 

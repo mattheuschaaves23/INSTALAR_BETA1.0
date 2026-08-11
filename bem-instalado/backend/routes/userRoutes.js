@@ -18,12 +18,14 @@ const uploadSingleProfileAsset = (req, res, next) => {
 };
 
 router.get('/profile', auth, controller.getProfile);
+router.get('/pdf-branding', auth, requireInstaller, requireVerifiedEmail, controller.getPdfBranding);
 router.get('/data-export', auth, controller.exportOwnData);
 router.delete('/account', auth, controller.deleteOwnAccount);
 router.get('/dashboard', auth, requireInstaller, requireVerifiedEmail, controller.getDashboard);
 router.get('/reviews/summary', auth, requireInstaller, requireVerifiedEmail, controller.getReviewsSummary);
 router.get('/reviews-dashboard', auth, requireInstaller, requireVerifiedEmail, controller.getReviewsDashboard);
 router.put('/profile', auth, requireInstaller, requireVerifiedEmail, controller.updateProfile);
+router.put('/pdf-branding', auth, requireInstaller, requireVerifiedEmail, controller.updatePdfBranding);
 router.get('/uploads/capabilities', auth, requireInstaller, requireVerifiedEmail, controller.getUploadCapabilities);
 router.get('/uploads/file/:assetKey', auth, requireInstaller, requireVerifiedEmail, controller.getStoredProfileAsset);
 router.post('/uploads', auth, requireInstaller, requireVerifiedEmail, uploadSingleProfileAsset, controller.uploadProfileAsset);

@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN IF NOT EXISTS pdf_branding JSONB NOT NULL DEFAULT '{}'::jsonb;

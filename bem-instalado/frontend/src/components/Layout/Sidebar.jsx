@@ -71,6 +71,7 @@ const NAV_GROUPS = [
     kicker: 'Dados, plano e comunicação',
     items: [
       { to: '/profile', label: 'Perfil', kicker: 'Conta e vitrine' },
+      { to: '/pdf-profissional', label: 'PDF profissional', kicker: 'Marca dos orçamentos' },
       { to: '/subscription', label: 'Assinatura', kicker: 'Plano e cobrança' },
       { to: '/notifications', label: 'Notificações', kicker: 'Alertas do painel' },
       { to: '/support', label: 'Suporte', kicker: 'Chat e ideias' },

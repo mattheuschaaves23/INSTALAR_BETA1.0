@@ -104,6 +104,32 @@ function decodeImage(value) {
   return null;
 }
 
+function cleanBrandingText(value, maxLength) {
+  return String(value || '')
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxLength);
+}
+
+function resolveBranding(branding, user, isPro) {
+  const source = isPro && branding && typeof branding === 'object' && !Array.isArray(branding)
+    ? branding
+    : {};
+  const accent = cleanBrandingText(source.accent_color, 7).toUpperCase();
+
+  return {
+    brandName: cleanBrandingText(source.brand_name, 80) || cleanBrandingText(user?.business_name, 80) || 'InstalaPro',
+    documentTitle: cleanBrandingText(source.document_title, 100) || 'Proposta comercial de instalação',
+    introText: cleanBrandingText(source.intro_text, 320),
+    closingText: cleanBrandingText(source.closing_text, 320),
+    accentColor: /^#[0-9A-F]{6}$/.test(accent) ? accent : COLORS.goldSoft,
+    showLogo: source.show_logo === undefined ? true : Boolean(source.show_logo),
+    showInstallerPhoto: source.show_installer_photo === undefined ? true : Boolean(source.show_installer_photo),
+    showContact: source.show_contact === undefined ? true : Boolean(source.show_contact),
+  };
+}
+
 function installmentInfo(budget) {
   const enabled = Boolean(budget?.installment_enabled);
   const count = Number(budget?.installments_count || 1);
@@ -179,10 +205,10 @@ function canFit(doc, y, heightNeeded) {
   return y + heightNeeded <= doc.page.height - BOTTOM_SAFE_AREA;
 }
 
-function drawMainHeader(doc, budget, user, isPro) {
+function drawMainHeader(doc, budget, user, isPro, branding) {
   const pageWidth = doc.page.width;
-  const logo = isPro ? decodeImage(user.logo) : null;
-  const photo = isPro ? decodeImage(user.installer_photo) : null;
+  const logo = isPro && branding.showLogo ? decodeImage(user.logo) : null;
+  const photo = isPro && branding.showInstallerPhoto ? decodeImage(user.installer_photo) : null;
 
   doc.save();
   doc.rect(0, 0, pageWidth, HEADER_HEIGHT).fill(COLORS.bg);
@@ -203,8 +229,14 @@ function drawMainHeader(doc, budget, user, isPro) {
     }
   }
 
-  doc.fillColor(COLORS.goldSoft).font('Helvetica-Bold').fontSize(19).text('InstalaPro', leftX, 28);
-  doc.fillColor(COLORS.text).font('Helvetica-Bold').fontSize(13).text('Proposta comercial de instalação', leftX, 52);
+  doc.fillColor(branding.accentColor).font('Helvetica-Bold').fontSize(19).text(branding.brandName, leftX, 28, {
+    width: 270,
+    ellipsis: true,
+  });
+  doc.fillColor(COLORS.text).font('Helvetica-Bold').fontSize(13).text(branding.documentTitle, leftX, 52, {
+    width: 280,
+    ellipsis: true,
+  });
   doc.fillColor(COLORS.muted).font('Helvetica').fontSize(10).text('Documento profissional para apresentação e fechamento.', leftX, 70);
 
   const rightBlockWidth = 232;
@@ -226,7 +258,7 @@ function drawMainHeader(doc, budget, user, isPro) {
   doc.save();
   doc.roundedRect(badgeX, badgeY, badgeWidth, 22, 11).fillAndStroke(COLORS.panel, statusColor(budget.status));
   doc.restore();
-  doc.fillColor(COLORS.goldSoft).font('Helvetica-Bold').fontSize(9).text(badgeText.toUpperCase(), badgeX, badgeY + 7, {
+  doc.fillColor(branding.accentColor).font('Helvetica-Bold').fontSize(9).text(badgeText.toUpperCase(), badgeX, badgeY + 7, {
     width: badgeWidth,
     align: 'center',
   });
@@ -243,13 +275,35 @@ function drawMainHeader(doc, budget, user, isPro) {
   }
 }
 
-function drawSubHeader(doc, budget) {
+function drawSubHeader(doc, budget, branding) {
   doc.save();
   doc.rect(0, 0, doc.page.width, 56).fill(COLORS.bg);
   doc.restore();
 
-  doc.fillColor(COLORS.goldSoft).font('Helvetica-Bold').fontSize(13).text(`Orçamento #${budget.id}`, MARGIN, 20);
+  doc.fillColor(branding.accentColor).font('Helvetica-Bold').fontSize(13).text(`Orçamento #${budget.id}`, MARGIN, 20);
   doc.fillColor(COLORS.muted).font('Helvetica').fontSize(9).text(`Continuação • ${formatDate(new Date())}`, MARGIN, 36);
+}
+
+function drawBrandMessage(doc, title, message, y, width, branding) {
+  if (!message) {
+    return 0;
+  }
+
+  const textWidth = width - 28;
+  doc.font('Helvetica').fontSize(10);
+  const textHeight = doc.heightOfString(message, { width: textWidth, lineGap: 2 });
+  const panelHeight = Math.max(62, textHeight + 42);
+
+  doc.save();
+  doc.roundedRect(MARGIN, y, width, panelHeight, 12).fillAndStroke(COLORS.panelSoft, branding.accentColor);
+  doc.restore();
+  doc.fillColor(branding.accentColor).font('Helvetica-Bold').fontSize(9).text(title.toUpperCase(), MARGIN + 14, y + 12);
+  doc.fillColor(COLORS.text).font('Helvetica').fontSize(10).text(message, MARGIN + 14, y + 29, {
+    width: textWidth,
+    lineGap: 2,
+  });
+
+  return panelHeight;
 }
 
 function drawSectionTitle(doc, title, y) {
@@ -532,16 +586,16 @@ function drawScopeAndSignature(doc, y, width, userName) {
   return scopeHeight + 58;
 }
 
-function drawFooter(doc, pageNumber, pageCount, budgetId, user, isPro) {
+function drawFooter(doc, pageNumber, pageCount, budgetId, user, isPro, branding) {
   const footerY = doc.page.height - 44;
 
   doc.save();
   doc.moveTo(MARGIN, footerY - 8).lineTo(doc.page.width - MARGIN, footerY - 8).lineWidth(1).stroke(COLORS.line);
   doc.restore();
 
-  const leftText = `InstalaPro • Orçamento #${budgetId}`;
+  const leftText = `${isPro ? branding.brandName : 'InstalaPro'} • Orçamento #${budgetId}`;
   const centerText = isPro
-    ? (toText(user?.phone) ? `Contato: ${toText(user.phone)}` : 'Documento gerado automaticamente')
+    ? (branding.showContact && toText(user?.phone) ? `Contato: ${toText(user.phone)}` : 'Documento profissional')
     : 'Criado gratuitamente com InstalaPro';
   const rightText = `Página ${pageNumber} de ${pageCount}`;
 
@@ -550,7 +604,7 @@ function drawFooter(doc, pageNumber, pageCount, budgetId, user, isPro) {
   doc.text(rightText, doc.page.width - MARGIN - 120, footerY, { width: 120, align: 'right' });
 }
 
-module.exports = function generateBudgetPDF({ budget, client, environments, user, isPro = false }) {
+module.exports = function generateBudgetPDF({ budget, client, environments, user, isPro = false, branding = null }) {
   return new Promise((resolve, reject) => {
     // Em ambientes serverless, como a Vercel, somente a pasta temporária do SO é gravável.
     // O identificador aleatório evita que duas requisições do mesmo orçamento disputem o mesmo arquivo.
@@ -568,12 +622,17 @@ module.exports = function generateBudgetPDF({ budget, client, environments, user
     stream.on('error', reject);
     doc.pipe(stream);
 
-    drawMainHeader(doc, budget, user, isPro);
+    const resolvedBranding = resolveBranding(branding, user, isPro);
+    drawMainHeader(doc, budget, user, isPro, resolvedBranding);
 
     const contentWidth = doc.page.width - MARGIN * 2;
     const gap = 14;
     const halfWidth = (contentWidth - gap) / 2;
     let y = 142;
+
+    if (resolvedBranding.introText) {
+      y += drawBrandMessage(doc, 'Mensagem de apresentação', resolvedBranding.introText, y, contentWidth, resolvedBranding) + 14;
+    }
 
     y = drawSectionTitle(doc, 'Dados do projeto', y);
 
@@ -616,7 +675,7 @@ module.exports = function generateBudgetPDF({ budget, client, environments, user
     environments.forEach((environment, index) => {
       if (!canFit(doc, y, 28)) {
         doc.addPage();
-        drawSubHeader(doc, budget);
+        drawSubHeader(doc, budget, resolvedBranding);
         y = 72;
         y = drawSectionTitle(doc, 'Detalhamento dos ambientes (continuação)', y);
         y = drawTableHeader(doc, y, tableWidths);
@@ -627,21 +686,25 @@ module.exports = function generateBudgetPDF({ budget, client, environments, user
 
     y += 14;
 
-    if (!canFit(doc, y, 430)) {
+    const closingMessageHeight = resolvedBranding.closingText ? 96 : 0;
+    if (!canFit(doc, y, 430 + closingMessageHeight)) {
       doc.addPage();
-      drawSubHeader(doc, budget);
+      drawSubHeader(doc, budget, resolvedBranding);
       y = 72;
     }
 
     y = drawSectionTitle(doc, 'Resumo e fechamento', y);
     y += drawTotalsPanel(doc, budget, installment, y, contentWidth) + 12;
+    if (resolvedBranding.closingText) {
+      y += drawBrandMessage(doc, 'Mensagem final', resolvedBranding.closingText, y, contentWidth, resolvedBranding) + 12;
+    }
     y += drawCommercialPanel(doc, budget, y, contentWidth) + 12;
     drawScopeAndSignature(doc, y, contentWidth, toText(user.name));
 
     const pageRange = doc.bufferedPageRange();
     for (let i = 0; i < pageRange.count; i += 1) {
       doc.switchToPage(i);
-      drawFooter(doc, i + 1, pageRange.count, budget.id, user, isPro);
+      drawFooter(doc, i + 1, pageRange.count, budget.id, user, isPro, resolvedBranding);
     }
 
     doc.end();

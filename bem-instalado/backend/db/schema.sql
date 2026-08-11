@@ -12,6 +12,7 @@
   phone VARCHAR(30),
   logo TEXT,
   installer_photo TEXT,
+  pdf_branding JSONB NOT NULL DEFAULT '{}'::jsonb,
   installation_gallery JSONB NOT NULL DEFAULT '[]'::jsonb,
   certificate_file TEXT,
   certificate_name VARCHAR(180),
@@ -484,6 +485,7 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified_at TIMESTAMP;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_version INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS installer_photo TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS pdf_branding JSONB NOT NULL DEFAULT '{}'::jsonb;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS installation_gallery JSONB NOT NULL DEFAULT '[]'::jsonb;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS certificate_file TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS certificate_name VARCHAR(180);

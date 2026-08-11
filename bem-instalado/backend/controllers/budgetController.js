@@ -843,7 +843,9 @@ exports.generatePDF = async (req, res) => {
           email,
           phone,
           logo,
-          installer_photo
+          installer_photo,
+          business_name,
+          COALESCE(pdf_branding, '{}'::jsonb) AS pdf_branding
         FROM users
         WHERE id = $1
       `,
@@ -857,6 +859,7 @@ exports.generatePDF = async (req, res) => {
       environments: environmentsResult.rows,
       user: userResult.rows[0],
       isPro: planAccess.is_pro,
+      branding: planAccess.features.custom_pdf_branding ? userResult.rows[0]?.pdf_branding : null,
     });
 
     return res.download(filePath, `orcamento-${budget.id}.pdf`, async () => {

@@ -26,6 +26,7 @@ const PANEL_NAV_ITEMS = [
   { to: '/budgets', label: 'Orçamentos', icon: 'file' },
   { to: '/clients', label: 'Clientes', icon: 'clients' },
   { to: '/profile', label: 'Perfil', icon: 'profile', section: 'CONTA' },
+  { to: '/pdf-profissional', label: 'PDF profissional', icon: 'file' },
   { to: '/subscription', label: 'Assinatura', icon: 'card' },
   { to: '/notifications', label: 'Notificações', icon: 'bell', badgeKey: 'notifications' },
   { to: '/settings', label: 'Configurações', icon: 'settings' },

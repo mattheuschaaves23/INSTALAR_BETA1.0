@@ -14,6 +14,7 @@ const PANEL_ROUTE_PREFIXES = [
   '/opportunities',
   '/reviews',
   '/profile',
+  '/pdf-profissional',
   '/settings',
   '/subscription',
   '/notifications',

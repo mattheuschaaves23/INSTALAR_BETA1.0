@@ -20,6 +20,7 @@ const INSTALLER_APP_PATHS = [
   '/reviews',
   '/notifications',
   '/profile',
+  '/pdf-profissional',
   '/settings',
   '/excluir-conta',
   '/subscription',
@@ -45,6 +46,7 @@ const ProtectedRoute = lazy(() => import('./components/Layout/ProtectedRoute'));
 const Notifications = lazy(() => import('./components/Notifications/Notifications'));
 const Opportunities = lazy(() => import('./components/Opportunities/Opportunities'));
 const Profile = lazy(() => import('./components/Profile/Profile'));
+const PdfBranding = lazy(() => import('./components/PdfBranding/PdfBranding'));
 const Home = lazy(() => import('./components/Public/Home'));
 const InstallerProfile = lazy(() => import('./components/Public/InstallerProfile'));
 const LegalPage = lazy(() => import('./components/Public/LegalPage'));
@@ -124,6 +126,7 @@ export default function App() {
           <Route element={<ProtectedRoute allowedAccountTypes={['installer']} loginPath="/instalador/entrar" />}>
             <Route element={<Layout />}>
               <Route element={<Profile />} path="/profile" />
+              <Route element={<PdfBranding />} path="/pdf-profissional" />
               <Route element={<Settings />} path="/settings" />
               <Route element={<Subscription />} path="/subscription" />
               <Route element={<AppDownload />} path="/download-app" />
