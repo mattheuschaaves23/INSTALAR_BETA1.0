@@ -6,15 +6,22 @@ function suppliedToken(req) {
   return String(req.get('x-operations-token') || bearer || '').trim();
 }
 
-function hasOperationsAccess(req) {
-  const expected = String(process.env.OPERATIONS_TOKEN || '').trim();
-  const received = suppliedToken(req);
+function hasExpectedToken(received, expected) {
   if (!expected || !received) return false;
 
   const expectedBuffer = Buffer.from(expected);
   const receivedBuffer = Buffer.from(received);
   return expectedBuffer.length === receivedBuffer.length
     && crypto.timingSafeEqual(expectedBuffer, receivedBuffer);
+}
+
+function hasOperationsAccess(req) {
+  const received = suppliedToken(req);
+  const acceptedTokens = [process.env.OPERATIONS_TOKEN, process.env.CRON_SECRET]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+
+  return acceptedTokens.some((expected) => hasExpectedToken(received, expected));
 }
 
 function requireOperationsAccess(req, res, next) {

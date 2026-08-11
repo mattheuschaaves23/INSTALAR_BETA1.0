@@ -1,0 +1,133 @@
+name: Operação e monitoramento
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: instalapro-operations-monitor
+  cancel-in-progress: false
+
+env:
+  APP_URL: https://instalar-sigma.vercel.app
+  HEALTH_ALERT_TITLE: '🚨 InstalaPro indisponível'
+  OPERATIONS_ALERT_TITLE: '🚨 InstalaPro: rotina operacional falhou'
+
+jobs:
+  check-and-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verificar disponibilidade do site e banco
+        id: health
+        shell: bash
+        run: |
+          set +e
+          status_code="$(curl --silent --show-error --output /tmp/health.json --write-out '%{http_code}' --max-time 20 --retry 2 --retry-all-errors "$APP_URL/api/health")"
+          curl_exit_code=$?
+          set -e
+
+          if [ "$curl_exit_code" -ne 0 ] || [ "$status_code" != "200" ]; then
+            echo "failed=true" >> "$GITHUB_OUTPUT"
+            echo "status_code=${status_code:-sem-resposta}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "failed=false" >> "$GITHUB_OUTPUT"
+
+      - name: Abrir alerta de indisponibilidade
+        if: steps.health.outputs.failed == 'true'
+        uses: actions/github-script@v8
+        env:
+          STATUS_CODE: ${{ steps.health.outputs.status_code }}
+        with:
+          script: |
+            const title = process.env.HEALTH_ALERT_TITLE;
+            const { owner, repo } = context.repo;
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: 'monitoring' });
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              await github.rest.issues.createLabel({ owner, repo, name: 'monitoring', color: 'd73a4a', description: 'Alertas automáticos de disponibilidade e operação' });
+            }
+            const { data: issues } = await github.rest.issues.listForRepo({ owner, repo, state: 'open', labels: 'monitoring', per_page: 100 });
+            if (!issues.some((issue) => issue.title === title)) {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                labels: ['monitoring'],
+                body: `O monitor automático não recebeu uma resposta saudável de ${process.env.APP_URL}/api/health. Código HTTP: ${process.env.STATUS_CODE}. Verifique Vercel, Neon e as variáveis de ambiente.`,
+              });
+            }
+
+      - name: Encerrar alerta de indisponibilidade recuperada
+        if: steps.health.outputs.failed == 'false'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const title = process.env.HEALTH_ALERT_TITLE;
+            const { owner, repo } = context.repo;
+            const { data: issues } = await github.rest.issues.listForRepo({ owner, repo, state: 'open', labels: 'monitoring', per_page: 100 });
+            for (const issue of issues.filter((item) => item.title === title)) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: issue.number, body: '✅ O monitor confirmou que a API voltou a responder normalmente.' });
+              await github.rest.issues.update({ owner, repo, issue_number: issue.number, state: 'closed' });
+            }
+
+      - name: Processar e-mails pendentes
+        id: operations
+        if: steps.health.outputs.failed == 'false'
+        env:
+          CRON_SECRET: ${{ secrets.INSTALAPRO_CRON_SECRET }}
+        shell: bash
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo 'O segredo INSTALAPRO_CRON_SECRET não está configurado no GitHub.' >&2
+            exit 1
+          fi
+          curl --fail --silent --show-error --output /tmp/operations.json --max-time 45 --retry 2 --retry-all-errors \
+            --request POST \
+            --header "Authorization: Bearer $CRON_SECRET" \
+            "$APP_URL/api/operations/run"
+
+      - name: Abrir alerta da rotina operacional
+        if: failure() && steps.health.outputs.failed == 'false'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const title = process.env.OPERATIONS_ALERT_TITLE;
+            const { owner, repo } = context.repo;
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: 'monitoring' });
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              await github.rest.issues.createLabel({ owner, repo, name: 'monitoring', color: 'd73a4a', description: 'Alertas automáticos de disponibilidade e operação' });
+            }
+            const { data: issues } = await github.rest.issues.listForRepo({ owner, repo, state: 'open', labels: 'monitoring', per_page: 100 });
+            if (!issues.some((issue) => issue.title === title)) {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                labels: ['monitoring'],
+                body: `A API está saudável, mas a execução de ${process.env.APP_URL}/api/operations/run falhou. Verifique a fila de e-mails, SMTP e o segredo INSTALAPRO_CRON_SECRET.`,
+              });
+            }
+
+      - name: Encerrar alerta da rotina operacional recuperada
+        if: success() && steps.health.outputs.failed == 'false'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const title = process.env.OPERATIONS_ALERT_TITLE;
+            const { owner, repo } = context.repo;
+            const { data: issues } = await github.rest.issues.listForRepo({ owner, repo, state: 'open', labels: 'monitoring', per_page: 100 });
+            for (const issue of issues.filter((item) => item.title === title)) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: issue.number, body: '✅ A rotina operacional voltou a concluir normalmente.' });
+              await github.rest.issues.update({ owner, repo, issue_number: issue.number, state: 'closed' });
+            }
