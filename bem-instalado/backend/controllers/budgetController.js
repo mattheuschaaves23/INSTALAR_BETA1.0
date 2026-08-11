@@ -862,7 +862,12 @@ exports.generatePDF = async (req, res) => {
     return res.download(filePath, `orcamento-${budget.id}.pdf`, async () => {
       await fs.unlink(filePath).catch(() => null);
     });
-  } catch (_error) {
+  } catch (error) {
+    console.error('Falha ao gerar PDF do orçamento.', {
+      budgetId: req.params.id,
+      userId: req.userId,
+      message: error?.message,
+    });
     return res.status(500).json({ error: 'Erro ao gerar PDF.' });
   }
 };

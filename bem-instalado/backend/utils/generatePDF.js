@@ -1,5 +1,7 @@
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
+const crypto = require('crypto');
 const PDFDocument = require('pdfkit');
 
 const COLORS = {
@@ -550,14 +552,20 @@ function drawFooter(doc, pageNumber, pageCount, budgetId, user, isPro) {
 
 module.exports = function generateBudgetPDF({ budget, client, environments, user, isPro = false }) {
   return new Promise((resolve, reject) => {
-    const tempDir = path.join(__dirname, '..', 'temp');
+    // Em ambientes serverless, como a Vercel, somente a pasta temporária do SO é gravável.
+    // O identificador aleatório evita que duas requisições do mesmo orçamento disputem o mesmo arquivo.
+    const tempDir = path.join(os.tmpdir(), 'instalapro-pdf');
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
     }
 
-    const filePath = path.join(tempDir, `orcamento-${budget.id}.pdf`);
+    const safeBudgetId = String(budget?.id || 'novo').replace(/[^a-zA-Z0-9_-]/g, '');
+    const fileName = `orcamento-${safeBudgetId || 'novo'}-${crypto.randomUUID()}.pdf`;
+    const filePath = path.join(tempDir, fileName);
     const doc = new PDFDocument({ size: 'A4', margin: MARGIN, bufferPages: true });
     const stream = fs.createWriteStream(filePath);
+
+    stream.on('error', reject);
     doc.pipe(stream);
 
     drawMainHeader(doc, budget, user, isPro);
@@ -639,6 +647,5 @@ module.exports = function generateBudgetPDF({ budget, client, environments, user
     doc.end();
 
     stream.on('finish', () => resolve(filePath));
-    stream.on('error', reject);
   });
 };
