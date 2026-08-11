@@ -83,11 +83,11 @@ jobs:
         id: operations
         if: steps.health.outputs.failed == 'false'
         env:
-          CRON_SECRET: ${{ secrets.INSTALAPRO_CRON_SECRET }}
+          CRON_SECRET: ${{ secrets.INSTALAPRO_CRON_SECRET_V2 }}
         shell: bash
         run: |
           if [ -z "$CRON_SECRET" ]; then
-            echo 'O segredo INSTALAPRO_CRON_SECRET não está configurado no GitHub.' >&2
+            echo 'O segredo INSTALAPRO_CRON_SECRET_V2 não está configurado no GitHub.' >&2
             exit 1
           fi
           curl --fail --silent --show-error --output /tmp/operations.json --max-time 45 --retry 2 --retry-all-errors \
@@ -115,7 +115,7 @@ jobs:
                 repo,
                 title,
                 labels: ['monitoring'],
-                body: `A API está saudável, mas a execução de ${process.env.APP_URL}/api/operations/run falhou. Verifique a fila de e-mails, SMTP e o segredo INSTALAPRO_CRON_SECRET.`,
+                body: `A API está saudável, mas a execução de ${process.env.APP_URL}/api/operations/run falhou. Verifique a fila de e-mails, SMTP e o segredo INSTALAPRO_CRON_SECRET_V2.`,
               });
             }
 
