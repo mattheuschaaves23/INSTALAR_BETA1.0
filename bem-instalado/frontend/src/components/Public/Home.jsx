@@ -739,8 +739,6 @@ export default function Home() {
   const [serviceProposal, setServiceProposal] = useState(null);
   const [loadingProposal, setLoadingProposal] = useState(false);
   const [respondingProposal, setRespondingProposal] = useState(false);
-  const [showProposalAdjustment, setShowProposalAdjustment] = useState(false);
-  const [proposalAdjustmentMessage, setProposalAdjustmentMessage] = useState('');
   const [privacyConsent, setPrivacyConsent] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState(
     typeof Notification === 'undefined' ? 'unsupported' : Notification.permission
@@ -752,25 +750,6 @@ export default function Home() {
   const [accountRequests, setAccountRequests] = useState([]);
   const [loadingAccountRequests, setLoadingAccountRequests] = useState(false);
   const [updatingRequestStatus, setUpdatingRequestStatus] = useState(null);
-  const proposalAdjustmentInputRef = useRef(null);
-
-  useEffect(() => {
-    if (!showProposalAdjustment) return undefined;
-
-    const focusInput = window.setTimeout(() => proposalAdjustmentInputRef.current?.focus(), 0);
-    const closeOnEscape = (event) => {
-      if (event.key === 'Escape' && !respondingProposal) {
-        setShowProposalAdjustment(false);
-      }
-    };
-
-    document.addEventListener('keydown', closeOnEscape);
-    return () => {
-      window.clearTimeout(focusInput);
-      document.removeEventListener('keydown', closeOnEscape);
-    };
-  }, [respondingProposal, showProposalAdjustment]);
-
   const selectedServiceRequest = useMemo(
     () => getServiceRequestOption(serviceRequest.service),
     [serviceRequest.service]
@@ -1388,15 +1367,15 @@ export default function Home() {
     }
   };
 
-  const respondToServiceProposal = async (decision, adjustmentMessage = '') => {
-    if (!publishedRequest?.id || !publishedRequest?.client_access_token || !serviceProposal || respondingProposal) return false;
-    const message = String(adjustmentMessage || '').trim();
-    if (decision === 'request_changes' && !message) {
-      toast.error('Escreva o que você gostaria de ajustar antes de enviar.');
-      return false;
+  const respondToServiceProposal = async (decision) => {
+    if (!publishedRequest?.id || !publishedRequest?.client_access_token || !serviceProposal || respondingProposal) return;
+    let message = '';
+    if (decision === 'request_changes') {
+      message = window.prompt('O que você gostaria de ajustar na proposta?') || '';
+      if (!message.trim()) return;
     }
-    if (decision === 'reject' && !await confirm('Deseja recusar esta proposta?')) return false;
-    if (decision === 'accept' && !await confirm('Confirmar esta proposta e reservar o horário?')) return false;
+    if (decision === 'reject' && !await confirm('Deseja recusar esta proposta?')) return;
+    if (decision === 'accept' && !await confirm('Confirmar esta proposta e reservar o horário?')) return;
     setRespondingProposal(true);
     try {
       const response = await api.post(
@@ -1409,34 +1388,10 @@ export default function Home() {
       setPublishedRequest(nextRequest);
       writePublishedClientRequest(nextRequest);
       toast.success(decision === 'accept' ? 'Proposta aceita. Seu horário está confirmado.' : decision === 'request_changes' ? 'Pedido de ajuste enviado.' : 'Proposta recusada.');
-      return true;
     } catch (error) {
       toast.error(error.response?.data?.error || 'Não foi possível responder à proposta.');
-      return false;
     } finally {
       setRespondingProposal(false);
-    }
-  };
-
-  const openProposalAdjustment = () => {
-    if (respondingProposal) return;
-    setProposalAdjustmentMessage('');
-    setShowProposalAdjustment(true);
-  };
-
-  const submitProposalAdjustment = async (event) => {
-    event.preventDefault();
-    const message = proposalAdjustmentMessage.trim();
-    if (!message) {
-      toast.error('Descreva o ajuste que você precisa.');
-      proposalAdjustmentInputRef.current?.focus();
-      return;
-    }
-
-    const sent = await respondToServiceProposal('request_changes', message);
-    if (sent) {
-      setShowProposalAdjustment(false);
-      setProposalAdjustmentMessage('');
     }
   };
 
@@ -2949,7 +2904,7 @@ export default function Home() {
                     {serviceProposal.status === 'sent' ? (
                       <div className="mt-2 flex flex-wrap gap-2">
                         <button className="gold-button" disabled={respondingProposal} onClick={() => respondToServiceProposal('accept')} type="button">Aceitar e agendar</button>
-                        <button className="client-app-ghost-button" disabled={respondingProposal} onClick={openProposalAdjustment} type="button">Solicitar ajuste</button>
+                        <button className="client-app-ghost-button" disabled={respondingProposal} onClick={() => respondToServiceProposal('request_changes')} type="button">Pedir ajuste</button>
                         <button className="client-app-opportunity-cancel" disabled={respondingProposal} onClick={() => respondToServiceProposal('reject')} type="button">Recusar</button>
                       </div>
                     ) : serviceProposal.status === 'accepted' ? <strong className="mt-2">Horário confirmado. Você receberá atualizações do serviço por aqui.</strong> : serviceProposal.status === 'change_requested' ? <strong className="mt-2">Seu pedido de ajuste foi enviado ao instalador.</strong> : <strong className="mt-2">Esta proposta foi recusada.</strong>}
@@ -3088,64 +3043,6 @@ export default function Home() {
             </>
           ) : null}
         </nav>
-      ) : null}
-
-      {showProposalAdjustment ? (
-        <div
-          aria-labelledby="proposal-adjustment-title"
-          aria-modal="true"
-          className="client-proposal-adjustment-overlay"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget && !respondingProposal) {
-              setShowProposalAdjustment(false);
-            }
-          }}
-          role="dialog"
-        >
-          <form className="client-proposal-adjustment-dialog" onSubmit={submitProposalAdjustment}>
-            <div className="client-proposal-adjustment-heading">
-              <div>
-                <span>Proposta recebida</span>
-                <h2 id="proposal-adjustment-title">O que você quer ajustar?</h2>
-              </div>
-              <button
-                aria-label="Fechar"
-                className="client-proposal-adjustment-close"
-                disabled={respondingProposal}
-                onClick={() => setShowProposalAdjustment(false)}
-                type="button"
-              >
-                ×
-              </button>
-            </div>
-            <p>Explique para o instalador o que precisa mudar no valor, serviço, material ou horário.</p>
-            <label className="client-proposal-adjustment-field">
-              <span>Mensagem para o instalador</span>
-              <textarea
-                ref={proposalAdjustmentInputRef}
-                maxLength={1000}
-                onChange={(event) => setProposalAdjustmentMessage(event.target.value)}
-                placeholder="Ex.: Pode ajustar o valor? Também gostaria de trocar o horário para sexta à tarde."
-                rows={5}
-                value={proposalAdjustmentMessage}
-              />
-              <small>{proposalAdjustmentMessage.length}/1000</small>
-            </label>
-            <div className="client-proposal-adjustment-actions">
-              <button
-                className="client-app-ghost-button"
-                disabled={respondingProposal}
-                onClick={() => setShowProposalAdjustment(false)}
-                type="button"
-              >
-                Cancelar
-              </button>
-              <button className="gold-button" disabled={respondingProposal} type="submit">
-                {respondingProposal ? 'Enviando...' : 'Enviar solicitação'}
-              </button>
-            </div>
-          </form>
-        </div>
       ) : null}
     </div>
   );
