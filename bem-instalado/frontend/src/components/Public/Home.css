@@ -5725,3 +5725,138 @@ html[data-site-theme='light'] :is(
   border: 1px solid #aaa69e !important;
   background: #ffffff !important;
 }
+
+/* Solicitação de ajuste da proposta: diálogo próprio para não depender do prompt do navegador. */
+.client-proposal-adjustment-overlay {
+  align-items: center;
+  background: rgba(18, 18, 18, 0.58);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 1.25rem;
+  position: fixed;
+  z-index: 1200;
+}
+
+.client-proposal-adjustment-dialog {
+  background: var(--surface-strong);
+  border: 1px solid var(--site-accent-line);
+  border-radius: 1.25rem;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.34);
+  color: var(--text);
+  max-width: 35rem;
+  padding: 1.4rem;
+  width: min(100%, 35rem);
+}
+
+.client-proposal-adjustment-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.client-proposal-adjustment-heading span,
+.client-proposal-adjustment-field > span {
+  color: var(--site-accent);
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.client-proposal-adjustment-heading h2 {
+  color: var(--text);
+  font-size: clamp(1.3rem, 3vw, 1.6rem);
+  line-height: 1.12;
+  margin: 0.28rem 0 0;
+}
+
+.client-proposal-adjustment-close {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--site-accent-line);
+  border-radius: 999px;
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 1.55rem;
+  height: 2.35rem;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  width: 2.35rem;
+}
+
+.client-proposal-adjustment-dialog > p {
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 0.8rem 0 1.15rem;
+}
+
+.client-proposal-adjustment-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.client-proposal-adjustment-field textarea {
+  background: var(--surface);
+  border: 1px solid var(--site-accent-line);
+  border-radius: 0.85rem;
+  color: var(--text);
+  font: inherit;
+  line-height: 1.45;
+  min-height: 8.2rem;
+  padding: 0.8rem 0.9rem;
+  resize: vertical;
+}
+
+.client-proposal-adjustment-field textarea:focus-visible,
+.client-proposal-adjustment-close:focus-visible {
+  outline: 3px solid rgba(var(--site-accent-rgb), 0.26);
+  outline-offset: 2px;
+}
+
+.client-proposal-adjustment-field small {
+  color: var(--muted);
+  font-size: 0.75rem;
+  justify-self: end;
+}
+
+.client-proposal-adjustment-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.2rem;
+}
+
+.client-proposal-adjustment-actions .gold-button,
+.client-proposal-adjustment-actions .client-app-ghost-button {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+}
+
+@media (max-width: 520px) {
+  .client-proposal-adjustment-overlay {
+    align-items: end;
+    padding: 0.7rem;
+  }
+
+  .client-proposal-adjustment-dialog {
+    border-radius: 1.15rem;
+    padding: 1.15rem;
+  }
+
+  .client-proposal-adjustment-actions {
+    flex-direction: column-reverse;
+  }
+
+  .client-proposal-adjustment-actions .gold-button,
+  .client-proposal-adjustment-actions .client-app-ghost-button {
+    width: 100%;
+  }
+}
