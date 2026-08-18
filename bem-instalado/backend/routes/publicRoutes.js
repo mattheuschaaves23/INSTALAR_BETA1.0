@@ -3,6 +3,7 @@ const controller = require('../controllers/publicController');
 const serviceRequestController = require('../controllers/serviceRequestController');
 const marketplaceFlowController = require('../controllers/marketplaceFlowController');
 const { createRateLimiter } = require('../middleware/rateLimit');
+const { requireTurnstile } = require('../middleware/turnstileMiddleware');
 const authMiddleware = require('../middleware/authMiddleware');
 const optionalAuthMiddleware = require('../middleware/optionalAuthMiddleware');
 const monitoringController = require('../controllers/monitoringController');
@@ -55,7 +56,7 @@ router.get('/dashboard-ads', publicSearchLimiter, controller.getDashboardAds);
 router.get('/location/reverse', publicSearchLimiter, controller.reverseLocation);
 router.get('/location/search', publicSearchLimiter, controller.searchLocation);
 router.get('/installers/:id', optionalAuthMiddleware, publicSearchLimiter, controller.getInstallerProfile);
-router.post('/service-requests', optionalAuthMiddleware, serviceRequestLimiter, serviceRequestController.createPublicServiceRequest);
+router.post('/service-requests', optionalAuthMiddleware, serviceRequestLimiter, requireTurnstile, serviceRequestController.createPublicServiceRequest);
 router.get('/service-requests/mine', authMiddleware, publicSearchLimiter, serviceRequestController.getMyServiceRequests);
 router.post('/service-requests/:id/claim', authMiddleware, serviceRequestLimiter, serviceRequestController.claimServiceRequest);
 router.get('/service-requests/:id/interests', publicSearchLimiter, serviceRequestController.getPublicServiceRequestInterests);
@@ -63,6 +64,6 @@ router.post('/service-requests/:id/interests/:interestId/select', serviceRequest
 router.get('/service-requests/:id/proposal', optionalAuthMiddleware, publicSearchLimiter, marketplaceFlowController.getClientProposal);
 router.post('/service-requests/:id/proposal/respond', optionalAuthMiddleware, serviceRequestLimiter, marketplaceFlowController.respondToProposal);
 router.patch('/service-requests/:id/status', optionalAuthMiddleware, serviceRequestLimiter, serviceRequestController.updateClientServiceRequestStatus);
-router.post('/installers/:id/reviews', authMiddleware, reviewLimiter, controller.createReview);
+router.post('/installers/:id/reviews', authMiddleware, reviewLimiter, requireTurnstile, controller.createReview);
 
 module.exports = router;

@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import AuthShell from '../Layout/AuthShell';
 import PasswordField from './PasswordField';
 import { forgotPasswordRequest, resetPasswordRequest } from '../../services/auth';
+import Turnstile, { isTurnstileEnabled } from '../Security/Turnstile';
 
 export default function PasswordRecovery() {
   const location = useLocation();
@@ -19,6 +20,8 @@ export default function PasswordRecovery() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [resetUrl, setResetUrl] = useState('');
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
   const title = useMemo(
     () => (mode === 'reset' ? 'Crie uma nova senha para entrar.' : 'Recupere o acesso ao painel.'),
@@ -33,10 +36,15 @@ export default function PasswordRecovery() {
       return;
     }
 
+    if (isTurnstileEnabled() && !turnstileToken) {
+      toast.error('Conclua a verificação de segurança antes de continuar.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const response = await forgotPasswordRequest({ email, account_type: accountType });
+      const response = await forgotPasswordRequest({ email, account_type: accountType, turnstile_token: turnstileToken });
       toast.success(response.message || 'Se o e-mail existir, as instruções serão enviadas.');
 
       if (response.reset_url || response.reset_token) {
@@ -45,6 +53,8 @@ export default function PasswordRecovery() {
         setMode('reset');
       }
     } catch (error) {
+      setTurnstileToken('');
+      setTurnstileResetKey((current) => current + 1);
       toast.error(error.response?.data?.error || 'Não foi possível iniciar a recuperação.');
     } finally {
       setLoading(false);
@@ -112,7 +122,14 @@ export default function PasswordRecovery() {
             />
           </label>
 
-          <button className="gold-button w-full" disabled={loading} type="submit">
+          <Turnstile
+            action="password_recovery"
+            onExpire={() => setTurnstileToken('')}
+            onVerify={setTurnstileToken}
+            resetKey={turnstileResetKey}
+          />
+
+          <button className="gold-button w-full" disabled={loading || (isTurnstileEnabled() && !turnstileToken)} type="submit">
             {loading ? 'Enviando...' : 'Recuperar senha'}
           </button>
         </form>

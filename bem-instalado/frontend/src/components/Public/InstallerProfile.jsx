@@ -8,6 +8,7 @@ import './InstallerProfile.css';
 import { formatCurrency, formatLongDate, formatShortDate } from '../../utils/formatters';
 import { formatInstallationDays } from '../../utils/installerDays';
 import PageMetadata from './PageMetadata';
+import Turnstile, { isTurnstileEnabled } from '../Security/Turnstile';
 
 const emptyReviewForm = { reviewer_name: '', reviewer_region: '', rating: 5, comment: '' };
 
@@ -85,6 +86,8 @@ export default function InstallerProfile() {
   const [payload, setPayload] = useState(null);
   const [reviewForm, setReviewForm] = useState(emptyReviewForm);
   const [sendingReview, setSendingReview] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
   const loadProfile = useCallback(async () => {
     try {
@@ -124,6 +127,11 @@ export default function InstallerProfile() {
       return;
     }
 
+    if (isTurnstileEnabled() && !turnstileToken) {
+      toast.error('Conclua a verificação de segurança antes de enviar a avaliação.');
+      return;
+    }
+
     setSendingReview(true);
     try {
       await api.post(`/public/installers/${id}/reviews`, {
@@ -132,11 +140,14 @@ export default function InstallerProfile() {
         reviewer_region: reviewForm.reviewer_region.trim(),
         rating: Number(reviewForm.rating),
         comment: reviewForm.comment.trim(),
+        turnstile_token: turnstileToken,
       });
       toast.success('Avaliação enviada com sucesso.');
       setReviewForm(emptyReviewForm);
       await loadProfile();
     } catch (error) {
+      setTurnstileToken('');
+      setTurnstileResetKey((current) => current + 1);
       toast.error(error.response?.data?.error || 'Não foi possível enviar a avaliação.');
     } finally {
       setSendingReview(false);
@@ -309,7 +320,7 @@ export default function InstallerProfile() {
           <div className="ig-panel-heading"><div><span><ProfileIcon name="star" size={18} /></span><div><p>Sua experiência</p><h2>Avalie este instalador</h2></div></div></div>
           {!user ? <div className="ig-review-locked"><p>Sua avaliação ajuda outras pessoas a escolherem com mais segurança.</p><Link className="ig-profile-primary-action" to={getClientLoginPath(`/installers/${installer.id}#avaliar-instalador`)}>Entrar para avaliar</Link></div>
             : isOwnProfile ? <p className="ig-profile-note">Este é o seu perfil. Autoavaliações não são permitidas.</p>
-              : <form className="ig-profile-form" onSubmit={handleReviewSubmit}><label><span>Seu nome</span><input name="reviewer_name" onChange={handleReviewChange} placeholder="Como você quer aparecer" required value={reviewForm.reviewer_name} /></label><label><span>Sua região</span><input name="reviewer_region" onChange={handleReviewChange} placeholder="Cidade ou bairro" value={reviewForm.reviewer_region} /></label><label><span>Nota</span><select name="rating" onChange={handleReviewChange} value={reviewForm.rating}><option value={5}>5 estrelas</option><option value={4}>4 estrelas</option><option value={3}>3 estrelas</option><option value={2}>2 estrelas</option><option value={1}>1 estrela</option></select></label><label className="ig-profile-comment-field"><span>Comentário</span><textarea name="comment" onChange={handleReviewChange} placeholder="Conte como foi sua experiência" rows="3" value={reviewForm.comment} /></label><button className="ig-profile-primary-action" disabled={sendingReview} type="submit">{sendingReview ? 'Enviando...' : 'Enviar avaliação'}</button></form>}
+              : <form className="ig-profile-form" onSubmit={handleReviewSubmit}><label><span>Seu nome</span><input name="reviewer_name" onChange={handleReviewChange} placeholder="Como você quer aparecer" required value={reviewForm.reviewer_name} /></label><label><span>Sua região</span><input name="reviewer_region" onChange={handleReviewChange} placeholder="Cidade ou bairro" value={reviewForm.reviewer_region} /></label><label><span>Nota</span><select name="rating" onChange={handleReviewChange} value={reviewForm.rating}><option value={5}>5 estrelas</option><option value={4}>4 estrelas</option><option value={3}>3 estrelas</option><option value={2}>2 estrelas</option><option value={1}>1 estrela</option></select></label><label className="ig-profile-comment-field"><span>Comentário</span><textarea name="comment" onChange={handleReviewChange} placeholder="Conte como foi sua experiência" rows="3" value={reviewForm.comment} /></label><Turnstile action="installer_review" onExpire={() => setTurnstileToken('')} onVerify={setTurnstileToken} resetKey={turnstileResetKey} /><button className="ig-profile-primary-action" disabled={sendingReview || (isTurnstileEnabled() && !turnstileToken)} type="submit">{sendingReview ? 'Enviando...' : 'Enviar avaliação'}</button></form>}
         </section>
 
         <aside className="ig-profile-store"><div><span>Parceiro recomendado</span><h2>{marketplace.title}</h2><p>{marketplace.description}</p><small>{(marketplace.highlights || []).slice(0, 2).join(' · ')}</small></div><a href={marketplace.url || 'https://www.beminstalado.com.br'} rel="noreferrer" target="_blank">{marketplace.cta_label || 'Conhecer a loja'} <ProfileIcon name="chevron" size={16} /></a></aside>

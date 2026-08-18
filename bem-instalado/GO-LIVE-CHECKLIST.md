@@ -21,6 +21,15 @@ curl -X POST https://SEU-DOMINIO/api/operations/run \
 
 `GET /api/operations/status` mostra o resumo interno de entregas e também exige o mesmo token. `ALERT_WEBHOOK_URL` envia alertas de erros 5xx e entrega de e-mail esgotada sem dados pessoais ou segredos. Confirme o alerta fazendo uma falha controlada de SMTP antes do lançamento.
 
+## Serviços externos de erro e segurança
+
+O código já está preparado, mas as integrações só ficam ativas depois das variáveis da Vercel serem cadastradas:
+
+- **Sentry:** crie dois projetos (React e Node), cadastre `REACT_APP_SENTRY_DSN` no build do frontend e `SENTRY_DSN` no backend. Os eventos removem e-mail, telefone, URLs com parâmetros e segredos antes de serem enviados. Faça um erro controlado em Preview e confirme que não há dados pessoais no evento.
+- **Cloudflare Turnstile:** crie um widget para `instalar-sigma.vercel.app` e para o domínio próprio quando existir. Cadastre `REACT_APP_TURNSTILE_SITE_KEY` e `TURNSTILE_SECRET_KEY`. Cadastro, recuperação de senha, publicação de pedido e avaliação passam a exigir validação no servidor. Use widgets diferentes em Preview e Production.
+- **Better Stack:** crie um monitor HTTP para `https://instalar-sigma.vercel.app/api/health` a cada cinco minutos, com alerta após duas falhas. Crie também um heartbeat de cinco minutos e guarde sua URL secreta em `BETTERSTACK_HEARTBEAT_URL`; a rotina `/api/operations/run` só envia o sinal depois de concluir.
+- **Vercel Firewall:** no painel do projeto, ative alertas de Firewall e crie regras de rate limit/desafio para `/api/auth/*`, `/api/public/service-requests` e `/api/public/installers/*/reviews`. Não aplique bloqueio por IP ao webhook da Asaas; ele já valida token próprio no backend.
+
 ## Backup e restauração
 
 Configurar no provedor PostgreSQL, antes de clientes reais:

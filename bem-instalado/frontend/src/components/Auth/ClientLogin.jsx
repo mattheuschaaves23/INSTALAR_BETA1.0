@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { startSocialLogin } from '../../services/auth';
+import Turnstile, { isTurnstileEnabled } from '../Security/Turnstile';
 import { clearOAuthErrorFromUrl, getOAuthErrorMessage } from '../../utils/oauthMessages';
 import { getAuthRequestErrorMessage } from '../../utils/authErrorMessage';
 import useAuthCapabilities from '../../hooks/useAuthCapabilities';
@@ -137,6 +138,8 @@ export default function ClientLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
   const submitLabel = useMemo(
     () => (isRegistering ? 'Criar minha conta' : needs2FA ? 'Validar acesso' : 'Entrar'),
@@ -187,11 +190,17 @@ export default function ClientLogin() {
           return;
         }
 
+        if (isTurnstileEnabled() && !turnstileToken) {
+          toast.error('Conclua a verificação de segurança antes de criar sua conta.');
+          return;
+        }
+
         await registerClient({
           name: form.name,
           phone: form.phone,
           email: form.email.trim().toLowerCase(),
           password: form.password,
+          turnstile_token: turnstileToken,
         });
         toast.success('Conta criada. Seus pedidos ficarão salvos aqui.');
         navigate(nextPath, { replace: true });
@@ -209,6 +218,10 @@ export default function ClientLogin() {
       toast.success('Login realizado.');
       navigate(nextPath, { replace: true });
     } catch (error) {
+      if (isRegistering) {
+        setTurnstileToken('');
+        setTurnstileResetKey((current) => current + 1);
+      }
       if (error.response?.status === 401 && error.response?.data?.twoFactorRequired) {
         setNeeds2FA(true);
         toast('Digite o código 2FA para concluir o acesso.');
@@ -228,6 +241,8 @@ export default function ClientLogin() {
   const toggleRegistration = () => {
     setIsRegistering((current) => !current);
     setNeeds2FA(false);
+    setTurnstileToken('');
+    setTurnstileResetKey((current) => current + 1);
   };
 
   const handleSocialLogin = (provider) => {
@@ -406,7 +421,16 @@ export default function ClientLogin() {
               </Link>
             ) : null}
 
-            <button className="client-login-submit" disabled={submitting} type="submit">
+            {isRegistering ? (
+              <Turnstile
+                action="client_register"
+                onExpire={() => setTurnstileToken('')}
+                onVerify={setTurnstileToken}
+                resetKey={turnstileResetKey}
+              />
+            ) : null}
+
+            <button className="client-login-submit" disabled={submitting || (isRegistering && isTurnstileEnabled() && !turnstileToken)} type="submit">
               <span>{submitting ? 'Aguarde...' : submitLabel}</span>
               <ClientLoginIcon name="arrow" />
             </button>

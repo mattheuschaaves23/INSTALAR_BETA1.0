@@ -3,6 +3,7 @@ const controller = require('../controllers/authController');
 const auth = require('../middleware/authMiddleware');
 const { createRateLimiter } = require('../middleware/rateLimit');
 const { issueCsrfToken } = require('../middleware/csrfMiddleware');
+const { requireTurnstile } = require('../middleware/turnstileMiddleware');
 
 const router = express.Router();
 
@@ -41,12 +42,12 @@ const twoFactorLimiter = createRateLimiter({
 
 router.get('/capabilities', controller.getCapabilities);
 router.get('/csrf', issueCsrfToken);
-router.post('/register', authBurstLimiter, controller.register);
-router.post('/register/client', authBurstLimiter, controller.registerClient);
+router.post('/register', authBurstLimiter, requireTurnstile, controller.register);
+router.post('/register/client', authBurstLimiter, requireTurnstile, controller.registerClient);
 router.post('/login', loginLimiter, controller.login);
 router.get('/oauth/:provider', authBurstLimiter, controller.startOAuth);
 router.get('/oauth/:provider/callback', authBurstLimiter, controller.handleOAuthCallback);
-router.post('/forgot-password', passwordRecoveryLimiter, controller.forgotPassword);
+router.post('/forgot-password', passwordRecoveryLimiter, requireTurnstile, controller.forgotPassword);
 router.post('/reset-password', passwordRecoveryLimiter, controller.resetPassword);
 router.post('/verify-email', authBurstLimiter, controller.verifyEmail);
 router.get('/session', auth, controller.getSession);

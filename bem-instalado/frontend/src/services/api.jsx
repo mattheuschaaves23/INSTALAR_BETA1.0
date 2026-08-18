@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { clearAuthToken, getAuthToken } from '../utils/safeStorage';
 import { getCsrfToken } from '../utils/csrfToken';
+import { captureFrontendException } from './sentry';
 
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
 const DEFAULT_API_TIMEOUT_MS = 20000;
@@ -125,6 +126,13 @@ api.interceptors.response.use(
   (error) => {
     const status = error.response?.status;
     const code = error.response?.data?.code || '';
+
+    if (status >= 500 || !error.response) {
+      captureFrontendException(error, {
+        source: 'api.request',
+        stack: error.config?.url ? `${String(error.config.method || 'GET').toUpperCase()} ${error.config.url}` : '',
+      });
+    }
 
     if (typeof window !== 'undefined') {
       if (

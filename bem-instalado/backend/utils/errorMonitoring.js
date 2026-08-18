@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const pool = require('../config/database');
 const { notifyOperationalAlert } = require('../services/operationalAlerts');
+const { captureException } = require('../services/sentry');
 
 function cleanText(value, maxLength = 1000) {
   return String(value || '').replace(/\s+/g, ' ').trim().slice(0, maxLength);
@@ -37,6 +38,14 @@ async function logApplicationError({
   statusCode = 500,
   metadata = {},
 }) {
+  const sentryContext = {
+    level: String(severity || 'error').toLowerCase(),
+    method: cleanText(req?.method, 12),
+    route: cleanText(req?.originalUrl || req?.path, 180),
+    source: cleanText(source, 30) || 'backend',
+    statusCode: Number(statusCode) || 500,
+  };
+
   try {
     await pool.query(
       `
@@ -59,6 +68,7 @@ async function logApplicationError({
       ]
     );
     if (String(severity).toLowerCase() !== 'info') {
+      void captureException(Object.assign(new Error(cleanText(message, 1200) || 'Erro sem mensagem'), { stack: stack || undefined }), sentryContext);
       void notifyOperationalAlert({
         severity: String(severity || 'error').toLowerCase(),
         source: cleanText(source, 30) || 'backend',
@@ -71,6 +81,9 @@ async function logApplicationError({
       });
     }
   } catch (monitoringError) {
+    if (String(severity).toLowerCase() !== 'info') {
+      void captureException(Object.assign(new Error(cleanText(message, 1200) || 'Erro sem mensagem'), { stack: stack || undefined }), sentryContext);
+    }
     console.error('Falha ao registrar erro da aplicação:', monitoringError.message);
   }
 }

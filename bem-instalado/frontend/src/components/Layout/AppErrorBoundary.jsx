@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import { captureFrontendException } from '../../services/sentry';
 
 function isChunkError(error) {
   const message = String(error?.message || error || '').toLowerCase();
@@ -21,6 +22,7 @@ export default class AppErrorBoundary extends Component {
   }
 
   componentDidCatch(error, errorInfo) {
+    captureFrontendException(error, { source: 'react.error-boundary', stack: errorInfo?.componentStack || '' });
     if (process.env.NODE_ENV !== 'production') {
       console.error('Erro de renderização capturado pelo AppErrorBoundary:', error, errorInfo);
     }

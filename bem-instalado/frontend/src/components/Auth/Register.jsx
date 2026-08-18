@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthShell from '../Layout/AuthShell';
 import PasswordField from './PasswordField';
+import Turnstile, { isTurnstileEnabled } from '../Security/Turnstile';
 
 const highlights = [
   {
@@ -44,6 +45,8 @@ export default function Register() {
     confirmPassword: '',
     phone: '',
   });
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
   const handleChange = (event) => {
     setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
@@ -67,6 +70,11 @@ export default function Register() {
       return;
     }
 
+    if (isTurnstileEnabled() && !turnstileToken) {
+      toast.error('Conclua a verificação de segurança antes de criar sua conta.');
+      return;
+    }
+
     try {
       await register({
         name: form.name,
@@ -75,11 +83,14 @@ export default function Register() {
         password: form.password,
         phone: form.phone,
         account_type: 'installer',
+        turnstile_token: turnstileToken,
       });
 
       toast.success('Conta criada. Seu plano Grátis permanente já está ativo.');
       navigate('/dashboard');
     } catch (error) {
+      setTurnstileToken('');
+      setTurnstileResetKey((current) => current + 1);
       toast.error(error.response?.data?.error || 'Não foi possível criar a conta.');
     }
   };
@@ -166,7 +177,14 @@ export default function Register() {
           </div>
         </section>
 
-        <button className="gold-button w-full" type="submit">
+        <Turnstile
+          action="installer_register"
+          onExpire={() => setTurnstileToken('')}
+          onVerify={setTurnstileToken}
+          resetKey={turnstileResetKey}
+        />
+
+        <button className="gold-button w-full" disabled={isTurnstileEnabled() && !turnstileToken} type="submit">
           Criar conta
         </button>
       </form>

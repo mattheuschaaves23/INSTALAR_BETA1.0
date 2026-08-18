@@ -9,11 +9,13 @@ import { ConfirmProvider } from './contexts/ConfirmContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import { applyStoredSitePreferences } from './utils/sitePreferences';
+import { initializeSentry } from './services/sentry';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 const isInstallerApp = process.env.REACT_APP_INSTALLER_APP === 'true';
 
 applyStoredSitePreferences();
+initializeSentry();
 
 if (isInstallerApp) {
   document.documentElement.dataset.installerApp = 'true';

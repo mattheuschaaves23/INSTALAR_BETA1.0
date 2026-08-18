@@ -16,6 +16,7 @@ import {
 import { safeSessionStorage } from '../../utils/safeStorage';
 import BrandWordmark from '../Layout/BrandWordmark';
 import PaginationControls from '../Layout/PaginationControls';
+import Turnstile, { isTurnstileEnabled } from '../Security/Turnstile';
 import './Home.css';
 import PageMetadata from './PageMetadata';
 
@@ -733,6 +734,8 @@ export default function Home() {
   const [publishingRequest, setPublishingRequest] = useState(false);
   const [publishedRequest, setPublishedRequest] = useState(null);
   const [showPublishForm, setShowPublishForm] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const [requestInterests, setRequestInterests] = useState([]);
   const [loadingInterests, setLoadingInterests] = useState(false);
   const [selectingInterestId, setSelectingInterestId] = useState(null);
@@ -1444,6 +1447,11 @@ export default function Home() {
       return;
     }
 
+    if (isTurnstileEnabled() && !turnstileToken) {
+      toast.error('Conclua a verificação de segurança antes de publicar o pedido.');
+      return;
+    }
+
     setPublishingRequest(true);
 
     try {
@@ -1490,6 +1498,7 @@ export default function Home() {
         latitude: guidedLocationTarget?.latitude,
         longitude: guidedLocationTarget?.longitude,
         privacy_consent: true,
+        turnstile_token: turnstileToken,
       });
 
       const nextRequest = response.data?.service_request || null;
@@ -1502,6 +1511,8 @@ export default function Home() {
       }
       toast.success('Pedido publicado. Avisaremos quando um instalador demonstrar interesse.');
     } catch (error) {
+      setTurnstileToken('');
+      setTurnstileResetKey((current) => current + 1);
       toast.error(error.response?.data?.error || 'Não foi possível publicar a solicitação.');
     } finally {
       setPublishingRequest(false);
@@ -2871,10 +2882,16 @@ export default function Home() {
                     <Link to="/privacidade">Política de Privacidade</Link>.
                   </span>
                 </label>
+                <Turnstile
+                  action="publish_service_request"
+                  onExpire={() => setTurnstileToken('')}
+                  onVerify={setTurnstileToken}
+                  resetKey={turnstileResetKey}
+                />
                 <div className="client-app-opportunity-actions">
                   <button
                     className="client-app-search-submit"
-                    disabled={publishingRequest}
+                    disabled={publishingRequest || (isTurnstileEnabled() && !turnstileToken)}
                     onClick={handlePublishServiceRequest}
                     type="button"
                   >
