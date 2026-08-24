@@ -5,7 +5,7 @@
 - Nome do app: `InstalaPro Instaladores`
 - Descrição curta: `Pedidos, agenda, clientes e orçamentos para instaladores profissionais.`
 - Categoria sugerida: `Negócios`
-- E-mail de suporte: `beminstaladohd@gmail.com`
+- E-mail de suporte: `instalaproo@gmail.com`
 - Política de Privacidade: `https://instalar-sigma.vercel.app/privacidade`
 - Exclusão de conta: `https://instalar-sigma.vercel.app/excluir-conta`
 - Contém anúncios: `Não`

@@ -47,7 +47,7 @@ Registre data, responsável, backup usado, duração e resultado de cada restaur
 - Novas contas por senha confirmam e-mail antes de ações sensíveis.
 - 2FA usa segredo criptografado e códigos de recuperação de uso único.
 - A pessoa pode baixar os próprios dados no painel, em **Configurações > Privacidade**. Senhas, segredos 2FA e tokens não entram no arquivo.
-- Solicitações LGPD de clientes ou pessoas sem login vão para `beminstaladohd@gmail.com`; registre identidade, escopo, data e resposta. Meta operacional: até 15 dias, salvo obrigação legal diferente.
+- Solicitações LGPD de clientes ou pessoas sem login vão para `instalaproo@gmail.com`; registre identidade, escopo, data e resposta. Meta operacional: até 15 dias, salvo obrigação legal diferente.
 - O upload valida formato e tamanho, mas antivírus/quarentena requer um serviço externo. Não anuncie análise antifraude automática até conectar um scanner e aprovar o processo de revisão.
 
 ## Push

@@ -45,11 +45,11 @@ services:
       - key: SMTP_SECURE
         value: "true"
       - key: SMTP_USER
-        value: beminstaladohd@gmail.com
+        value: instalaproo@gmail.com
       - key: SMTP_PASSWORD
         sync: false
       - key: SMTP_FROM
-        value: InstalaPro <beminstaladohd@gmail.com>
+        value: InstalaPro <instalaproo@gmail.com>
       - key: GOOGLE_OAUTH_CLIENT_ID
         sync: false
       - key: GOOGLE_OAUTH_CLIENT_SECRET

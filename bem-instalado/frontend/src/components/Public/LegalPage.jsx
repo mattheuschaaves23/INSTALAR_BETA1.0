@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import BrandWordmark from '../Layout/BrandWordmark';
 
-const UPDATED_AT = '6 de agosto de 2026';
+const UPDATED_AT = '24 de agosto de 2026';
 
 const privacySections = [
   ['1. Quais dados usamos', 'Coletamos os dados informados no cadastro e no pedido, como nome, telefone, e-mail, cidade, endereço aproximado ou completo, fotos do ambiente e preferências do serviço. Para instaladores, também tratamos dados profissionais, documentos de verificação, certificado e portfólio.'],
@@ -45,7 +45,7 @@ export default function LegalPage({ type }) {
         <p className="legal-page-eyebrow">TRANSPARÊNCIA E SEGURANÇA</p>
         <h1>{title}</h1>
         <p className="legal-page-intro">{intro}</p>
-        <p className="legal-page-version">Versão 2026-08-06 · atualizada em {UPDATED_AT}</p>
+        <p className="legal-page-version">Versão 2026-08-24 · atualizada em {UPDATED_AT}</p>
 
         <div className="legal-page-sections">
           {sections.map(([sectionTitle, body]) => (
@@ -60,7 +60,7 @@ export default function LegalPage({ type }) {
           <strong>Precisa falar sobre seus dados?</strong>
           <p>
             Instaladores podem usar a área de suporte. Clientes e pessoas sem acesso podem escrever para{' '}
-            <a href="mailto:beminstaladohd@gmail.com">beminstaladohd@gmail.com</a>.
+            <a href="mailto:instalaproo@gmail.com">instalaproo@gmail.com</a>.
           </p>
         </aside>
 

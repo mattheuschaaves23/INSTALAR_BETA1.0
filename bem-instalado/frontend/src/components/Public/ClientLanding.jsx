@@ -320,7 +320,7 @@ function Process() {
         <nav aria-label="Links institucionais">
           <Link to="/privacidade">Privacidade</Link>
           <Link to="/termos">Termos</Link>
-          <a href="mailto:beminstaladohd@gmail.com">Contato</a>
+          <a href="mailto:instalaproo@gmail.com">Contato</a>
         </nav>
         <span>© {new Date().getFullYear()} InstalaPro</span>
       </footer>

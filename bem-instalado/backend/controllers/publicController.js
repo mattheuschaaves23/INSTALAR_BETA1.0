@@ -10,7 +10,7 @@ const MARKETPLACE_CTA_LABEL = process.env.MARKETPLACE_CTA_LABEL || 'Visitar loja
 const MARKETPLACE_WHATSAPP_URL =
   process.env.MARKETPLACE_WHATSAPP_URL || 'https://api.whatsapp.com/send?phone=5548999816000';
 const MARKETPLACE_CONTACT_PHONE = process.env.MARKETPLACE_CONTACT_PHONE || '(48) 99981-6000';
-const MARKETPLACE_CONTACT_EMAIL = process.env.MARKETPLACE_CONTACT_EMAIL || 'beminstaladohd@gmail.com';
+const MARKETPLACE_CONTACT_EMAIL = process.env.MARKETPLACE_CONTACT_EMAIL || 'instalaproo@gmail.com';
 
 function buildMarketplacePayload() {
   return {

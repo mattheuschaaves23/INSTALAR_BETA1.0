@@ -9,7 +9,7 @@ Este diretório reúne os textos, declarações e imagens para publicar o aplica
 - Suporte: https://instalar-sigma.vercel.app/instalador/entrar
 - Política de Privacidade: https://instalar-sigma.vercel.app/privacidade
 - Exclusão de conta: https://instalar-sigma.vercel.app/excluir-conta
-- E-mail: beminstaladohd@gmail.com
+- E-mail: instalaproo@gmail.com
 
 ## Imagens prontas
 

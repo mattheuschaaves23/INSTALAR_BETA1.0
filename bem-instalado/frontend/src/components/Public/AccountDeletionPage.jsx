@@ -44,7 +44,7 @@ export default function AccountDeletionPage() {
 
         <div className="account-deletion-actions">
           <Link className="gold-button" to="/settings">Entrar e excluir minha conta</Link>
-          <a className="ghost-button" href="mailto:beminstaladohd@gmail.com?subject=Solicitação%20de%20exclusão%20de%20conta">
+          <a className="ghost-button" href="mailto:instalaproo@gmail.com?subject=Solicitação%20de%20exclusão%20de%20conta">
             Solicitar por e-mail
           </a>
         </div>
@@ -62,7 +62,7 @@ export default function AccountDeletionPage() {
           <strong>Canal de privacidade</strong>
           <p>
             Se precisar de ajuda, escreva para{' '}
-            <a href="mailto:beminstaladohd@gmail.com">beminstaladohd@gmail.com</a> usando o e-mail
+            <a href="mailto:instalaproo@gmail.com">instalaproo@gmail.com</a> usando o e-mail
             cadastrado na conta.
           </p>
         </aside>
