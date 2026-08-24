@@ -4,8 +4,8 @@
 
 - [x] Identificador único: `br.com.instalapro.instaladores`.
 - [x] Android com `targetSdk 36`.
-- [x] Geração de APK assinado para atualização direta.
 - [x] Geração de Android App Bundle (`.aab`) para a Play Store.
+- [x] Atualizações distribuídas exclusivamente pela Google Play.
 - [x] Projeto iOS criado com Capacitor.
 - [x] Manifesto de privacidade do iOS com o motivo obrigatório do Preferences.
 - [x] Validação iOS automatizada em macOS 26 e Xcode 26.

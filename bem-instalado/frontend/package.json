@@ -42,6 +42,7 @@
     "build:ios:web": "vite build --mode ios",
     "android:sync": "vite build --mode android && cap sync android",
     "android:apk:debug": "vite build --mode android && cap sync android && cd android && gradlew.bat assembleDebug",
+    "android:aab:release": "vite build --mode android && cap sync android && cd android && gradlew.bat bundleRelease",
     "ios:sync": "vite build --mode ios && cap sync ios",
     "test": "vitest run"
   }

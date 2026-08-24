@@ -40,17 +40,20 @@ O APK de desenvolvimento será criado em
 `android/app/build/outputs/apk/debug/app-debug.apk`. Ele serve para testes
 locais e não deve ser distribuído como versão pública.
 
-## Publicação automática
+## Publicação na Google Play
 
 Tags no formato `android-v1.0.0` executam o fluxo `Android Instaladores` no
 GitHub Actions. O fluxo exige os segredos `ANDROID_KEYSTORE_BASE64`,
-`ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` e `ANDROID_KEY_PASSWORD`,
-gera um APK de release assinado, verifica a assinatura e anexa o APK e seu
-arquivo SHA-256 automaticamente a uma versão pública no GitHub.
+`ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` e `ANDROID_KEY_PASSWORD` e
+gera o Android App Bundle (`.aab`) assinado para envio ao teste ou produção na
+Google Play.
 
-O keystore permanente nunca deve ser salvo no repositório. Mantenha também uma
-cópia de segurança privada; sem ele não será possível atualizar o aplicativo
-com a mesma identidade.
+O keystore de upload nunca deve ser salvo no repositório. Mantenha também uma
+cópia de segurança privada; sem ele não será possível enviar futuras versões
+com a mesma identidade de upload.
+
+Não há atualização por APK dentro do aplicativo distribuído pela Google Play.
+As versões novas são entregues pelo próprio Google Play, com Play App Signing.
 
 ## Login com Google
 

@@ -61,7 +61,7 @@ jobs:
           test -n "$ANDROID_KEYSTORE_BASE64"
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/instalapro-upload.jks"
 
-      - name: Compilar APK instalável e Android App Bundle
+      - name: Compilar Android App Bundle
         working-directory: bem-instalado/frontend/android
         env:
           ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/instalapro-upload.jks
@@ -70,22 +70,12 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease bundleRelease --no-daemon
-
-      - name: Verificar assinatura do APK
-        working-directory: bem-instalado/frontend/android
-        run: |
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify \
-            --verbose \
-            --print-certs \
-            app/build/outputs/apk/release/app-release.apk
+          ./gradlew bundleRelease --no-daemon
 
       - name: Preparar arquivo para download
         shell: bash
         run: |
-          cp android/app/build/outputs/apk/release/app-release.apk InstalaPro-Instaladores.apk
           cp android/app/build/outputs/bundle/release/app-release.aab InstalaPro-Instaladores.aab
-          sha256sum InstalaPro-Instaladores.apk > InstalaPro-Instaladores.apk.sha256
           sha256sum InstalaPro-Instaladores.aab > InstalaPro-Instaladores.aab.sha256
 
       - name: Salvar APK e AAB na execução
@@ -93,25 +83,9 @@ jobs:
         with:
           name: InstalaPro-Instaladores
           path: |
-            bem-instalado/frontend/InstalaPro-Instaladores.apk
-            bem-instalado/frontend/InstalaPro-Instaladores.apk.sha256
             bem-instalado/frontend/InstalaPro-Instaladores.aab
             bem-instalado/frontend/InstalaPro-Instaladores.aab.sha256
           if-no-files-found: error
-
-      - name: Publicar versão para download
-        if: startsWith(github.ref, 'refs/tags/android-v')
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "${GITHUB_REF_NAME}" \
-            InstalaPro-Instaladores.apk \
-            InstalaPro-Instaladores.apk.sha256 \
-            InstalaPro-Instaladores.aab \
-            InstalaPro-Instaladores.aab.sha256 \
-            --title "InstalaPro Instaladores ${GITHUB_REF_NAME#android-v}" \
-            --notes "Aplicativo Android exclusivo para instaladores. O APK permite instalação direta e atualização sem reinstalar; o AAB é o pacote destinado à Google Play."
 
       - name: Remover chave temporária
         if: always()
